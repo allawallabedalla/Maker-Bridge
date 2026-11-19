@@ -136,7 +136,7 @@ Wärmeglied α·L·ΔT (sonst ±20 K angenommen).
 | M16 | Torsion | τ ≈ 3T/(b·t²) offen; Bredt τ = T/(2A_m·t) | 2.001 L22/23, 16.20 Unit 10–12 (OCW) | G, M | τ ≤ σ/(√3·S); stehende Welle: σ_Z | mittel | ✅ umgesetzt – nur soll |
 | M19 | Deckeldurchbiegung | D = Eh³/(12(1−ν²)); w = α·q·b⁴/D | 2.080J L7 (OCW-Thema) | G, S (Last), M | w ≤ Abstand zur Platine darunter | mittel | ✅ umgesetzt – nur soll |
 | M21 | Plastische Reserve | Rechteck M_p = 1,5·M_y | 2.002, 2.080J L12 | G | nur Info (PETG), nicht in Z | niedrig | ✅ umgesetzt – info |
-| M22 | Bruchmechanik Fehlstellen | K_I = Yσ√(πa), a ≈ Linienbreite | 2.002 SES 23–26 | **K_IC neu** | K_I ≤ K_IC/S | niedrig | ◐ umgesetzt, **ungetestet** (kein Test nennt die ID, Stand 19.11.2026) – nimmt FEM-Spitze, konservativ |
+| M22 | Bruchmechanik Fehlstellen | K_I = Yσ√(πa), a ≈ Linienbreite | 2.002 SES 23–26 | **K_IC neu** | K_I ≤ K_IC/S | niedrig | ✅ umgesetzt – nimmt FEM-Spitze, konservativ |
 | M23 | Zahnrad (Lewis) | σ = F_t/(b·m·Y) | 2.007 L13 (OCW) | G/S | σ ≤ σ_XY/S, liegend drucken | niedrig | ✅ umgesetzt – nur soll |
 | M24 | Constraint-Zählung | FG = 6 − C | 2.72 L08, 2.75 | S (Baugruppe) | Überbestimmung melden | niedrig | ✅ umgesetzt – nur soll |
 | M26 | Sicherheitsziel aus Streuung | k_e = 1 − 0,08·z (99 % → 0,81) | 2.72 L04 (OCW) | Streuung je Richtung **neu** | S_ziel ≥ Lastfaktor/k_e; in Z höher | mittel | ✅ umgesetzt |
@@ -162,7 +162,7 @@ Wärmeglied α·L·ΔT (sonst ±20 K angenommen).
 | W5 | Innenluft | Spalt < ~10 mm: Nu = 1, h = k_Luft/δ (0,026 W/mK); Strahlung ε_eff = 1/(1/ε₁ + 1/ε₂ − 1) ≈ 0,82 | 4.42J Gl. 3.15, 16.050 §9.3 (OCW) | G + board.step | Luft als Ersatzleiter + h_r Platine↔Wand | hoch | ✅ umgesetzt – `innenluft` |
 | W6 | Sonne | Q = α_s·G·A_proj, G ≈ 1000 W/m²; ΔT ≈ Q/((h_c + h_r)·A_ges) | 2.997 L8 (OCW, 1000 W/m² Standardwert) | **S: außen, Farbe→α_s neu** | T∞ + ΔT_Sonne + ΔT_intern < Tg − 10 K (→ D1) | hoch | ✅ umgesetzt – `sonne` + Prüfung |
 | W7 | Biot, Zeitkonstante | Bi = hL/k < 1/6; τ = ρcV/(hA) | 4.42J, 16.050 §3.3/§6, 3.044 L4 (OCW) | G, M (**c_p neu**), S (Lastdauer) | Lastdauer > 3τ → stationär ok | mittel | ◐ teilweise – c_p FR4/ALU fehlt → τ eher zu klein |
-| W8 | Quelle im Körper | ΔT = q'''L²/(8k) | 16.050 §4 (OCW) | G, Leistung | T_max-Größenordnung | niedrig | ◐ umgesetzt, **ungetestet** (kein Test nennt die ID, Stand 19.11.2026) – nur info |
+| W8 | Quelle im Körper | ΔT = q'''L²/(8k) | 16.050 §4 (OCW) | G, Leistung | T_max-Größenordnung | niedrig | ✅ umgesetzt – nur info |
 | W9 | Rippen-Wirkungsgrad | m = √(hP/(kA)), η = tanh(mL)/(mL) | 16.050 §5 (OCW) | G, M | η < 0,5 → Rippe lohnt nicht (PLA k ≈ 0,13) | niedrig | ✅ umgesetzt |
 | W10 | Abkühlung beim Druck | Fo = αt/L², α ≈ 10⁻⁷ m²/s | 3.064 lec_33, 3.044 L4 | Sl (Schichtzeit) | Schichtzeit ≥ Abkühlzeit bis Tg (kleine Türme) | niedrig | ◐ teilweise – braucht `h_luefter_W_m2K` |
 
@@ -210,13 +210,13 @@ Wärmeglied α·L·ΔT (sonst ±20 K angenommen).
 |---|---|---|---|---|---|---|---|
 | E1 | Logikpegel | NM_H = V_OH − V_IH, NM_L = V_IL − V_OL | 6.002 L4, 6.012 L14 (OCW) | K, **Bauteil-DB** | NM ≥ 0,4 V; Eingang ≤ V_DD + 0,3 V | hoch | ✅ umgesetzt |
 | E2 | Spannungsfall | R = ρl/(wt), ~0,5 mΩ/□ bei 35 µm | 6.622 L12 (OCW) | K, **Strom je Netz neu** | ΔV ≤ 2–3 % | hoch | ✅ umgesetzt |
-| E3 | Leiterbahnerwärmung | P = I²R; Grenze IPC-2152 (**extern**) | 6.622 L12/16 | K | oder an fem_waerme übergeben | hoch | ◐ umgesetzt, **ungetestet** (kein Test nennt die ID, Stand 19.11.2026) |
+| E3 | Leiterbahnerwärmung | P = I²R; Grenze IPC-2152 (**extern**) | 6.622 L12/16 | K | oder an fem_waerme übergeben | hoch | ✅ umgesetzt |
 | E4 | Sperrschicht LDO/Lader | P = (V_in − V_out)·I + V_in·I_q; T_j = T_a + P·RθJA | 6.622 L16, 6.111 L16 (OCW) | K, DB (RθJA), T_a aus Elmer | T_j ≤ T_j,max − 20 K | hoch | ✅ umgesetzt |
 | E5 | Widerstand/LED | P = I²R; R_LED = (V_s − V_f)/I | 6.002 L22, 6.012 L8 (OCW) | K (Footprint → P_nenn), DB (V_f) | P ≤ 0,5·P_nenn; V_s − V_f ≥ 0,3 V | hoch | ✅ umgesetzt |
 | E6 | Akkulaufzeit | t = C/I_mittel, I_mittel = ΣI_i·D_i; P = αCV²f | 6.002 L22 (OCW) | K (Dauerverbraucher), DB/S (Modi) | ≥ Projektziel | hoch | ◐ teilweise – Ruhestrom-Untergrenze, Modi aus soll |
 | E7 | Spannungsteiler | I = V/(R1 + R2); R_th = R1‖R2 | 6.002 L3/L12 (OCW) | K | I ≤ 1–5 µA bei Akku; R_th ≤ ADC-Vorgabe | hoch | ✅ umgesetzt |
 | E8 | Brownout bei Funkspitze | V = V0 − I·R_int; ΔV = IΔt/C | 10.626 L3, 6.101 (OCW) | K, DB (I_peak, R_int) | V_min ≥ Brownout + Reserve | hoch | ✅ umgesetzt |
-| E9 | Entkopplung | C ≥ ΔIΔt/ΔV; L_loop ≈ μ0·Δ·l/w; f = 1/(2π√(LC)) | 6.622 L38, 6.101 (OCW) | K | ≥ 1 C je Power-Pin, ≤ 2–3 mm, L_loop ≤ 2–5 nH | hoch | ◐ umgesetzt, **ungetestet** (kein Test nennt die ID, Stand 19.11.2026) |
+| E9 | Entkopplung | C ≥ ΔIΔt/ΔV; L_loop ≈ μ0·Δ·l/w; f = 1/(2π√(LC)) | 6.622 L38, 6.101 (OCW) | K | ≥ 1 C je Power-Pin, ≤ 2–3 mm, L_loop ≤ 2–5 nH | hoch | ✅ umgesetzt |
 | E10 | Hot Loop Schaltregler | Masche klein, SW-Fläche klein | 6.622 L38 (OCW) | K, DB (Pin-Rollen) | Eingangs-C ≤ 3 mm | hoch* | ◐ teilweise – SW-Fläche nur info |
 | E11 | I2C-Pull-up | t_r ≈ 0,85·RC; R_min = (V_DD − V_OL)/I_OL; C_Leiterbahn ≈ εwl/h | 6.002 L13 (OCW); Grenzen NXP UM10204 (**extern**) | K | t_r ≤ 1000/300 ns | hoch | ✅ umgesetzt |
 | E12 | RC/LC-Grenzfrequenz | f_c = 1/(2πRC); Q = ω0L/R | 6.002 L18, 6.101 (OCW) | K | Anti-Alias, Audio-Hochpass ≤ 20 Hz, Q ≤ 1 | mittel | ◐ teilweise – nur RC, kein LC-Q/Audio-Hochpass |
@@ -224,8 +224,8 @@ Wärmeglied α·L·ΔT (sonst ±20 K angenommen).
 | E14 | Z0 Antenne/USB | Γ = (Z − Z0)/(Z + Z0); Microstrip Hammerstad (**extern**) | 6.013 L11–14, 6.776 L3–5 | K (Lagenaufbau) | ±10 % | mittel* | ◐ teilweise – nur Microstrip, kein CPWG |
 | E15 | Antennen-Keepout | Masse unter Antenne löscht Abstrahlung; λ/4 868 MHz ≈ 8,6 cm | 6.013 L18/19 (OCW) | K, Gehäuse-3D, DB | 0 Kupfer im Keepout, Metall ≥ λ/10 | hoch* | ◐ teilweise – Platine ja, Metall im Gehäuse nein |
 | E16 | Link-Budget | log-distance PL = PL(1 m) + 10·n·log10(r), n je Umgebung (frei 2 … dorf 3,5 … stadt 4); + Hindernisse, Kabel, Antennenfehler | 6.013 L17 (OCW), n: Rappaport Tab. 4.2 (**extern**), kalibriert Bodenklima 15.11.2026 | S, K (Funk erkannt) | Reserve ≥ 10 dB; Funk im Entwurf ohne soll `funk` = **fehler** | hoch* | ✅ umgesetzt (15.11.2026: vorher nur Freiraum + still übersprungen, im Feld 30 dB zu optimistisch) |
-| E17 | Rückstrompfad | L ≈ μ0·Δ·l/w | 6.622 L38 (OCW) | K | 100 % über durchgehender Fläche | mittel | ◐ umgesetzt, **ungetestet** (kein Test nennt die ID, Stand 19.11.2026) |
-| E18 | Übersprechen | C = εwl/d; Serien-R bremst Flanke | 6.002 L13, 6.622 L38 (OCW) | K | Serien-R 22–33 Ω an schnellen Ausgängen | mittel | ◐ umgesetzt, **ungetestet** (kein Test nennt die ID, Stand 19.11.2026) |
+| E17 | Rückstrompfad | L ≈ μ0·Δ·l/w | 6.622 L38 (OCW) | K | 100 % über durchgehender Fläche | mittel | ✅ umgesetzt |
+| E18 | Übersprechen | C = εwl/d; Serien-R bremst Flanke | 6.002 L13, 6.622 L38 (OCW) | K | Serien-R 22–33 Ω an schnellen Ausgängen | mittel | ✅ umgesetzt |
 | E19 | EMI-Filter | f0 ≤ f_sw/10 | 6.622 L28–30 (OCW) | K, DB | Dämpfung ausreichend | mittel | ◐ teilweise – Ferrite ohne L übersprungen |
 | E20 | Verstärker vs. Lautsprecher | BTL P ≈ V_DD²/(2R_L), I_peak ≈ V_DD/R_L (passend zu P; korrigiert nach Gegenprüfung) | 6.002 L22, 6.101 (OCW) | K, DB | R_L ≥ R_L,min; I_peak → E2/E8 | mittel | ✅ umgesetzt |
 | E21 | LiPo-Ladestrom | I_chg ≤ 0,5–1 C; P_Lader → E4 | C-Rate **extern**, Wärme 6.622 L16 | K (R_PROG), S (mAh) | I ≤ 1 C | hoch | ✅ umgesetzt |

@@ -87,6 +87,7 @@ def test_m22_eckwert():
             return std
         pdir = tempfile.gettempdir() + '/mb2_gibt_es_nicht'
     r = M._pruefe_bruch(K(), 'teil', 'PETG')[0]
+    assert r['id'] == 'M22', r
     assert 'sigma 3.6 MPa' in r['hinweis'], r
     a = float(r['hinweis'].split('a = ')[1].split(' mm')[0])
     nah(r['wert'], round(M.m22_KI(3.567, a), 3), 1e-3)

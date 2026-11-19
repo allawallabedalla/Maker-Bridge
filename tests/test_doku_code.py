@@ -54,6 +54,8 @@ def test_offen_wird_nicht_ausgegeben():
 def test_umgesetzt_heisst_getestet():
     tests = ''.join(open(f, encoding='utf-8').read() for f in glob.glob(os.path.join(BASIS, 'tests', '*.py')))
     ohne = [k for k, s in _katalog().items() if s == '✅' and f"'{k}'" not in tests and f'"{k}"' not in tests and f"'{k}-" not in tests]
+    veraltet = [k for k, s in _katalog().items() if s == 'ungetestet' and (f"'{k}'" in tests or f'"{k}"' in tests)]
+    assert not veraltet, f'Katalog sagt "ungetestet", es gibt aber einen Test - auf ✅ setzen: {veraltet}'
     assert not ohne, f'"✅ umgesetzt" ohne einen Test, der die ID nennt (auf "ungetestet" stellen oder Test schreiben): {ohne}'
 
 

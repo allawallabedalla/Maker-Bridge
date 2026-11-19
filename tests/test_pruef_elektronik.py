@@ -595,6 +595,69 @@ def test_echt_mb2_projekte():
         assert not any(e['stufe'] == 'fehler' for e in res), (name, [e for e in res if e['stufe'] == 'fehler'])
 
 
+# ------------------------------------------------------------------ E3, E9, E17, E18 (seit 19.11.2026, vorher ungetestet)
+
+def test_e3_leiterbahn_hand():
+    """/VBAT 1 A (Netzklasse Leistung_1A) auf 0,2 mm, 35 um, Aussenlage: dT nach IPC-2221B wie ipc2221_dT."""
+    pl = _ldo_platine({'elektronik': {'T_a_C': 20}}, klasse={'/VBAT': 'Leistung_1A'})
+    e = eintrag(el.pruefe_e3(pl), 'E3', enthaelt='/VBAT')
+    dT = el.ipc2221_dT(1.0, 0.2, 0.035, aussen=True)
+    assert nahe(e['wert'], round(dT, 2), 1e-6) and 10 < dT < 20, (e, dT)  # 19,5 K: ueber 10 K, unter 20 K
+    assert e['stufe'] == 'warnung', e
+    # 0,1 mm Bahn: dT > 20 K -> fehler (Strom aus Netzklasse = explizit)
+    pl2 = _ldo_platine({'elektronik': {'T_a_C': 20}}, klasse={'/VBAT': 'Leistung_1A'})
+    for t in pl2.bahnen('/VBAT'):
+        t['w'] = 0.1
+    assert eintrag(el.pruefe_e3(pl2), 'E3', enthaelt='/VBAT')['stufe'] == 'fehler'
+    # P = I^2 R: 1 * 1,72e-5 * 20 / (0,2 * 0,035) = 49,1 mW
+    assert nahe(e['daten']['P_W'], 1.72e-5 * 20 / (0.2 * 0.035), 2e-2), e['daten']
+
+
+def test_e9_entkopplung_abstand():
+    """U2.3V3 bei (0,0), C3 bei (2,0) -> 2 mm; U1.VIN bei (10,0), C2 bei (10,4) -> 4 mm > 3 mm -> warnung."""
+    res = el.pruefe_e9(_ldo_platine())
+    u1 = [e for e in res if e['id'] == 'E9' and (e.get('daten') or {}).get('ref') == 'U1' and e['daten'].get('C') == 'C2']
+    assert u1 and nahe(u1[0]['wert'], 4.0) and u1[0]['stufe'] == 'warnung', u1
+    alle = ' '.join(e['hinweis'] for e in res)
+    assert 'C3 in 2.0 mm' in alle, alle[:500]
+    # Versorgungspin ohne jeden Kondensator -> fehler
+    pl = _ldo_platine()
+    pl.netze['+3V3'] = [x for x in pl.netze['+3V3'] if x['ref'] != 'C3']
+    pl.pins_von['C3'] = [x for x in pl.pins_von['C3'] if x['netz'] != '+3V3']
+    assert any(e['stufe'] == 'fehler' and 'U2' in e['hinweis'] for e in el.pruefe_e9(pl) if e['id'] == 'E9')
+
+
+def _takt_platine(spalt_mm, gnd_flaeche=True):
+    """SPI-Takt 20 mm auf F.Cu, MISO parallel daneben; GND-Flaeche auf B.Cu unter allem (optional)."""
+    teile = {'U1': ('ESP32-C6-MINI-1-H4', 'x', {'LCSC': 'C6553337'}), 'U2': ('W25Q32', 'x', {})}
+    netze = {'/SPI_SCK': [('U1', '20', 'IO20', 'output'), ('U2', '6', 'CLK', 'input')],
+             '/MISO': [('U1', '21', 'IO21', 'input'), ('U2', '2', 'DO', 'output')],
+             'GND': [('U1', '1', 'GND', 'power_in'), ('U2', '4', 'GND', 'power_in')]}
+    y = 0.2 + spalt_mm                                    # Mittenabstand = Spalt + 2 * halbe Breite (0,1 + 0,1)
+    bahnen = [{'art': 'bahn', 'a': [10, 10], 'b': [30, 10], 'w': 0.2, 'lage': 'F.Cu', 'netz': '/SPI_SCK', 'l': 20.0},
+              {'art': 'bahn', 'a': [10, 10 + y], 'b': [30, 10 + y], 'w': 0.2, 'lage': 'F.Cu', 'netz': '/MISO', 'l': 20.0}]
+    poly = {'aussen': [[0, 0], [50, 0], [50, 50], [0, 50]], 'loecher': []}
+    zonen = [{'netz': 'GND', 'regel': False, 'lagen': ['B.Cu'], 'fp': None, 'flaechen': {'B.Cu': [poly]}}] if gnd_flaeche else []
+    return _platine(teile, netze, bahnen=bahnen, zonen=zonen)
+
+
+def test_e17_rueckstrompfad():
+    e = eintrag(el.pruefe_e17(_takt_platine(0.3)), 'E17', enthaelt='/SPI_SCK')
+    assert e['stufe'] == 'ok' and e['wert'] == 100, e                       # ganz ueber der GND-Flaeche
+    assert eintrag(el.pruefe_e17(_takt_platine(0.3, gnd_flaeche=False)), 'E17')['stufe'] == 'warnung'
+
+
+def test_e18_uebersprechen_hand():
+    """20 mm parallel, Spalt 0,3 mm (<= 2 w = 0,4): C_m = eps0 * 4,5 * 35 um * 20 mm / 0,3 mm -> warnung
+    (> 10 mm parallel). Spalt 0,6 mm > 0,4 mm: keine Kopplung gewertet."""
+    res = [e for e in el.pruefe_e18(_takt_platine(0.3)) if e['id'] == 'E18' and '->' in e['hinweis']]
+    assert res and res[0]['stufe'] == 'warnung' and nahe(res[0]['wert'], 20.0), res
+    C = el.EPS0 * 4.5 * 0.035 * 20 / 0.3                # EPS0 in F/mm, Masse in mm
+    assert f'{C * 1e15:.1f} fF' in res[0]['hinweis'], (res[0]['hinweis'], C * 1e15)
+    weit = [e for e in el.pruefe_e18(_takt_platine(0.6)) if e['id'] == 'E18' and '->' in e['hinweis']]
+    assert not weit, weit
+
+
 if __name__ == '__main__':
     n = 0
     for name, f in list(globals().items()):

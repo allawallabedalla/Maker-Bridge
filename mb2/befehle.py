@@ -143,6 +143,21 @@ def anforderungen_pruefen(projekt: str):
 
 
 @befehl('anforderungen')
+def fragen(projekt: str, einreihen: str = '', art: str = 'komfort', beantworte: str = '', antwort: str = ''):
+    """Fragen-Warteschlange in projekt.md ('## Offene Fragen'): gibt die EINE naechste Frage zurueck.
+    einreihen + art (widerspruch | sicherheit | ziel | komfort) haengt eine Frage an; beantworte (Textanfang) + antwort
+    hakt eine ab. Widersprueche X* aus dem Katalog werden automatisch eingereiht. Je Nachricht nur EINE Frage stellen."""
+    from . import fragen as fr, pruefungen
+    d = pdir(projekt)
+    if einreihen:
+        fr.einreihen(d, einreihen, art)
+    if beantworte:
+        fr.beantworten(d, beantworte, antwort)
+    neu = fr.aus_katalog(d, pruefungen.alle(d, module=['widerspruch'])['module'])
+    return dict(fr.naechste(d), aus_widerspruch_neu=neu)
+
+
+@befehl('anforderungen')
 def abnahme_eintragen(projekt: str, schritt: str, ist: float | str, notiz: str = ''):
     """Ist-Wert eines Abnahmeschritts am realen Geraet eintragen (abnahme.json), z. B. AB-FUNK snr_dB."""
     from . import anforderungen as an

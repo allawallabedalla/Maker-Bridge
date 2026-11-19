@@ -1,6 +1,6 @@
 """Ergebnis-Cache fuer teure Befehle (cad_build, fem_*): gleiche Eingaben -> gespeichertes Ergebnis statt neu rechnen.
 
-Schluessel = SHA-256 ueber alle Eingabedateien UND den Quelltext von mb2/*.py. Damit rechnet jede Aenderung an
+Schluessel = SHA-256 ueber alle Eingabedateien UND den Quelltext von mb2/**/*.py. Damit rechnet jede Aenderung an
 Skript, Sollmassen, STEP, Lastfall oder an den Pruefungen selbst neu. Lieber zu oft neu als ein veraltetes Ergebnis.
 Treffer nur, wenn alle Ausgabedateien des gespeicherten Ergebnisses noch existieren."""
 import glob
@@ -11,10 +11,16 @@ import os
 MB2 = os.path.dirname(os.path.abspath(__file__))
 
 
+def quelldateien():
+    """Alle Python-Dateien von mb2 einschliesslich Unterordner (pruefungen/, sensorprofile/) - seit 19.11.2026; vorher
+    nur mb2/*.py, dann blieb ein Ergebnis nach einer Aenderung an einer Pruefung faelschlich gueltig."""
+    return sorted(glob.glob(os.path.join(MB2, '**', '*.py'), recursive=True))
+
+
 def schluessel(dateien, extra=None):
     h = hashlib.sha256()
-    for p in sorted(glob.glob(os.path.join(MB2, '*.py'))):
-        h.update(os.path.basename(p).encode())
+    for p in quelldateien():
+        h.update(os.path.relpath(p, MB2).replace(os.sep, '/').encode())
         h.update(open(p, 'rb').read())
     for p in sorted(set(os.path.normcase(os.path.abspath(d)) for d in dateien)):
         h.update(p.encode())

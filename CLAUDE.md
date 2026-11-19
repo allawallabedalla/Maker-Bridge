@@ -3,7 +3,7 @@
 - **Git:** Änderungen direkt auf `main` committen und pushen (Vorgabe des Nutzers, 19.11.2026). Vorher
   `uv run python tests/alle.py` – nur pushen, wenn keine Testfunktion `fehlgeschlagen` ist; nicht ausgeführte Tests
   (Werkzeug/Beispielprojekt fehlt) im Commit nennen.
-- **Alle Kommunikation ADHS-tauglich:** Kernaussage zuerst, kurze Sätze, Listen ≤ 5 Punkte, Zeiten in Minuten,
+- **Alle Kommunikation ADHS-tauglich:** Kernaussage zuerst, kurze Sätze, Listen ≤ 5 Punkte, keine geratenen Zeitangaben (Umfang statt Minuten),
   keine Floskeln, Details nur auf Nachfrage, am Ende genau EIN nächster Schritt.
 - Rückfragen nach `claude/skills/idee-zu-druck-2/SKILL.md`: ohne Vorwissen verständlich, kritisch statt gefällig.
   **Alle offenen Fragen stellen, aber nur EINE je Nachricht**; die übrigen warten in einer Liste (wichtigste zuerst).

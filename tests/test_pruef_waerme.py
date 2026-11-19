@@ -376,6 +376,21 @@ def test_andere_projekte_laufen():
 
 SCHNELL = ('test_w', 'test_fehlende')
 
+def test_w8_quelle_im_koerper_hand():
+    """1 W in 10 x 10 x 2 mm Metall (k aus MATERIAL): q3 = 1 W / 200e-9 m^3 = 5e6 W/m^3, L = 2 mm,
+    dT = q3 L^2 / (8 k). Ohne Waermeleitung: uebersprungen."""
+    from mb2.material import MATERIAL
+    mat = next(m for m, v in MATERIAL.items() if (v.get('waermeleitung_W_mK') or 0) > 50)
+    k = MATERIAL[mat]['waermeleitung_W_mK']
+    erg = {'koerper_info': {'block': {'waerme_W': 1.0, 'material': mat, 'volumen_mm3': 200.0, 'bbox_mm': [10, 10, 2],
+                                      'T_max_C': 30.0, 'T_min_C': 29.0}}}
+    e = W._w8('fall', {}, erg)[0]
+    assert e['id'] == 'W8' and e['stufe'] == 'info', e
+    assert abs(e['wert'] - 5e6 * 0.002 ** 2 / (8 * k)) <= 0.0005, (e['wert'], k)      # auf 3 Stellen gerundet
+    erg['koerper_info']['block']['material'] = 'GIBT_ES_NICHT'
+    assert W._w8('fall', {}, erg)[0]['stufe'] == 'uebersprungen'
+
+
 if __name__ == '__main__':
     schnell = 'schnell' in sys.argv
     try:
