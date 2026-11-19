@@ -221,7 +221,7 @@
    "id": "A-STRAHLUNG",
    "ebene": "system",
    "herkunft": "Lastenheft MB2-TEMP-001 (Nutzer 19.11.2026, Aussenluft fuer ML-Daten)",
-   "text": "Sonne und Waermestrahlung verfaelschen die Lufttemperatur hoechstens um einen festzulegenden Wert (Fuehler im belueftetem Strahlungsschutz).",
+   "text": "Sonne und Waermestrahlung verfaelschen die Lufttemperatur hoechstens um einen festzulegenden Wert (Fuehler in passivem Lamellen-Strahlungsschutz ohne Luefter, Entscheidung Nutzer 19.11.2026).",
    "notiz": "Zielwert offen - Vorschlag des Nutzers einholen. Nachweis: Parallelmessung neben einer aktiv belueften Referenz bzw. Wetterstation ueber sonnige und windstille Tage.",
    "nachweise": [
     {
@@ -235,7 +235,8 @@
       "einheit": "°C"
      }
     }
-   ]
+   ],
+   "risiko": "Passiv gewaehlt gegen die Empfehlung \"belueftet\": bei Sonne und wenig Wind ist ein Strahlungsfehler ueber 0,5 °C zu erwarten. Er haengt an Sonne und Wind und kann von einem ML-Modell mitgelernt werden. Die Genauigkeit +-0,5 °C (A-MESS-TEMP) gilt nur fuer den Sensor im Bad, nicht fuer die Lufttemperatur draussen. Gegenmassnahme: Feldvergleich (dieser Nachweis) und Strahlung/Wind als Merkmale oder Filter im ML-Datensatz."
   },
   {
    "id": "A-REAKTION",
