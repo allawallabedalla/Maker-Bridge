@@ -453,7 +453,9 @@ def pruefen(pdir, katalog=None, extra=None):
                    if n['stufe'] in ('komponente', 'integration'))
     druckfertig = bool(zeilen) and not matrix_maengel and all(nur_vor_abnahme(z) for z in zeilen) and \
         not any(z['status'] == 'verletzt' for z in zeilen) and not any(z['matrix_maengel'] for z in zeilen)
+    risiken = risiken_sammeln(lade(pdir, 'anforderungen.json', {}))
     mfg = messtechnische_freigabe(pdir, anf, zeilen)
+    mfg['risiken'] = risiken
     fertig = druckfertig and all(z['status'] in ('bewiesen',) for z in zeilen) and \
         mfg['status'] in ('nicht_anwendbar', 'freigegeben')
     freigabe = 'fertig' if fertig else ('druckfertig' if druckfertig else 'nicht_druckfertig')
@@ -463,6 +465,7 @@ def pruefen(pdir, katalog=None, extra=None):
                              if n['stufe'] in ('abnahme', 'feld') and n['status'] != 'bewiesen'],
            'kontext_hash': kontext_hash(pdir), 'zeit': datetime.datetime.now().isoformat(timespec='seconds')}
     erg['messtechnische_freigabe'] = mfg
+    erg['risiken'] = risiken
     erg['glaubwuerdigkeit'] = [{k: g[k] for k in ('anforderung', 'fall', 'risiko', 'status', 'text')} for g in glaub]
     os.makedirs(os.path.join(pdir, 'pruef'), exist_ok=True)
     speichere(pdir, 'pruef/v_matrix.json', erg)
@@ -472,6 +475,16 @@ def pruefen(pdir, katalog=None, extra=None):
 
 
 # ---------------------------------------------------------------------------------------------- Messtechnische Freigabe
+
+def risiken_sammeln(anf_datei):
+    """Bewusst eingegangene Risiken (seit 19.11.2026): Feld 'risiko' je Anforderung und Liste 'risiken' auf oberster
+    Ebene von anforderungen.json. Typisch: Entscheidung des Nutzers gegen eine Empfehlung. Sie blockieren nichts, muessen
+    aber sichtbar sein (v_matrix, audit, Messprotokoll) und bei der menschlichen Freigabe ausdruecklich akzeptiert werden."""
+    r = [{'anforderung': a['id'], 'risiko': a['risiko']} for a in anf_datei.get('anforderungen', []) if a.get('risiko')]
+    r += [{'anforderung': None, 'risiko': x if isinstance(x, str) else x.get('risiko', str(x))}
+          for x in anf_datei.get('risiken', [])]
+    return r
+
 
 def _ist_messtechnisch(a):
     return bool(a.get('messtechnik')) or any(n.get('art') == 'katalog' and str(n.get('ref', '')).startswith('MK')
@@ -507,16 +520,20 @@ def messtechnische_freigabe(pdir, anf, zeilen):
             'freigabe_durch': fg.get('pruefer') if st == 'freigegeben' else None}
 
 
-def messtechnik_freigeben(pdir, pruefer, notiz=''):
+def messtechnik_freigeben(pdir, pruefer, notiz='', risiken_akzeptiert=False):
     """Menschliche Freigabe der Messfunktion festhalten. Absichtlich KEIN MCP-Befehl: von Hand aufrufen
     (python -c "from mb2 import anforderungen as a; a.messtechnik_freigeben('projects/x', 'Name')").
     Verweigert, solange nicht alle messtechnischen Anforderungen bewiesen sind."""
     v = pruefen(pdir)
     if v['messtechnische_freigabe']['status'] != 'bereit_zur_menschlichen_freigabe':
         raise RuntimeError(f'nicht freigebbar: {v["messtechnische_freigabe"]}')
+    if v['risiken'] and not risiken_akzeptiert:
+        raise RuntimeError('Offene Risiken muessen ausdruecklich akzeptiert werden (risiken_akzeptiert=True): '
+                           + ' | '.join(r['risiko'] for r in v['risiken']))
     f = lade(pdir, 'freigabe.json', {})
     f['messtechnik'] = {'pruefer': pruefer, 'datum': datetime.datetime.now().isoformat(timespec='seconds'),
-                        'kontext_hash': v['kontext_hash'], 'notiz': notiz}
+                        'kontext_hash': v['kontext_hash'], 'notiz': notiz,
+                        'akzeptierte_risiken': [r['risiko'] for r in v['risiken']]}
     speichere(pdir, 'freigabe.json', f)
     return pruefen(pdir)['messtechnische_freigabe']
 
@@ -535,6 +552,9 @@ def messprotokoll(pdir, anf, zeilen, mfg):
          f'mb2/anforderungen.py. **Gruen heisst bewiesen**: nur rueckfuehrbar gemessene Reihen koennen beweisen.', '',
          f'**Messtechnische Freigabe: {mfg["status"]}**', '']
     L += [f'- {g}' for g in mfg['gruende']] + ['']
+    if mfg.get('risiken'):
+        L += ['**Bewusst eingegangene Risiken** (muessen bei der Freigabe akzeptiert werden):', '']
+        L += [f'- {r["anforderung"] or "Projekt"}: {r["risiko"]}' for r in mfg['risiken']] + ['']
     L += ['| Anforderung | Eigenschaft | Reihe | Datenstatus | gemessen | zulaessig | U_pruef (k=2) | '
           'Akzeptanzgrenze | Auswertung | Status | Grund |', '|' + '---|' * 11]
     for z, n in mess:

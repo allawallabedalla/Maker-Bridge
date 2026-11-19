@@ -659,6 +659,7 @@ def audit(projekt: str):
         v = an.pruefen(d, katalog=kat, extra={'kicad': kicad})
         freigabe = v['freigabe']
         vmatrix = {'freigabe': freigabe, 'zaehlung': v['zaehlung'], 'offen_abnahme': v['offen_abnahme'],
+                   'risiken': v.get('risiken', []), 'messtechnische_freigabe': v['messtechnische_freigabe']['status'],
                    'datei': os.path.join(d, 'pruef', 'v_matrix.json')}
         maengel += [f'V-Matrix: {m}' for m in v['matrix_maengel']]
         for z in v['anforderungen']:

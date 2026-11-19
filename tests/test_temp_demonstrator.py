@@ -265,7 +265,14 @@ def test_freigabe_nur_durch_mensch_und_an_stand_gebunden():
     v = an.pruefen(d)
     mf = v['messtechnische_freigabe']
     assert mf['status'] == 'bereit_zur_menschlichen_freigabe', mf          # Software gibt nie selbst frei
-    assert an.messtechnik_freigeben(d, 'TESTFIXTURE Pruefer')['status'] == 'freigegeben'
+    assert mf['risiken'] and 'Passiv' in mf['risiken'][0]['risiko'], mf.get('risiken')     # A-STRAHLUNG
+    try:
+        an.messtechnik_freigeben(d, 'TESTFIXTURE Pruefer')
+        raise AssertionError('Freigabe ohne Akzeptanz der Risiken')
+    except RuntimeError as ex:
+        assert 'Risiken' in str(ex), ex
+    assert an.messtechnik_freigeben(d, 'TESTFIXTURE Pruefer', risiken_akzeptiert=True)['status'] == 'freigegeben'
+    assert 'Bewusst eingegangene Risiken' in open(os.path.join(d, 'pruef', 'messprotokoll.md'), encoding='utf-8').read()
     pm = os.path.join(d, 'messung.json')
     m = json.load(open(pm, encoding='utf-8'))
     m['reihen'][0]['punkte'][0]['ist'] += 0.001

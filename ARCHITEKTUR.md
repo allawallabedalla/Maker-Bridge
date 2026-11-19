@@ -177,6 +177,25 @@ nicht_druckfertig/druckfertig/fertig. `feld_abgleich` macht aus zu optimistische
 Jeder FEM-Nachweis wird je Modell nach Risiko (Einfluss × Folge) eingestuft. Die Pflichten wachsen mit dem Risiko: Die Faktoren haben Stufen (Code, Lösung, Sensitivität, Strenge der Validierung, Anwendbarkeit, Herkunft). Die Sensitivität rechnet `fem_sensitivitaet`, die Varianten liegen in `fem/sens/`, der Materialwechsel je Lauf geht über `material_override`.
 Einzelheiten in `VMODELL.md`, Bewertung und Quellen in `IN_SILICO.md`. Test: `tests/test_glaubwuerdigkeit.py`.
 
+## 7f Messtechnik, Ziele, Teststatus (seit 19.11.2026)
+
+- **Messkette** `mb2/pruefungen/messkette.py`, generisch und ohne Sensorwissen:
+  - GUM-Budget aus Einzelbeiträgen oder aus einer Modellgleichung mit numerischen Sensitivitäten (`budget_aus_modell`), rauschbegrenzte Auflösung
+  - Bewertung von Referenzmessreihen mit Datenstatus und Mindestverfahren je Eigenschaft
+  - ILAC-G8-Entscheidung, Korrekturpolynom
+  - Katalog MK1–MK5
+- **Sensorprofile** `mb2/sensorprofile/`: Modellgleichungen je Sensortyp. Erstes Profil `rtd_ratiometrisch_3leiter` mit IEC 60751, IDAC-Tausch, ADS1220-Grenzen als Daten und Kalibriermodus.
+- **V-Matrix** (`anforderungen.py`):
+  - Nachweisart `messung`, `messtechnische_freigabe` (Software höchstens „bereit“, freigeben nur ein Mensch, an den Kontext-Hash gebunden)
+  - Kalibrierreihe ≠ Nachweis
+  - Risiken
+  - Messprotokoll `pruef/messprotokoll.md`
+  - CSV-Import `messreihen_aus_csv`, Kalibrierung `kalibrierung_auswerten`
+- **Projektziele** `project_new(..., ziele=...)` und `mb2/pruefungen/kpi.py` (K1–K4): Kosten, Aufwand, Termin, Priorität. „unbekannt“ ist erlaubt und wird als Risiko geführt.
+- **Tests:** `tests/alle.py` klassifiziert je Funktion. Ein nicht ausgeführter Test ist nie bestanden. Stand in `tests/TESTSTATUS.md`.
+- **Anleitung** (`claude/skills/idee-zu-druck-2/SKILL.md`): Rückfragen einfach und ohne Vorwissen verständlich. Kritisch statt gefällig. Erst Systemgrenze und Ziele, dann Technik.
+- **Erstes Beispiel** `demonstratoren/MB2-TEMP-001/` (PT100 + ADS1220, abgebrochen 19.11.2026; Stand dort).
+
 ## 7b Katalog-Prüfungen (mb2/pruefungen)
 Analytische Prüfungen aus `OCW_PRUEFKATALOG.md` als Vorab-Schätzung, Gegenprobe zur FEM und harte Grenze. Sie **lesen nur**, was vorliegt (STEP, `*.pruefung.json`, FEM-Ergebnisse, `print/slice.json`, KiCad), und rechnen keine FEM.
 

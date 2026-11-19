@@ -30,6 +30,21 @@ Die Werkzeuge liefert der MCP-Server **mb2**. Jeder Schritt läuft über einen e
   Folgen prüfen.
 
 ## 0. Idee schärfen (du selbst)
+- **Systemgrenze zuerst:** Wird ein Gerät oder ein Modul gebaut, das an einen vorhandenen Rechner kommt (ESP32,
+  Raspberry Pi …)? Was macht das Modul, was der Rechner (Zeitstempel, Speicher, Übertragung)? Wo sitzt welche
+  Elektronik? Erst danach Bauteile wählen. (Lehre MB2-TEMP-001: falsche Annahme „Gerät“ kostete eine Runde.)
+- **Leitungslängen prüfen:** SPI und I²C sind Platinenbusse (Zentimeter bis wenige Meter). Muss ein Sensor weiter weg,
+  dann nur das analoge Fühlerkabel verlängern (z. B. 3-Leiter-PT100) oder einen Bus für lange Leitungen vorsehen
+  (RS-485, I²C-Verlängerer).
+- **Zahlen gegen die Anwendung halten:** Messbereich, Messrate, Genauigkeit, Laufzeit aus der Anwendung ableiten,
+  nicht übernehmen. (Lehre MB2-TEMP-001: 100 °C für Außenluft, 5 Werte/s ohne Grund.)
+- **Einbau beeinflusst die Messung:** Bei Sensoren den Einbau als Teil der Messkette behandeln (Strahlungsschutz,
+  Wärmeleitung über Halter, Luftaustausch, mechanische Verspannung) – oft größer als jeder Elektronikfehler.
+- **Aufwand × Stückzahl:** Kalibrierung, Prüfung und Montage je Gerät mit der Stückzahl multiplizieren, bevor ein
+  Verfahren gewählt wird.
+- **Entscheidung gegen die Empfehlung:** respektieren, aber als `risiko` an der betroffenen Anforderung in
+  `anforderungen.json` eintragen (Folge in Zahlen, Gegenmaßnahme). Risiken erscheinen in v_matrix, audit und
+  Messprotokoll und müssen bei der menschlichen Freigabe ausdrücklich akzeptiert werden.
 - **Ziele zuerst (KPIs):** vor der Technik `ZIEL_FELDER` abfragen und an `project_new(..., ziele=...)` geben:
   Zielkosten je Gerät, Stückzahl, Termin, Arbeitszeit je Gerät, Fehlerfolge (was passiert, wenn es falsch arbeitet),
   Priorität als Reihenfolge von Qualität/Kosten/Zeit, vorhandene Prüfmittel. Einfach fragen, je Feld „weiß nicht“

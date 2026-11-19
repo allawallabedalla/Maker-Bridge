@@ -124,6 +124,7 @@ Darum gibt es zwei Ebenen:
   - Das erste Profil ist `rtd_ratiometrisch_3leiter`: IEC 60751, IDAC-Tausch, MK4-Bauteilgrenzen. Bauteilgrenzen sind Daten, keine eingebauten Datenblattwerte.
   - Der Demonstrator dazu liegt unter `demonstratoren/MB2-TEMP-001/`.
 - **Kalibrierung** (`kalibrierung_auswerten`): Eine Reihe liefert die Korrektur. Sie darf nicht zugleich Nachweis sein (Grund `kalibrierdaten_als_nachweis`). Der Nachweis braucht eine unabhängige Reihe nach dem Laden der Korrektur.
+- **Risiken** (`risiko` je Anforderung oder Liste `risiken` in `anforderungen.json`): bewusst eingegangen, z. B. Nutzerentscheidung gegen eine Empfehlung. Blockieren nichts, stehen aber in `v_matrix.risiken`, im audit (`v_matrix.risiken`) und im Messprotokoll. `messtechnik_freigeben` verlangt `risiken_akzeptiert=True` und speichert die akzeptierten Risiken in `freigabe.json`.
 - Grenze: Der KI-Prüfer organisiert und rechnet den Nachweis. Beweiskraft hat nur die Messung mit rückführbarer Referenz. Eine kritische Freigabe macht ein Mensch.
 
 ## Befehle (MCP mb2)

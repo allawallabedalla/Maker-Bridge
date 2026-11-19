@@ -1,5 +1,10 @@
 # Demonstrator MB2-TEMP-001: PT100-Temperatursensor
 
+> **Projekt abgebrochen (19.11.2026).** Der Stand bleibt als Beispiel und Testgrundlage für die Messtechnik der
+> Maker-Bridge erhalten (`tests/test_temp_demonstrator.py`).
+> - **Erreicht:** Lastenheft für Außenluft, Messkette mit ADS1220-Datenblattwerten (MK2–MK5 ok), Kalibrierkonzept, Treiber und Rechnung (auf dem PC getestet), Messanleitung.
+> - **Nicht erreicht:** kein Fühler gekauft, keine echte Messung, MK1 offen (Eigenerwärmung), Zielwerte für Strahlung und Reaktionszeit offen, Kabellänge offen, SHT31-Feuchte nicht entschieden.
+
 Erster messtechnischer Demonstrator. Er läuft durch die bestehende Architektur, ohne eigene Subsysteme:
 - V-Matrix (`mb2/anforderungen.py`)
 - Messkette MK1–MK4 (`mb2/pruefungen/messkette.py`, Profil `mb2/sensorprofile/rtd.py`)

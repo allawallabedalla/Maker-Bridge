@@ -59,4 +59,6 @@ Hintergrund: Der ADS1220 spricht SPI – SPI ist nur für kurze Leitungen
 - 19.11.2026: Strahlungsschutz wird **gekauft** (Nutzer), nicht gedruckt. Auswahlkriterien in README → Kaufteile.
   Folge: kein Lüfter nachrüstbar, sofern das Modell es nicht vorsieht; Schutzwirkung nur über den Feldvergleich bekannt.
 
+- 19.11.2026: **Projekt abgebrochen** (Nutzer). Stand bleibt als Beispiel erhalten.
+
 ## Audit
