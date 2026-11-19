@@ -303,6 +303,15 @@ class _Kriechen:
         self.tau, self.q_tau = g('kriech_tau_h')
         self.E1000, self.q_1000 = g('kriechmodul_1000h_MPa')
         self.U, self.q_U = g('aktivierung_U_kJ_mol')
+        # Physikalisch unmoegliche Kennwerte (0, negativ, Verhaeltnis > 1) gelten als fehlend - Randwert-Probe
+        # 19.11.2026: tau = 0 liess das Modul abstuerzen statt die Pruefung zu ueberspringen
+        self.ungueltig = []
+        for name, ok in (('r', lambda v: 0 < v <= 1), ('tau', lambda v: v > 0), ('E1000', lambda v: v > 0),
+                         ('U', lambda v: v > 0)):
+            v = getattr(self, name)
+            if v is not None and not ok(float(v)):
+                self.ungueltig.append(f'{name} = {v}')
+                setattr(self, name, None)
         pj = s.get('_projekt', {})
         self.T_mittel, self.spanne = pj.get('T_mittel_C'), pj.get('T_tagesgang_K')
 
@@ -333,7 +342,8 @@ class _Kriechen:
             v = min(1.0, self.E1000 / self.E0)
             return v, f'Kriechmodul 1000 h {self.E1000} MPa', t_eff > 1000
         return None, f'Kriechkennwerte fuer {self.material} fehlen (kriech_E_inf_zu_E0 + kriech_tau_h oder ' \
-                     'kriechmodul_1000h_MPa in kennwerte.py)', False
+                     'kriechmodul_1000h_MPa in kennwerte.py)' + \
+            (f'; ungueltig verworfen: {", ".join(self.ungueltig)}' if self.ungueltig else ''), False
 
 
 def _dauer_h(ts, pj):

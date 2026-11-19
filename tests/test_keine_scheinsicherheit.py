@@ -205,6 +205,9 @@ def test_weglassprobe_dauer_toleranz_schwingung():
 
 def _fem_projekt():
     """Oeffentliches FEM-Projekt (Wandhaken wie tests/test_durchlauf.py), einmal gebaut und gerechnet."""
+    fertig = os.path.join(TMP, 'fem_basis', 'haken')
+    if os.path.exists(os.path.join(fertig, 'fem', 'haken.erg.json')):
+        return fertig
     from mb2 import befehle as B, werkzeuge
     if not werkzeuge.ccx():
         from _nachweis import NichtAusgefuehrt
@@ -276,6 +279,67 @@ def test_weglassprobe_fem():
     r = lauf(neu_soll=null)
     assert not [k for k, v in r.items() if k[0] == 'schwingung'], 'Modul schwingung abgestuerzt'
     assert r[('S2', 'haken', next(k[2] for k in r if k[0] == 'S2'))] == 'uebersprungen'
+
+def _zahlen(o, pfad=()):
+    if isinstance(o, bool):
+        return
+    if isinstance(o, (int, float)):
+        yield pfad
+    elif isinstance(o, dict):
+        for k, v in o.items():
+            yield from _zahlen(v, pfad + (k,))
+    elif isinstance(o, list):
+        for i, v in enumerate(o):
+            yield from _zahlen(v, pfad + (i,))
+
+
+def _setze(o, pfad, wert):
+    import copy
+    o = copy.deepcopy(o)
+    x = o
+    for t in pfad[:-1]:
+        x = x[t]
+    x[pfad[-1]] = wert
+    return o
+
+
+def _randprobe(name, soll, module, vorbereiten=None, basis_dir=None, datei='cad/soll.json'):
+    """Jede Zahl einzeln auf 0 und -1 setzen: kein Modul darf abstuerzen (ungueltige Eingabe -> uebersprungen/fehler
+    mit Hinweis, nie ein Traceback)."""
+    abstuerze = []
+    for pfad in _zahlen(soll):
+        for wert in (0, -1):
+            neu = _setze(soll, pfad, wert)
+            if basis_dir:
+                d = os.path.join(TMP, name)
+                shutil.rmtree(d, ignore_errors=True)
+                shutil.copytree(basis_dir, d)
+                json.dump(neu, open(os.path.join(d, datei), 'w', encoding='utf-8'))
+            else:
+                d = _projekt(name, neu)
+                if vorbereiten:
+                    vorbereiten(d)
+            for e in (x for l in pruefungen.alle(d, module)['module'].values() for x in l):
+                if e['id'] in pruefungen.MODULE:
+                    abstuerze.append(('/'.join(map(str, pfad)), wert, e['hinweis'][:120]))
+    return abstuerze
+
+
+def test_randwerte_kein_absturz():
+    funde = _randprobe('rp_mech', MECH_SOLL, ('mechanik',))
+    funde += _randprobe('rp_elek', ELEK_SOLL, ('elektronik',))
+    funde += _randprobe('rp_dauer', DAUER_SOLL, ('dauer', 'toleranz', 'schwingung'),
+                        lambda d: json.dump({'ok': True, 'bbox_mm': [40, 30, 20], 'druck_drehung': [0, 0, 0]},
+                                            open(os.path.join(d, 'out', 'teil.pruefung.json'), 'w')))
+    assert not funde, f'{len(funde)} Abstuerze bei Randwerten: {funde[:12]}'
+
+
+def test_randwerte_fem_kein_absturz():
+    basis_dir = _fem_projekt()
+    soll = json.load(open(os.path.join(basis_dir, 'cad', 'soll.json'), encoding='utf-8'))
+    funde = _randprobe('rp_fem', soll, FEM_MODULE, basis_dir=basis_dir)
+    funde += _randprobe('rp_fall', FEM_FALL, FEM_MODULE, basis_dir=basis_dir, datei='fem/haken.json')
+    assert not funde, f'{len(funde)} Abstuerze bei Randwerten: {funde[:12]}'
 
 
 if __name__ == '__main__':

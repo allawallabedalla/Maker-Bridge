@@ -28,3 +28,7 @@ Gefunden mit der FEM-Weglass-Probe:
 - `anregung_Hz: 0` ließ das Modul `schwingung` abstürzen (Division durch null). Jetzt `uebersprungen` mit Hinweis.
 - M3 ohne `a_mm`: Last an der Spitze angenommen, die Spannungs-Gegenprobe sprang von warnung auf ok. Jetzt höchstens warnung mit Hinweis.
 - Druckplatte galt nach jedem cad_build als veraltet (Zeitstempel im STEP-Kopf), auch bei gleicher Geometrie. Jetzt Geometrie-Hash in `platte.json`: kein unnötiges cad_plate/Slicen in langen Läufen.
+
+Randwert-Probe (`test_randwerte_kein_absturz`, `test_randwerte_fem_kein_absturz`): jede Zahl in den Test-Projekten
+einzeln auf 0 und −1 – kein Modul darf abstürzen. Gefunden: Kriech-Zeitkonstante 0/−1 brachte `dauer` zum Absturz.
+Jetzt gelten unmögliche Kriechkennwerte als fehlend (Prüfung übersprungen, Hinweis „ungültig verworfen“).
