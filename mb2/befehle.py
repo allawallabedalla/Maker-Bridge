@@ -50,6 +50,7 @@ ZIEL_FELDER = {
     'fehlerfolge': 'was passiert, wenn das Geraet falsch arbeitet: gering | mittel | hoch',
     'prioritaet': 'Reihenfolge von qualitaet, kosten, zeit - was gibt bei einem Konflikt nach?',
     'pruefmittel': 'vorhandene Mess- und Pruefgeraete (Liste)',
+    'zeit_h_pro_woche': 'wie viele Stunden pro Woche fuer das Projekt verfuegbar sind (fuer Aufwand gegen Termin)',
 }
 
 

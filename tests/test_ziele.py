@@ -13,7 +13,8 @@ from mb2.pruefungen import kpi                             # noqa: E402
 
 TMP = tempfile.mkdtemp(prefix='mb2_ziele_')
 ZIELE = {'zielkosten_eur_stueck': 40, 'stueckzahl': 5, 'termin': '2027-03-31', 'aufwand_h_stueck': 3,
-         'fehlerfolge': 'mittel', 'prioritaet': ['qualitaet', 'kosten', 'zeit'], 'pruefmittel': ['TESTFIXTURE']}
+         'fehlerfolge': 'mittel', 'prioritaet': ['qualitaet', 'kosten', 'zeit'], 'pruefmittel': ['TESTFIXTURE'],
+         'zeit_h_pro_woche': 10}
 
 
 def neu(name, ziele):

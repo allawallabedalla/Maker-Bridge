@@ -20,7 +20,7 @@ import json
 import os
 
 MODULE = ('fem_plausi', 'waerme', 'mechanik', 'dauer', 'toleranz', 'schwingung', 'elektronik', 'druck', 'firmware',
-          'messkette', 'kpi')
+          'messkette', 'kpi', 'widerspruch')
 STUFEN = ('ok', 'info', 'warnung', 'fehler', 'uebersprungen')
 
 

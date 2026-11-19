@@ -42,6 +42,10 @@ Die Werkzeuge liefert der MCP-Server **mb2**. Jeder Schritt läuft über einen e
   Wärmeleitung über Halter, Luftaustausch, mechanische Verspannung) – oft größer als jeder Elektronikfehler.
 - **Aufwand × Stückzahl:** Kalibrierung, Prüfung und Montage je Gerät mit der Stückzahl multiplizieren, bevor ein
   Verfahren gewählt wird.
+- **Widersprüche (X1–X9, `mb2/pruefungen/widerspruch.py`):** nach `project_new` und nach jeder Änderung an Zielen,
+  Einsatz oder Anforderungen `pruefkatalog` lesen. Jeden X-`fehler` und jede X-`warnung` dem Nutzer einzeln als einfache
+  Rückfrage stellen (was passt nicht zusammen, warum zählt es, Möglichkeiten zur Auflösung) – nie stillschweigend
+  eine Seite anpassen.
 - **Entscheidung gegen die Empfehlung:** respektieren, aber als `risiko` an der betroffenen Anforderung in
   `anforderungen.json` eintragen (Folge in Zahlen, Gegenmaßnahme). Risiken erscheinen in v_matrix, audit und
   Messprotokoll und müssen bei der menschlichen Freigabe ausdrücklich akzeptiert werden.

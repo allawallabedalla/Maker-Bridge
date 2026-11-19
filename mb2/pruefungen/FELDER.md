@@ -175,3 +175,12 @@ Messreihe in `messung.json`: `datenstatus`, `sensor_id`, `seriennummer`, `datum`
 | `stueckzahl`, `fehlerfolge` (gering/mittel/hoch), `pruefmittel` | Grundlage der Widerspruchsprüfung (folgt) | – |
 
 Posten ohne Preis oder Quelle zählen als Lücke, nie als 0 €.
+
+## Widerspruchsprüfung (seit 19.11.2026, X1–X9, `mb2/pruefungen/widerspruch.py`)
+
+Hält Ziele, Einsatz, Messanforderungen und Schnittstelle gegeneinander. Ein harter Widerspruch ergibt `fehler`, ein Verstoß gegen eine Faustregel `warnung`.
+Zusätzliche Eingaben:
+- `_projekt.schnittstelle {bus: spi|i2c, leitung_m}` (X7)
+- `ziele.zeit_h_pro_woche` (X5)
+
+Alle übrigen Werte kommen aus `ziele`, `messkette`, `anforderungen.json`, `messung.json` und `kosten.json`.
