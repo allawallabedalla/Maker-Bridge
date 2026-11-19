@@ -1,0 +1,289 @@
+{
+ "_doku": {
+  "zweck": "Kennwerte je Bauteil fuer die Elektronik-Pruefungen E1-E25 (mb2/pruefungen/elektronik.py). Projektweise ergaenzen/ueberschreiben mit <projekt>/electronics/bauteile.json (gleiche Form).",
+  "zuordnung": "Bauteil wird ueber das Symbolfeld LCSC, dann MPN, dann den Wert (Value) gefunden; Vergleich ohne Gross/Klein, Leerzeichen, '-' und '_'.",
+  "einheiten": "V, A, Ohm, F, H, Hz, degC, K/W. Logikpegel als Ausdruck in VDD (z. B. '0.75*VDD', 'VDD-0.4') oder Zahl in V.",
+  "pins": "Pinrollen nach Pin-NAME aus dem Schaltplan (gross, ohne ~{}): vdd, gnd, pgnd, vin, vout, sw, bat, prog, fb, en, rf, ac, rect, od (Open-Drain-Ausgang). Ohne Eintrag: Pin-Typ aus dem Symbol (power_out -> vout, power_in -> vdd/gnd).",
+  "stand": "'geprueft' = Wert am 10.11.2026 gegen Datenblatt/Herstellerseite per Suche bestaetigt; 'datenblatt' = Datenblattwert aus dem Wissensstand, nicht maschinell gegengeprueft (vor Serienentscheidungen nachsehen); 'typklasse' = physikalischer Typwert der Bauteilklasse, kein Herstellerwert. null = unbekannt -> Pruefung meldet 'uebersprungen' bzw. 'warnung'."
+ },
+ "teile": {
+  "ESP32-C6-MINI-1": {
+   "lcsc": ["C6553337"],
+   "mpn": ["ESP32-C6-MINI-1", "ESP32-C6-MINI-1-H4", "ESP32-C6-MINI-1-N4", "ESP32-C6-MINI-1-H8", "ESP32-C6-MINI-1U-H4"],
+   "typ": "mcu",
+   "VDD_V": [3.0, 3.6],
+   "logik": {"V_IH": "0.75*VDD", "V_IL": "0.25*VDD", "V_OH": "0.8*VDD", "V_OL": "0.1*VDD", "I_OH_A": 0.04, "I_OL_A": 0.028,
+             "V_in_max": "VDD+0.3", "fuenf_v_tolerant": false},
+   "I_peak_A": 0.5,
+   "I_dauer_A": null,
+   "I_sleep_A": null,
+   "antenne": {"f_MHz": 2440, "keepout": true},
+   "pins": {"3V3": "vdd", "GND": "gnd", "EN": "en"},
+   "quelle": {
+    "VDD_V": "Espressif ESP32-C6-MINI-1/1U Datenblatt, Recommended Operating Conditions (datenblatt)",
+    "logik": "Espressif ESP32-C6 Datenblatt, DC Characteristics (3,3 V, 25 C): V_IH 0,75 VDD, V_IL 0,25 VDD, V_OH 0,8 VDD @ 40 mA, V_OL 0,1 VDD @ 28 mA (datenblatt; gleiche Pegel wie ESP32/ESP32-S2, dort geprueft)",
+    "I_peak_A": "Espressif ESP32-C6-MINI-1 Datenblatt/Hardware Design Guidelines: Versorgung muss >= 0,5 A liefern (Auslegungswert fuer Funkspitzen, datenblatt)",
+    "antenne": "Espressif: Antennenbereich ueber die Platinenkante oder kein Kupfer darunter (datenblatt)"
+   }
+  },
+  "RAK3172": {
+   "mpn": ["RAK3172", "RAK3172-T-8-SM-I", "RAK3172-T-8-SM-NI", "RAK3172-8-SM-I", "RAK3172-8-SM-NI", "RAK3172-T-9-SM-NI"],
+   "lcsc": ["C19723908", "C19723906", "C19723907"],
+   "typ": "mcu",
+   "VDD_V": [2.0, 3.6],
+   "logik": {"V_IH": "0.7*VDD", "V_IL": "0.3*VDD", "V_OH": "VDD-0.4", "V_OL": 0.4, "I_OH_A": 0.008, "I_OL_A": 0.008,
+             "V_in_max": "VDD+0.3", "fuenf_v_tolerant": null},
+   "I_peak_A": 0.142,
+   "I_tx_20dBm_A": 0.087,
+   "I_dauer_A": null,
+   "I_sleep_A": 1.69e-06,
+   "antenne": {"f_MHz": 868, "keepout": false},
+   "pins": {"VDD": "vdd", "GND": "gnd", "RF": "rf"},
+   "quelle": {
+    "VDD_V": "RAKwireless RAK3172 Datasheet: 2,0-3,6 V (RAK3172/-T) (geprueft)",
+    "I_sleep_A": "RAKwireless RAK3172 Datasheet: 1,69 uA Sleep (geprueft)",
+    "I_tx_20dBm_A": "RAKwireless RAK3172 Datasheet: 87 mA @ 20 dBm 868 MHz (geprueft)",
+    "I_peak_A": "RAK-Forum, Messung bei 22 dBm: 133-142 mA (2,5-3,5 V) - Datenblatt nennt nur 87 mA @ 20 dBm; der hoehere Wert ist konservativ (geprueft, Forumsmessung)",
+    "logik": "ST STM32WLE5 Datenblatt, I/O static characteristics: V_IL 0,3 VDD, V_IH 0,7 VDD, V_OL 0,4 V / V_OH VDD-0,4 V @ 8 mA (datenblatt); 5-V-Toleranz je Pin (FT) nicht modulbezogen belegt -> null"
+   }
+  },
+  "RT9080-33": {
+   "lcsc": ["C841192"],
+   "mpn": ["RT9080-33GJ5", "RT9080N-33GJ5"],
+   "typ": "ldo",
+   "V_out_V": 3.3,
+   "V_in_V": [1.2, 5.5],
+   "I_max_A": 0.6,
+   "I_q_A": 2e-06,
+   "dropout_V": 0.53,
+   "dropout_bei_A": 0.6,
+   "RthJA_K_W": 230.6,
+   "Tj_max_C": 125,
+   "pins": {"VIN": "vin", "VOUT": "vout", "GND": "gnd", "EN": "en"},
+   "quelle": {
+    "I_q_A": "Richtek RT9080 (DS9080): 2 uA Ground Current ohne Last (geprueft; Haendler nennen teils 4 uA)",
+    "I_max_A": "Richtek RT9080: 600 mA (geprueft)",
+    "V_in_V": "Richtek RT9080: 1,2-5,5 V (geprueft)",
+    "dropout_V": "Haendlerangaben fuer -33GJ5 widerspruechlich (0,31 V bzw. 0,53 V @ 600 mA) - der groessere Wert ist konservativ (geprueft, Widerspruch)",
+    "RthJA_K_W": "Richtek DS9080: theta_JA 230,6 K/W TSOT-23-5, JEDEC 51-7 Vierlagenplatine (geprueft) - auf 2 Lagen schlechter",
+    "Tj_max_C": "Richtek DS9080 Recommended Operating Conditions: -40..125 C (datenblatt)"
+   }
+  },
+  "BQ51050B": {
+   "lcsc": ["C133307"],
+   "mpn": ["BQ51050B", "BQ51050BRHLR", "BQ51050BRHLT"],
+   "typ": "qi_lader",
+   "chemie": "LiPo",
+   "V_bat_reg_V": 4.2,
+   "K_prog_AOhm": 314,
+   "prog_pins": ["ILIM"],
+   "I_chg_max_A": 1.5,
+   "qi_f_s_Hz": 100000,
+   "pins": {"BAT": "bat", "RECT": "rect", "AC1": "ac", "AC2": "ac", "PGND": "gnd", "ILIM": "prog"},
+   "quelle": {
+    "K_prog_AOhm": "TI BQ51050B Datenblatt 8.3.4.3.1 R_ILIM: I_BULK = K_ILIM / R_ILIM, R_ILIM = R1 + R_FOD, K_ILIM = 314 A*Ohm (TI-E2E-Thread bestaetigt, geprueft)",
+    "V_bat_reg_V": "TI BQ51050B: 4,20-V-Variante (BQ51051B: 4,35 V) (datenblatt)",
+    "I_chg_max_A": "TI BQ51050B: Ladestrom bis 1,5 A (geprueft, TI-Produktseite)",
+    "qi_f_s_Hz": "WPC Qi v1.x Empfaenger: Serienresonanz f_S = 100 kHz (+5/-10 %), Parallelresonanz f_D = 1 MHz (extern)"
+   }
+  },
+  "BQ51013B": {
+   "lcsc": ["C55663"],
+   "mpn": ["BQ51013B", "BQ51013BRHLR", "BQ51013BRHLT"],
+   "typ": "qi_empfaenger",
+   "V_out_V": 5.0,
+   "qi_f_s_Hz": 100000,
+   "pins": {"OUT": "vout", "RECT": "rect", "AC1": "ac", "AC2": "ac", "PGND": "gnd", "ILIM": "prog"},
+   "quelle": {
+    "V_out_V": "TI BQ51013B: geregelter 5-V-Ausgang (datenblatt)",
+    "qi_f_s_Hz": "WPC Qi v1.x: f_S = 100 kHz (extern)"
+   }
+  },
+  "BQ24073": {
+   "lcsc": ["C15220"],
+   "mpn": ["BQ24073", "BQ24073RGTR", "BQ24073RGTT"],
+   "typ": "lader_linear",
+   "chemie": "LiPo",
+   "V_bat_reg_V": 4.2,
+   "V_out_V": 4.4,
+   "V_out_folgt_bat": true,
+   "K_prog_AOhm": 890,
+   "prog_pins": ["ISET"],
+   "K_ilim_AOhm": 1610,
+   "Tj_max_C": 125,
+   "RthJA_K_W": null,
+   "pins": {"IN": "vin", "OUT": "vout", "BAT": "bat", "VSS": "gnd", "ISET": "prog", "ILIM": "ilim", "TS": "ts"},
+   "quelle": {
+    "K_prog_AOhm": "TI BQ2407x Datenblatt: I_CHG = K_ISET / R_ISET, K_ISET = 890 A*Ohm (datenblatt; Gegenprobe Evolve-Kiesel 2,4 kOhm -> 0,37 A wie projekt.md)",
+    "K_ilim_AOhm": "TI BQ2407x: I_IN_MAX = K_ILIM / R_ILIM, K_ILIM = 1610 A*Ohm (datenblatt; Evolve-Kiesel 2,4 kOhm -> 0,67 A wie projekt.md)",
+    "V_out_V": "TI BQ24072/3: OUT geregelt auf 4,4 V (datenblatt; projekt.md Evolve-Kiesel)",
+    "V_out_folgt_bat": "TI BQ2407x Power-Path: ohne Eingang versorgt der Akku OUT ueber den BAT-FET (datenblatt, Battery-only mode) -> OUT-Bereich ab V_bat,min",
+    "V_bat_reg_V": "TI BQ24073: 4,20 V (PDF-Tabelle 4,195/4,200/4,205 V, geprueft)",
+    "Tj_max_C": "TI BQ24073: thermische Regelung bei T_J = 125 C (datenblatt)"
+   }
+  },
+  "DW01A": {
+   "lcsc": ["C351410"],
+   "mpn": ["DW01A", "DW01A-G", "DW01"],
+   "typ": "akkuschutz",
+   "chemie": "LiPo",
+   "V_ueberentladung_V": 2.4,
+   "V_ueberladung_V": 4.3,
+   "I_q_A": 6e-06,
+   "I_q_typ_A": 3e-06,
+   "pins": {"VCC": "vdd", "GND": "gnd", "OD": "gate", "OC": "gate", "CS": "sense"},
+   "logik_ausgang": "VCC",
+   "quelle": {
+    "V_ueberentladung_V": "Fortune DW01A Datenblatt: Overdischarge detection 2,40 V +-0,1 V (datenblatt)",
+    "V_ueberladung_V": "Fortune DW01A: Overcharge detection 4,30 V +-0,05 V (datenblatt)",
+    "I_q_A": "Fortune DW01A: Supply current normal 3,0 uA typ / 6,0 uA max - max-Wert fuer das Ruhestrombudget (datenblatt)"
+   }
+  },
+  "TPS63000": {
+   "lcsc": ["C24966"],
+   "mpn": ["TPS63000", "TPS63000DRCR", "TPS63000DRCT"],
+   "typ": "buckboost",
+   "V_in_V": [1.8, 5.5],
+   "V_fb_V": 0.5,
+   "I_q_A": 5e-05,
+   "f_sw_Hz": 1500000,
+   "eta": null,
+   "heiss": ["vin", "vout"],
+   "pins": {"VIN": "vin", "VINA": "vin_a", "L1": "sw", "L2": "sw", "VOUT": "vout", "PGND": "gnd", "GND": "gnd", "FB": "fb", "EN": "en"},
+   "quelle": {
+    "V_in_V": "TI TPS6300x Datenblatt: 1,8-5,5 V (datenblatt)",
+    "V_fb_V": "TI TPS63000: V_FB = 500 mV (datenblatt; Gegenprobe 180k/20k -> 5,0 V wie projekt.md)",
+    "I_q_A": "TI TPS6300x: Ruhestrom < 50 uA (datenblatt)",
+    "f_sw_Hz": "TI TPS6300x: Schaltfrequenz 1,5 MHz typ (datenblatt)"
+   }
+  },
+  "TPS610994": {
+   "mpn": ["TPS610994", "TPS610994DRV", "TPS610994DRVR"],
+   "typ": "boost",
+   "V_out_V": 3.3,
+   "V_in_V": [0.7, 5.5],
+   "I_q_A": 1e-06,
+   "f_sw_Hz": null,
+   "eta": null,
+   "heiss": ["vout"],
+   "pins": {"VI": "vin", "VIN": "vin", "SW": "sw", "VOUT": "vout", "GND": "gnd", "FB": "fb", "EN": "en"},
+   "quelle": {
+    "V_out_V": "TI TPS61099x Variantentabelle: TPS610994 fest 3,3 V bei FB an GND (datenblatt; projekt.md Rad-Warnknopf)",
+    "I_q_A": "TI TPS61099x: Ruhestrom ca. 1 uA (datenblatt)",
+    "V_in_V": "TI TPS61099x: Eingang 0,7-5,5 V (datenblatt)"
+   }
+  },
+  "SHT45": {
+   "lcsc": ["C5221601"],
+   "mpn": ["SHT45-AD1B", "SHT45", "SHT45-AD1B-R2", "SHT45-AD1B-R3"],
+   "typ": "sensor",
+   "VDD_V": [1.08, 3.6],
+   "logik": {"V_IH": "0.7*VDD", "V_IL": "0.3*VDD", "V_OL": null, "V_in_max": "VDD+0.3", "fuenf_v_tolerant": false},
+   "I_peak_A": 0.0005,
+   "I_sleep_A": null,
+   "C_pin_pF": null,
+   "pins": {"VDD": "vdd", "VSS": "gnd", "SDA": "od", "SCL": "in"},
+   "quelle": {
+    "VDD_V": "Sensirion SHT4x Datenblatt: 1,08-3,6 V (datenblatt)",
+    "logik": "Sensirion SHT4x Datenblatt, Interface: V_IL 0,3 VDD, V_IH 0,7 VDD (datenblatt); V_OL fehlt -> UM10204 0,4 V @ 3 mA",
+    "I_peak_A": "Sensirion SHT4x: Messstrom max. 500 uA (ohne Heizer) (datenblatt)"
+   }
+  },
+  "LPS22HH": {
+   "lcsc": ["C2827824"],
+   "mpn": ["LPS22HH", "LPS22HHTR"],
+   "typ": "sensor",
+   "VDD_V": [1.7, 3.6],
+   "logik": {"V_IH": "0.8*VDD", "V_IL": "0.2*VDD", "V_OL": null, "V_in_max": "VDD+0.3", "fuenf_v_tolerant": false},
+   "I_peak_A": null,
+   "I_sleep_A": null,
+   "pins": {"VDD": "vdd", "VDD_IO": "vdd", "GND": "gnd", "SDA": "od", "SCL": "in"},
+   "quelle": {
+    "VDD_V": "ST LPS22HH Datenblatt: VDD 1,7-3,6 V (datenblatt)",
+    "logik": "ST LPS22HH Datenblatt, Digital I/O: V_IH 0,8 Vdd_IO, V_IL 0,2 Vdd_IO (datenblatt)"
+   }
+  },
+  "AO3400A": {
+   "lcsc": ["C20917"],
+   "mpn": ["AO3400A", "AO3400"],
+   "typ": "nmos",
+   "V_GS_th_max_V": 1.45,
+   "R_DS_on_Ohm": {"10": 0.0265, "4.5": 0.032, "2.5": 0.048},
+   "I_D_A": 5.7,
+   "RthJA_K_W": 125,
+   "Tj_max_C": 150,
+   "Q_g_C": null,
+   "pins": {"G": "gate", "D": "drain", "S": "source"},
+   "quelle": {
+    "V_GS_th_max_V": "AOS AO3400A Datenblatt: V_GS(th) 0,65-1,45 V (datenblatt)",
+    "R_DS_on_Ohm": "AOS AO3400A: R_DS(on) < 26,5 mOhm @10 V, < 32 mOhm @4,5 V, < 48 mOhm @2,5 V (datenblatt)",
+    "RthJA_K_W": "AOS AO3400A: R_thJA steady state max 125 K/W (datenblatt)"
+   }
+  },
+  "AO3401A": {
+   "mpn": ["AO3401A", "AO3401"],
+   "typ": "pmos",
+   "V_GS_th_max_V": 1.3,
+   "R_DS_on_Ohm": null,
+   "RthJA_K_W": 125,
+   "Tj_max_C": 150,
+   "pins": {"G": "gate", "D": "drain", "S": "source"},
+   "quelle": {
+    "V_GS_th_max_V": "AOS AO3401A Datenblatt: V_GS(th) -0,5..-1,3 V (datenblatt)",
+    "RthJA_K_W": "AOS AO3401A: R_thJA steady state max 125 K/W (datenblatt)"
+   }
+  },
+  "BAT54": {
+   "mpn": ["BAT54", "BAT54W", "BAT54-7-F"],
+   "typ": "diode",
+   "V_f_tabelle": [[0.0001, 0.24], [0.001, 0.32], [0.01, 0.40], [0.03, 0.50], [0.1, 0.80]],
+   "I_F_max_A": 0.2,
+   "quelle": {"V_f_tabelle": "NXP/Nexperia BAT54 Datenblatt: V_F max 240/320/400/500/800 mV bei 0,1/1/10/30/100 mA (datenblatt)",
+              "I_F_max_A": "NXP BAT54: I_F 200 mA (datenblatt)"}
+  },
+  "B5819W": {
+   "lcsc": ["C8598"],
+   "mpn": ["B5819W", "B5819W SL"],
+   "typ": "diode",
+   "V_f_tabelle": null,
+   "I_F_max_A": 1.0,
+   "quelle": {"I_F_max_A": "B5819W (SOD-123): 1 A Durchlassstrom (datenblatt); V_F je Hersteller unterschiedlich -> nachtragen"}
+  },
+  "MAX98357A": {
+   "mpn": ["MAX98357A", "MAX98357AETE+T", "VERSTAERKER_MAX98357A"],
+   "werte": ["Verstaerker_MAX98357A"],
+   "typ": "verstaerker_btl",
+   "VDD_V": [2.5, 5.5],
+   "R_L_min_Ohm": 4,
+   "pins_nr": {"7": "vdd", "6": "gnd"},
+   "quelle": {"R_L_min_Ohm": "Maxim MAX98357A/B Datenblatt: spezifiziert fuer 4 Ohm und 8 Ohm (3,2 W an 4 Ohm bei 5 V) (datenblatt)",
+              "VDD_V": "Maxim MAX98357A: 2,5-5,5 V (datenblatt)",
+              "pins_nr": "Adafruit #3006 Breakout: LRC, BCLK, DIN, GAIN, SD, GND, Vin (Stecker J3 Pin 1-7)"}
+  },
+  "Energizer L91": {
+   "werte": ["2x AA Lithium L91", "L91", "Energizer L91", "1x AA Lithium L91"],
+   "typ": "batterie",
+   "zelle_V": [0.9, 1.8],
+   "zelle_nenn_V": 1.5,
+   "kapazitaet_mAh": 3500,
+   "R_int_Ohm_zelle": 0.15,
+   "pins": {"+": "bat", "-": "gnd"},
+   "quelle": {"zelle_V": "Energizer L91 Datenblatt: Leerlauf ca. 1,8 V, Entladeschluss 0,8-0,9 V (datenblatt)",
+              "kapazitaet_mAh": "Energizer L91: 3500 mAh bis 0,8 V bei 25 mA (datenblatt)",
+              "R_int_Ohm_zelle": "Energizer L91: Innenwiderstand 90-150 mOhm (oberer Wert) (datenblatt)"}
+  }
+ },
+ "generisch_led": {
+  "_quelle": "Typklasse (AlGaInP rot/gelb/amber ca. 2,0-2,1 V, InGaN gruen/blau/weiss ca. 3,0 V bei 20 mA) - kein Herstellerwert; Hersteller-V_f in 'teile' eintragen",
+  "rot": 2.0, "red": 2.0, "amber": 2.1, "orange": 2.1, "gelb": 2.1, "yellow": 2.1, "gelbgruen": 2.1,
+  "gruen": 3.0, "green": 3.0, "blau": 3.0, "blue": 3.0, "weiss": 3.0, "white": 3.0, "465nm": 3.0, "570nm": 2.1, "660nm": 1.9, "940nm": 1.3,
+  "I_max_A": 0.02
+ },
+ "chemie": {
+  "LiPo": {"V_min": 3.0, "V_max": 4.2, "quelle": "Li-Ion/LiPo 1S: Ladeschluss 4,2 V, Entladeschluss ca. 3,0 V (extern, Zellenhersteller-Standard)"}
+ },
+ "widerstand_nennleistung_W": {
+  "_quelle": "Standard-Nennleistung Dickschicht-Chipwiderstaende (Yageo RC / UniOhm Datenblaetter, 70 C)",
+  "0201": 0.05, "0402": 0.0625, "0603": 0.1, "0805": 0.125, "1206": 0.25, "1210": 0.5, "2010": 0.75, "2512": 1.0
+ }
+}

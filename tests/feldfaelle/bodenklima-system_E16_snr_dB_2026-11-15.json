@@ -1,0 +1,41 @@
+{
+ "projekt": "bodenklima-system",
+ "pruefung": "E16",
+ "schluessel": "P_rx_dBm",
+ "gemessen_umgerechnet": -134.031,
+ "toleranz": 8.0,
+ "messung": {
+  "groesse": "snr_dB",
+  "wert": -17.0,
+  "einheit": "dB",
+  "ort": "Beet 830 m",
+  "datum": "2026-11-15",
+  "quelle": "Basis werte.json, Antenne Magnetfuss auf Unterlegscheibe, Basis hinter Dachziegeln"
+ },
+ "soll_projekt": {
+  "aussen": true,
+  "material": "ASA",
+  "elektronik": {
+   "funk": {
+    "r_m": 830,
+    "f_MHz": 869.525,
+    "P_t_dBm": 14,
+    "P_rx_min_dBm": -132,
+    "G_t_dBi": 2,
+    "G_r_dBi": 0,
+    "umgebung": "dorf",
+    "hindernisse": [
+     "ziegel_dach"
+    ],
+    "kabel": [
+     {
+      "typ": "rg174",
+      "m": 3
+     }
+    ],
+    "magnetfuss_ohne_blech": true
+   }
+  }
+ },
+ "regel": "Erster Feldfall (Bodenklima 15.11.2026): Freiraum-Modell versprach -84 dBm, gemessen -134 dBm. Modell darf nicht optimistischer als gemessen + Toleranz sein."
+}

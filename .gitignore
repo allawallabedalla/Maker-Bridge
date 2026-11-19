@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+slicer_data/
+projects/*/fem/*/
+projects/*/electronics/*.dsn
+projects/*/electronics/*.ses
+
+# nicht im oeffentlichen Repo: eigene Projekte und Audit-Laeufe
+projects/
+audits/
+*.pyc

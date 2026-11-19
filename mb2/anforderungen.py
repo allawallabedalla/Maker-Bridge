@@ -1,0 +1,607 @@
+"""Anforderungen nach dem V-Modell, Beweispflicht, Herkunft, Abnahme am Geraet und Feldabgleich (seit 15.11.2026).
+
+Kernproblem (audits/KERNPROBLEM_2026-11-15.md): Gruen hiess "keine Pruefung hat angeschlagen". Jetzt gilt:
+**Ein Projekt ist erst frei, wenn jede Anforderung einen bestandenen, belegten Nachweis auf der passenden V-Ebene hat.**
+
+V-Modell in mb2 (links Entwurf, rechts Nachweis auf derselben Hoehe):
+
+    system      (Lastenheft: was das Geraet im Einsatz koennen muss)  <->  abnahme (am Geraet) + feld (im Einsatz)
+    subsystem   (Pflichtenheft: Elektronik, Gehaeuse, Firmware, Montage) <->  integration (Katalog-Systempruefungen, FEM)
+    komponente  (Teil, Platine, Firmware-Konstante)                     <->  komponente (cad_build, ERC/DRC, Katalog je Teil)
+
+Dateien je Projekt (alle JSON, von Menschen und Agenten lesbar):
+- ``anforderungen.json``  {"anforderungen": [Anforderung]}
+- ``abnahme.json``        Abnahmeprotokoll: Schritte mit Soll, Ist, Datum (aus den Anforderungen erzeugt, Ist bleibt erhalten)
+- ``feld.json``           Messungen im Einsatz {"messungen": [{groesse, wert, einheit, datum, ort, quelle}]}
+
+Anforderung:
+    {"id": "A-FUNK", "ebene": "system|subsystem|komponente", "eltern": ["A-..."], "text": "...",
+     "herkunft": "Nutzer 15.11.2026 | abgeleitet aus A-..",       # WER es verlangt (Rueckverfolgbarkeit nach oben)
+     "eingaben": ["elektronik.funk.r_m", ...],                    # soll-Felder, auf denen der Nachweis beruht
+     "nachweise": [Nachweis], "notiz": "..."}
+Nachweis:
+    {"art": "katalog|cad|fem|slice|kicad|abnahme|feld|manuell", "ref": "E16" | "<teil>" | "<fall>" | "alle" | "<schritt>",
+     "teil": "..." (optional, katalog), "stufe": "komponente|integration|abnahme|feld",
+     "kriterium": {"groesse": "snr_dB", "op": ">=", "wert": -5, "einheit": "dB"}   # abnahme/feld
+     "warnung_akzeptiert": "Begruendung"   # sonst zaehlt eine Warnung als NICHT bewiesen
+     "beleg": "Pfad/Foto", "geprueft_von": "..."}                   # manuell
+     "modell": {"frage", "einsatz", "einfluss", "folge", "validierung", "anwendbarkeit"}  # fem: V&V 40, glaubwuerdigkeit.py
+Herkunft der Eingaben: ``_projekt._herkunft`` (bzw. je Teil ``_herkunft``) {"feld.pfad": "gemessen|datenblatt|norm|
+berechnet|geschaetzt|angenommen: Beleg"}. Ein Nachweis auf geschaetzten/angenommenen Eingaben ist nur 'vorbehalt'.
+
+Status je Anforderung: 'bewiesen' | 'vorbehalt' (bestanden, aber auf Annahmen/zu knapper Reserve) | 'unbewiesen' |
+'verletzt'. Freigabe: 'nicht_druckfertig' (Komponente/Subsystem nicht bewiesen) -> 'druckfertig' (alles bis Integration
+bewiesen) -> 'fertig' (auch Abnahme + Feld bewiesen).
+"""
+import datetime
+import hashlib
+import json
+import os
+import re
+
+from . import glaubwuerdigkeit
+
+EBENEN = ('system', 'subsystem', 'komponente')
+STUFEN_JE_EBENE = {'system': ('abnahme', 'feld'), 'subsystem': ('integration', 'abnahme', 'feld'),
+                   'komponente': ('komponente', 'integration')}
+HERKUNFT_STARK = ('gemessen', 'datenblatt', 'norm', 'berechnet')
+HERKUNFT_SCHWACH = ('geschaetzt', 'angenommen')
+# Unsicherheit je Herkunft: relativ bzw. in dB (Funk). Reserve muss groesser sein, sonst 'vorbehalt'.
+UNSICHERHEIT_REL = {'gemessen': 0.05, 'datenblatt': 0.10, 'norm': 0.10, 'berechnet': 0.10, 'geschaetzt': 0.30,
+                    'angenommen': 0.50, None: 0.30}
+UNSICHERHEIT_DB = {'gemessen': 3.0, 'datenblatt': 6.0, 'norm': 6.0, 'berechnet': 6.0, 'geschaetzt': 10.0,
+                   'angenommen': 15.0, None: 10.0}
+# Lageabhaengige Woerter in Anweisungen: nur mit eindeutiger Markierung zulaessig (Bodenklima: Klemmen gespiegelt)
+LAGEWOERTER = r'\b(links|rechts|oben|unten|vorne|hinten|linke|rechte|obere|untere)\b'
+MARKIERUNG = r'pin ?\d|dreieck|eckig|markier|aufdruck|beschrift|farbe|rot|schwarz|weiss|gelb|gruen|blau|j\d|nase|kerbe'
+RAUSCHEN_125K_DBM = -174 + 10 * 5.0969 + 6     # -174 dBm/Hz + 10 log10(125 kHz) + NF 6 dB = -117 dBm
+
+
+# ---------------------------------------------------------------------------------------------- Laden/Speichern
+
+def _pfad(pdir, name):
+    return os.path.join(pdir, name)
+
+
+def lade(pdir, name, leer):
+    p = _pfad(pdir, name)
+    return json.load(open(p, encoding='utf-8')) if os.path.exists(p) else leer
+
+
+def speichere(pdir, name, daten):
+    json.dump(daten, open(_pfad(pdir, name), 'w', encoding='utf-8'), indent=1, ensure_ascii=False)
+
+
+def kontext_hash(pdir):
+    """Hash aller Eingaben, von denen Urteile abhaengen (soll, projekt.md, Anforderungen, Abnahme, Feld)."""
+    h = hashlib.sha1()
+    for f in ('cad/soll.json', 'projekt.md', 'anforderungen.json', 'abnahme.json', 'feld.json'):
+        p = os.path.join(pdir, f)
+        if os.path.exists(p):
+            h.update(f.encode())
+            h.update(open(p, 'rb').read())
+    return h.hexdigest()[:16]
+
+
+def _soll(pdir):
+    return lade(pdir, 'cad/soll.json', {})
+
+
+def _feldwert(d, pfad):
+    for t in pfad.split('.'):
+        if not isinstance(d, dict) or t not in d:
+            return None
+        d = d[t]
+    return d
+
+
+# ---------------------------------------------------------------------------------------------- Herkunft
+
+def herkunft_von(soll, pfad):
+    """(klasse, text) fuer ein soll-Feld 'a.b.c' (projektweit) oder 'Teil:a.b'. Klasse None = nicht angegeben."""
+    teil, _, f = pfad.rpartition(':')
+    quelle = (soll.get(teil, {}) if teil else soll.get('_projekt', {})).get('_herkunft', {}) or {}
+    txt = quelle.get(f)
+    if txt is None:      # Elternfeld deckt Kinder ab ("elektronik.funk": "gemessen: ...")
+        teile = f.split('.')
+        for i in range(len(teile) - 1, 0, -1):
+            txt = quelle.get('.'.join(teile[:i]))
+            if txt:
+                break
+    if not txt:
+        return None, 'Herkunft nicht angegeben'
+    klasse = txt.split(':')[0].strip().lower()
+    return (klasse if klasse in HERKUNFT_STARK + HERKUNFT_SCHWACH else None), txt
+
+
+def schwaechste_herkunft(soll, eingaben):
+    """('gemessen'|...|None|'geschaetzt'|'angenommen'|'fehlt', Texte). None = Herkunft nicht angegeben (zaehlt schwach)."""
+    reihe = HERKUNFT_STARK + (None,) + HERKUNFT_SCHWACH
+    schwach, idx, texte = 'gemessen', 0, []
+    for e in eingaben or []:
+        teil, _, f = e.rpartition(':')
+        wert = _feldwert(soll.get(teil, {}) if teil else soll.get('_projekt', {}), f)
+        if wert is None:
+            return 'fehlt', texte + [f'{e}: Wert fehlt']
+        k, t = herkunft_von(soll, e)
+        texte.append(f'{e}: {t}')
+        if reihe.index(k) > idx:
+            schwach, idx = k, reihe.index(k)
+    return schwach, texte
+
+
+# ---------------------------------------------------------------------------------------------- Nachweise
+
+def _vergleich(ist, op, soll_wert):
+    return {'>=': ist >= soll_wert, '>': ist > soll_wert, '<=': ist <= soll_wert, '<': ist < soll_wert,
+            '==': ist == soll_wert}.get(op, False)
+
+
+def _reserve_ok(e, herkunft):
+    """Reserve gegen Unsicherheit aus der Herkunft. None = nicht bewertbar (kein Wert/Grenze)."""
+    w, g = e.get('wert'), e.get('grenze')
+    if not isinstance(w, (int, float)) or not isinstance(g, (int, float)) or str(e.get('id', '')).startswith('FW'):
+        return None, ''      # FW: Gleichheit gefordert, keine Reserve
+    if e.get('einheit') == 'dB':
+        u = UNSICHERHEIT_DB.get(herkunft, 10.0)
+        r = abs(w - g) if e.get('id') != 'E16' else w    # E16: wert IST die Reserve
+        return r >= u, f'Reserve {r:.1f} dB gegen Unsicherheit {u:.0f} dB ({herkunft or "Herkunft offen"})'
+    if g == 0:
+        return None, ''
+    r = abs(w - g) / abs(g)
+    u = UNSICHERHEIT_REL.get(herkunft, 0.3)
+    return r >= u, f'Reserve {r * 100:.0f} % gegen Unsicherheit {u * 100:.0f} % ({herkunft or "Herkunft offen"})'
+
+
+def _katalog_status(nw, katalog):
+    treffer = []
+    for l in (katalog or {}).values():
+        for e in l:
+            eid = e['id']
+            if nw['ref'] == 'alle' or eid == nw['ref'] or eid.startswith(nw['ref'] + '-') or \
+                    (eid == 'E1-E25' and nw['ref'].startswith('E')):
+                if nw.get('teil') and e.get('teil') not in (None, nw['teil']):
+                    continue
+                treffer.append(e)
+    if not treffer:
+        return 'unbewiesen', f'Katalog {nw["ref"]}: kein Ergebnis', []
+    st = [e['stufe'] for e in treffer]
+    if 'fehler' in st:
+        return 'verletzt', f'Katalog {nw["ref"]}: fehler', treffer
+    if 'uebersprungen' in st:
+        return 'unbewiesen', f'Katalog {nw["ref"]}: uebersprungen', treffer
+    if 'warnung' in st:
+        if nw.get('warnung_akzeptiert'):
+            return 'vorbehalt', f'Katalog {nw["ref"]}: Warnung akzeptiert ({nw["warnung_akzeptiert"]})', treffer
+        angenommen = any('angenommen' in (e.get('hinweis') or '') for e in treffer if e['stufe'] == 'warnung')
+        return 'unbewiesen', f'Katalog {nw["ref"]}: Warnung{" (auf Annahmen)" if angenommen else ""} nicht bewertet', treffer
+    return 'bewiesen', f'Katalog {nw["ref"]}: ok', treffer
+
+
+def _cad_status(nw, pdir):
+    out = os.path.join(pdir, 'out')
+    teile = [f[:-len('.pruefung.json')] for f in os.listdir(out) if f.endswith('.pruefung.json')] \
+        if os.path.isdir(out) else []
+    if nw['ref'] != 'alle':
+        teile = [t for t in teile if t == nw['ref']] or [None]
+    if not teile or teile == [None]:
+        return 'unbewiesen', f'cad {nw["ref"]}: kein Pruefbericht', []
+    schlecht = []
+    for t in teile:
+        b = json.load(open(os.path.join(out, t + '.pruefung.json'), encoding='utf-8'))
+        if not b.get('ok'):
+            schlecht.append(t)
+    return ('verletzt', f'cad: nicht bestanden {schlecht}', []) if schlecht else ('bewiesen', f'cad {teile} ok', [])
+
+
+def _fem_faelle(nw, pdir):
+    fd = os.path.join(pdir, 'fem')
+    faelle = [f[:-9] for f in os.listdir(fd) if f.endswith('.erg.json')] if os.path.isdir(fd) else []
+    return faelle if nw['ref'] == 'alle' else [f for f in faelle if f == nw['ref']]
+
+
+def _fem_status(nw, pdir):
+    fd = os.path.join(pdir, 'fem')
+    faelle = [f[:-9] for f in os.listdir(fd) if f.endswith('.erg.json')] if os.path.isdir(fd) else []
+    if nw['ref'] != 'alle':
+        faelle = [f for f in faelle if f == nw['ref']]
+    if not faelle:
+        return 'unbewiesen', f'fem {nw["ref"]}: nicht gerechnet', []
+    schlecht, vorb = [], []
+    for f in faelle:
+        bw = json.load(open(os.path.join(fd, f + '.erg.json'), encoding='utf-8')).get('bewertung') or {}
+        if not bw.get('ok'):
+            schlecht.append(f)
+        elif bw.get('angenommen'):
+            vorb.append(f)
+    if schlecht:
+        return 'verletzt', f'fem nicht ok: {schlecht}', []
+    if vorb:
+        return 'vorbehalt', f'fem ok, aber auf Annahmen: {vorb}', []
+    return 'bewiesen', f'fem {faelle} ok', []
+
+
+def _slice_status(pdir):
+    s = lade(pdir, 'print/slice.json', None)
+    if not s:
+        return 'unbewiesen', 'nicht gesliced', []
+    if not s.get('ok') or s.get('probleme'):
+        return 'verletzt', f'slice: {s.get("probleme")}', []
+    return 'bewiesen', 'slice ok', []
+
+
+def _kicad_status(nw, extra):
+    k = (extra or {}).get('kicad')
+    if not k:
+        return 'unbewiesen', 'kein DRC-Ergebnis (audit)', []
+    err = (k.get('drc') or {}).get('error', 0)
+    return ('verletzt', f'DRC {err} Fehler', []) if err else ('bewiesen', 'DRC 0 Fehler', [])
+
+
+def _kriterium_text(k):
+    return f'{k.get("groesse", "")} {k.get("op", "")} {k.get("wert")} {k.get("einheit", "")}'.strip()
+
+
+def _abnahme_status(nw, abnahme):
+    s = next((x for x in abnahme.get('schritte', []) if x['id'] == nw['ref']), None)
+    if not s:
+        return 'unbewiesen', f'Abnahmeschritt {nw["ref"]} fehlt (abnahme_erzeugen)', []
+    if s.get('ist') is None:
+        return 'unbewiesen', f'Abnahme {nw["ref"]}: noch nicht gemessen (Soll {_kriterium_text(s.get("soll") or {})})', []
+    k = s.get('soll') or {}
+    if 'wert' in k and isinstance(s['ist'], (int, float)):
+        ok = _vergleich(s['ist'], k.get('op', '>='), k['wert'])
+    else:
+        ok = bool(s.get('ok'))
+    return ('bewiesen' if ok else 'verletzt'), f'Abnahme {nw["ref"]}: Ist {s["ist"]} (Soll {_kriterium_text(k)})', []
+
+
+def _feld_status(nw, feld):
+    k = nw.get('kriterium') or {}
+    if k.get('wert') is None:
+        return 'unbewiesen', f'Feld: Kriterium {k.get("groesse")} ohne Zielwert (Ziel in soll/anforderungen.json nachtragen)', []
+    ms = [m for m in feld.get('messungen', []) if m.get('groesse') == k.get('groesse')]
+    if not ms:
+        return 'unbewiesen', f'Feld: keine Messung {k.get("groesse")} (Soll {_kriterium_text(k)})', []
+    schlecht = [m for m in ms if not _vergleich(m['wert'], k.get('op', '>='), k['wert'])]
+    if schlecht:
+        return 'verletzt', f'Feld: {len(schlecht)}/{len(ms)} Messungen verfehlen {_kriterium_text(k)} ' \
+                           f'(schlechteste {min(m["wert"] for m in schlecht) if k.get("op", ">=").startswith(">") else max(m["wert"] for m in schlecht)})', []
+    return 'bewiesen', f'Feld: {len(ms)} Messungen erfuellen {_kriterium_text(k)}', []
+
+
+def _manuell_status(nw, pdir):
+    b = nw.get('beleg')
+    if b and (os.path.exists(os.path.join(pdir, b)) or os.path.exists(b)) and nw.get('geprueft_von'):
+        return 'bewiesen', f'manuell belegt: {b} ({nw["geprueft_von"]})', []
+    return 'unbewiesen', 'manueller Nachweis ohne Beleg-Datei/Pruefer', []
+
+
+def nachweis_status(nw, pdir, katalog, abnahme, feld, extra=None):
+    art = nw.get('art')
+    if art == 'katalog':
+        return _katalog_status(nw, katalog)
+    if art == 'cad':
+        return _cad_status(nw, pdir)
+    if art == 'fem':
+        return _fem_status(nw, pdir)
+    if art == 'slice':
+        return _slice_status(pdir)
+    if art == 'kicad':
+        return _kicad_status(nw, extra)
+    if art == 'abnahme':
+        return _abnahme_status(nw, abnahme)
+    if art == 'feld':
+        return _feld_status(nw, feld)
+    if art == 'manuell':
+        return _manuell_status(nw, pdir)
+    return 'unbewiesen', f'unbekannte Nachweisart {art!r}', []
+
+
+# ---------------------------------------------------------------------------------------------- Bewertung
+
+RANG = {'verletzt': 3, 'unbewiesen': 2, 'vorbehalt': 1, 'bewiesen': 0}
+
+
+def pruefen(pdir, katalog=None, extra=None):
+    """V-Matrix: Status je Anforderung, Rueckverfolgbarkeit, Freigabestufe. katalog = alle()['module'] (sonst gerechnet)."""
+    anf = lade(pdir, 'anforderungen.json', {}).get('anforderungen', [])
+    soll = _soll(pdir)
+    abnahme = lade(pdir, 'abnahme.json', {})
+    feld = lade(pdir, 'feld.json', {})
+    if katalog is None:
+        from . import pruefungen
+        katalog = pruefungen.alle(pdir)['module']
+    ids = {a['id'] for a in anf}
+    zeilen, matrix_maengel, glaub = [], [], []
+    if not anf:
+        matrix_maengel.append('Keine Anforderungen (anforderungen.json) - ohne Lastenheft ist nichts bewiesen '
+                              '(anforderungen_erzeugen)')
+    for a in anf:
+        ebene = a.get('ebene')
+        maengel = []
+        if ebene not in EBENEN:
+            maengel.append(f'Ebene {ebene!r} unbekannt ({"/".join(EBENEN)})')
+        if ebene == 'system' and not a.get('herkunft'):
+            maengel.append('Systemanforderung ohne Herkunft (wer verlangt es?)')
+        if ebene in ('subsystem', 'komponente') and not [e for e in a.get('eltern', []) if e in ids]:
+            maengel.append('keine Elternanforderung (Rueckverfolgbarkeit nach oben fehlt)')
+        nws = a.get('nachweise', [])
+        stufen = {n.get('stufe') for n in nws}
+        if ebene in STUFEN_JE_EBENE and not stufen & set(STUFEN_JE_EBENE[ebene]):
+            maengel.append(f'kein Nachweis auf V-Ebene {"/".join(STUFEN_JE_EBENE[ebene])}')
+        if ebene == 'system' and 'abnahme' not in stufen and 'feld' not in stufen:
+            maengel.append('Systemanforderung braucht Abnahme am Geraet oder Feldmessung')
+        herk, htexte = schwaechste_herkunft(soll, a.get('eingaben'))
+        ergebnisse, st_gesamt = [], 'bewiesen' if nws else 'unbewiesen'
+        for nw in nws:
+            st, txt, treffer = nachweis_status(nw, pdir, katalog, abnahme, feld, extra)
+            # Reserve gegen Unsicherheit (nur bei bestandenem Katalog-Nachweis mit Wert/Grenze)
+            if st == 'bewiesen' and treffer:
+                for e in treffer:
+                    ok, rtxt = _reserve_ok(e, herk if herk != 'fehlt' else None)
+                    if ok is False:
+                        st, txt = 'vorbehalt', txt + f'; {rtxt} - zu knapp'
+                    elif ok:
+                        txt += f'; {rtxt}'
+            if nw.get('art') == 'fem':
+                # Glaubwuerdigkeit je Modell (V&V 40): ein Modell ist hoechstens so gut wie seine Belege
+                for fall in _fem_faelle(nw, pdir):
+                    g = glaubwuerdigkeit.bewerte(pdir, fall, nw.get('modell'), katalog,
+                                                 herk if herk != 'fehlt' else None)
+                    glaub.append({'anforderung': a['id'], **g})
+                    if RANG[g['status']] > RANG[st]:
+                        st = g['status']
+                    if g['status'] != 'bewiesen':
+                        txt += f'; {g["text"]}'
+            ergebnisse.append({'art': nw.get('art'), 'ref': nw.get('ref'), 'stufe': nw.get('stufe'),
+                               'status': st, 'beleg': txt})
+            if RANG[st] > RANG[st_gesamt]:
+                st_gesamt = st
+        if st_gesamt == 'bewiesen' and herk in HERKUNFT_SCHWACH + (None,) and a.get('eingaben'):
+            st_gesamt = 'vorbehalt'
+        if herk == 'fehlt' and st_gesamt in ('bewiesen', 'vorbehalt'):
+            st_gesamt = 'unbewiesen'
+        if maengel and st_gesamt == 'bewiesen':
+            st_gesamt = 'unbewiesen'
+        zeilen.append({'id': a['id'], 'ebene': ebene, 'text': a.get('text'), 'status': st_gesamt,
+                       'nachweise': ergebnisse, 'herkunft_eingaben': herk, 'herkunft_text': htexte,
+                       'matrix_maengel': maengel, 'eltern': a.get('eltern', [])})
+    # Kinder erben: Eltern sind hoechstens so gut wie ihr schlechtestes Kind
+    nach_id = {z['id']: z for z in zeilen}
+    for z in zeilen:
+        for e in z['eltern']:
+            if e in nach_id and RANG[z['status']] > RANG[nach_id[e]['status']] and z['status'] != 'vorbehalt':
+                nach_id[e]['status'] = z['status'] if z['status'] == 'verletzt' else 'unbewiesen'
+                nach_id[e].setdefault('wegen_kind', []).append(z['id'])
+    unten = [z for z in zeilen if z['ebene'] in ('subsystem', 'komponente')]
+    oben = [z for z in zeilen if z['ebene'] == 'system']
+    # Druckfertig: alle Komponenten-/Integrationsnachweise bewiesen (Abnahme/Feld duerfen noch offen sein)
+    def nur_vor_abnahme(z):
+        return all(n['status'] in ('bewiesen', 'vorbehalt') for n in z['nachweise']
+                   if n['stufe'] in ('komponente', 'integration'))
+    druckfertig = bool(zeilen) and not matrix_maengel and all(nur_vor_abnahme(z) for z in zeilen) and \
+        not any(z['status'] == 'verletzt' for z in zeilen) and not any(z['matrix_maengel'] for z in zeilen)
+    fertig = druckfertig and all(z['status'] in ('bewiesen',) for z in zeilen)
+    freigabe = 'fertig' if fertig else ('druckfertig' if druckfertig else 'nicht_druckfertig')
+    zaehl = {s: sum(1 for z in zeilen if z['status'] == s) for s in RANG}
+    erg = {'freigabe': freigabe, 'zaehlung': zaehl, 'anforderungen': zeilen, 'matrix_maengel': matrix_maengel,
+           'offen_abnahme': [f'{z["id"]}: {n["beleg"]}' for z in oben + unten for n in z['nachweise']
+                             if n['stufe'] in ('abnahme', 'feld') and n['status'] != 'bewiesen'],
+           'kontext_hash': kontext_hash(pdir), 'zeit': datetime.datetime.now().isoformat(timespec='seconds')}
+    erg['glaubwuerdigkeit'] = [{k: g[k] for k in ('anforderung', 'fall', 'risiko', 'status', 'text')} for g in glaub]
+    os.makedirs(os.path.join(pdir, 'pruef'), exist_ok=True)
+    speichere(pdir, 'pruef/v_matrix.json', erg)
+    glaubwuerdigkeit.bericht(pdir, glaub)
+    return erg
+
+
+# ---------------------------------------------------------------------------------------------- Standard-Anforderungen
+
+def standard(pdir):
+    """Aus Einsatz + Merkmalen abgeleitete Grundanforderungen (Lastenheft-Geruest). Eigene Anforderungen kommen dazu."""
+    from .pruefungen.merkmale import merkmale
+    mk = merkmale(pdir)
+    pj = _soll(pdir).get('_projekt', {})
+    a = lambda m: (mk.get(m) or {}).get('aktiv')  # noqa: E731
+    L = []
+    L.append({'id': 'A-GERAET', 'ebene': 'system', 'herkunft': 'project_new: Idee in projekt.md',
+              'text': 'Das Geraet erfuellt die Idee aus projekt.md im Einsatz (Abnahme am fertigen Geraet).',
+              'nachweise': [{'art': 'abnahme', 'ref': 'AB-FUNKTION', 'stufe': 'abnahme'}]})
+    L.append({'id': 'A-MONTAGE', 'ebene': 'system', 'herkunft': 'mb2-Standard (Bodenklima: Klemmen gespiegelt)',
+              'text': 'Montage und Anschluss nach Anleitung sind eindeutig und geprueft (Pin 1/Farbe, nicht links/rechts).',
+              'nachweise': [{'art': 'abnahme', 'ref': 'AB-ANSCHLUSS', 'stufe': 'abnahme'}]})
+    L.append({'id': 'S-DRUCK', 'ebene': 'subsystem', 'eltern': ['A-GERAET'], 'herkunft': 'abgeleitet aus A-GERAET',
+              'text': 'Alle Teile sind druckbar (Wand, Spalt, Ueberhang) und gesliced ohne Profilprobleme.',
+              'nachweise': [{'art': 'cad', 'ref': 'alle', 'stufe': 'komponente'},
+                            {'art': 'slice', 'ref': 'platte', 'stufe': 'integration'},
+                            {'art': 'katalog', 'ref': 'BL', 'stufe': 'komponente'}]})
+    L.append({'id': 'S-FEST', 'ebene': 'subsystem', 'eltern': ['A-GERAET'], 'herkunft': 'abgeleitet aus A-GERAET',
+              'text': 'Belastete Teile halten mit wirksamer Sicherheit >= 2 (Realterme: Temperatur, Kriechen, UV).',
+              'eingaben': ['material'],
+              'nachweise': [{'art': 'fem', 'ref': 'alle', 'stufe': 'integration'},
+                            {'art': 'katalog', 'ref': 'F23', 'stufe': 'integration'}]})
+    if a('aussen') or a('elektronik') or pj.get('T_max_C') is not None:
+        L.append({'id': 'S-TEMP', 'ebene': 'subsystem', 'eltern': ['A-GERAET'], 'herkunft': 'abgeleitet aus Einsatz',
+                  'text': 'Teiltemperatur (Luft + Sonne + Eigenwaerme) bleibt >= 20 K unter Tg.',
+                  'eingaben': ['T_max_C'] + (['farbe'] if a('aussen') else []),
+                  'nachweise': [{'art': 'katalog', 'ref': 'D1', 'stufe': 'integration'}] +
+                               ([{'art': 'katalog', 'ref': 'W6', 'stufe': 'integration'}] if a('aussen') else [])})
+    if a('funk'):
+        r = (pj.get('elektronik', {}).get('funk') or {}).get('r_m')
+        L.append({'id': 'A-FUNK', 'ebene': 'system', 'herkunft': 'abgeleitet aus Merkmal Funk',
+                  'text': f'Pakete kommen am Einsatzort zuverlaessig an ({r or "?"} m).',
+                  'eingaben': ['elektronik.funk.r_m', 'elektronik.funk.umgebung', 'elektronik.funk.hindernisse'],
+                  'nachweise': [{'art': 'abnahme', 'ref': 'AB-FUNK', 'stufe': 'abnahme'},
+                                {'art': 'feld', 'ref': 'empfangsquote', 'stufe': 'feld',
+                                 'kriterium': {'groesse': 'empfangsquote_proz', 'op': '>=', 'wert': 95, 'einheit': '%'}}]})
+        L.append({'id': 'S-FUNK', 'ebene': 'subsystem', 'eltern': ['A-FUNK'], 'herkunft': 'abgeleitet aus A-FUNK',
+                  'text': 'Linkbudget mit >= 10 dB Reserve (realistische Umgebung, Hindernisse, Kabel, Antenne).',
+                  'eingaben': ['elektronik.funk.r_m', 'elektronik.funk.umgebung'],
+                  'nachweise': [{'art': 'katalog', 'ref': 'E16', 'stufe': 'integration'},
+                                {'art': 'katalog', 'ref': 'FW1', 'stufe': 'komponente'}]})
+    if a('akku'):
+        L.append({'id': 'A-AKKU', 'ebene': 'system', 'herkunft': 'abgeleitet aus Merkmal Akku',
+                  'text': f'Laufzeit je Ladung/Batteriesatz >= {pj.get("laufzeit_ziel_h") or "?"} h im Einsatz.',
+                  'eingaben': ['akku_mAh', 'laufzeit_ziel_h'],
+                  'nachweise': [{'art': 'katalog', 'ref': 'E6', 'stufe': 'integration'},
+                                {'art': 'feld', 'ref': 'laufzeit', 'stufe': 'feld',
+                                 'kriterium': {'groesse': 'laufzeit_h', 'op': '>=',
+                                               'wert': pj.get('laufzeit_ziel_h'), 'einheit': 'h'}}]})
+        L.append({'id': 'S-STROM', 'ebene': 'subsystem', 'eltern': ['A-AKKU'], 'herkunft': 'abgeleitet aus A-AKKU',
+                  'text': 'Kein Brownout bei Funkspitze (kalt, gealtert), Laden nur im erlaubten Temperaturfenster.',
+                  'nachweise': [{'art': 'katalog', 'ref': 'E8', 'stufe': 'integration'},
+                                {'art': 'katalog', 'ref': 'E21', 'stufe': 'integration'}]})
+    if a('schrauben') or a('schnapper'):
+        L.append({'id': 'S-VERBINDUNG', 'ebene': 'subsystem', 'eltern': ['A-GERAET'], 'herkunft': 'abgeleitet aus Merkmal',
+                  'text': 'Schraub- und Schnappverbindungen halten dauerhaft (Kopfpressung, Restvorspannung, Dehnung).',
+                  'nachweise': ([{'art': 'katalog', 'ref': 'M12', 'stufe': 'komponente'},
+                                 {'art': 'katalog', 'ref': 'D4', 'stufe': 'integration'}] if a('schrauben') else []) +
+                               ([{'art': 'katalog', 'ref': 'M1', 'stufe': 'komponente'}] if a('schnapper') else [])})
+    return L
+
+
+def erzeugen(pdir):
+    """anforderungen.json anlegen/ergaenzen: Standard-Anforderungen hinzufuegen, vorhandene (auch geaenderte) behalten."""
+    alt = lade(pdir, 'anforderungen.json', {'anforderungen': []})
+    vorhanden = {a['id'] for a in alt['anforderungen']}
+    neu = [a for a in standard(pdir) if a['id'] not in vorhanden]
+    alt['anforderungen'] += neu
+    alt.setdefault('hinweis', 'V-Modell (mb2/anforderungen.py): system <-> abnahme/feld, subsystem <-> integration, '
+                              'komponente <-> komponente. Eigene Anforderungen des Nutzers als system-Ebene mit herkunft '
+                              'ergaenzen; Standard-Eintraege anpassen statt loeschen.')
+    speichere(pdir, 'anforderungen.json', alt)
+    return {'neu': [a['id'] for a in neu], 'gesamt': len(alt['anforderungen'])}
+
+
+# ---------------------------------------------------------------------------------------------- Abnahme
+
+STANDARD_SCHRITTE = {
+    'AB-ANSCHLUSS': {'anweisung': 'Jede Klemme/jeden Stecker nach Pin-Nummer (Pin 1 = Dreieck bzw. eckiges Pad) und '
+                                  'Aderfarbe anschliessen, dann je Ader Durchgang Pin -> Ziel messen.',
+                     'soll': {'groesse': 'falsch_angeschlossen', 'op': '==', 'wert': 0, 'einheit': 'Adern'}},
+    'AB-FUNKTION': {'anweisung': 'Fertiges Geraet nach projekt.md in Betrieb nehmen; alle Messwerte plausibel?',
+                    'soll': {'groesse': 'funktion_ok', 'op': '==', 'wert': 1, 'einheit': 'ja=1'}},
+    'AB-FUNK': {'anweisung': 'Am endgueltigen Einbauort (Antennen montiert, Deckel zu) Neustart ueber den Reset-Pin '
+                             '(nicht Batterie ziehen: Pufferkondensatoren halten den Chip), dann SNR des ersten Pakets '
+                             'an der Basis ablesen.',
+                'soll': {'groesse': 'snr_dB', 'op': '>=', 'wert': -5, 'einheit': 'dB'}},
+}
+
+
+def lageabhaengig(text):
+    """Anweisung nennt links/rechts/oben/unten ohne eindeutige Markierung -> Hinweis (sonst None)."""
+    t = text.lower().replace('ä', 'ae').replace('ö', 'oe').replace('ü', 'ue')
+    if re.search(LAGEWOERTER, t) and not re.search(MARKIERUNG, t):
+        return 'lageabhaengig ohne Markierung (Pin 1/Dreieck/Farbe/Aufdruck nennen)'
+    return None
+
+
+def abnahme_erzeugen(pdir):
+    """abnahme.json aus allen Nachweisen art='abnahme' erzeugen; vorhandene Ist-Werte und eigene Schritte bleiben."""
+    anf = lade(pdir, 'anforderungen.json', {}).get('anforderungen', [])
+    ab = lade(pdir, 'abnahme.json', {'schritte': []})
+    da = {s['id']: s for s in ab['schritte']}
+    for a in anf:
+        for nw in a.get('nachweise', []):
+            if nw.get('art') != 'abnahme':
+                continue
+            s = da.get(nw['ref'])
+            vorlage = STANDARD_SCHRITTE.get(nw['ref'], {})
+            if not s:
+                s = {'id': nw['ref'], 'anforderung': a['id'],
+                     'anweisung': nw.get('anweisung') or vorlage.get('anweisung') or f'Pruefung fuer {a["id"]}: {a.get("text")}',
+                     'soll': nw.get('kriterium') or vorlage.get('soll') or {}, 'ist': None, 'datum': None, 'notiz': ''}
+                ab['schritte'].append(s)
+                da[s['id']] = s
+    probleme = []
+    for s in ab['schritte']:
+        p = lageabhaengig(s.get('anweisung', ''))
+        if p:
+            probleme.append(f'{s["id"]}: {p}')
+        if not (s.get('soll') or {}).get('groesse'):
+            probleme.append(f'{s["id"]}: kein messbares Soll')
+    ab['hinweis'] = 'Ist-Werte mit abnahme_eintragen(projekt, schritt, ist, notiz). Erst mit allen Ist-Werten ist das ' \
+                    'Projekt "fertig" (nicht nur "druckfertig").'
+    speichere(pdir, 'abnahme.json', ab)
+    return {'schritte': [s['id'] for s in ab['schritte']], 'offen': [s['id'] for s in ab['schritte'] if s.get('ist') is None],
+            'probleme': probleme}
+
+
+def abnahme_eintragen(pdir, schritt, ist, notiz=''):
+    ab = lade(pdir, 'abnahme.json', {'schritte': []})
+    s = next((x for x in ab['schritte'] if x['id'] == schritt), None)
+    if s is None:
+        raise RuntimeError(f'Abnahmeschritt {schritt!r} unbekannt – erst abnahme_erzeugen')
+    s['ist'] = ist
+    s['datum'] = datetime.date.today().isoformat()
+    if notiz:
+        s['notiz'] = notiz
+    k = s.get('soll') or {}
+    if 'wert' in k and isinstance(ist, (int, float)):
+        s['ok'] = _vergleich(ist, k.get('op', '>='), k['wert'])
+    speichere(pdir, 'abnahme.json', ab)
+    return s
+
+
+# ---------------------------------------------------------------------------------------------- Feld
+
+# Feldgroesse -> (Katalog-ID, daten-Schluessel der Vorhersage, Umrechnung Messung -> Vorhersagegroesse, Toleranz)
+VORHERSAGE = {
+    'snr_dB': ('E16', 'P_rx_dBm', lambda m: m + RAUSCHEN_125K_DBM, 8.0),      # SNR -> P_rx = SNR + Rauschen
+    'rssi_dBm': ('E16', 'P_rx_dBm', lambda m: m, 8.0),
+    'laufzeit_h': ('E6', None, lambda m: m, None),                              # wert von E6
+}
+
+
+def feld_eintragen(pdir, groesse, wert, einheit='', ort='', quelle='', datum=None):
+    f = lade(pdir, 'feld.json', {'messungen': []})
+    m = {'groesse': groesse, 'wert': wert, 'einheit': einheit, 'ort': ort, 'quelle': quelle,
+         'datum': datum or datetime.date.today().isoformat()}
+    f['messungen'].append(m)
+    speichere(pdir, 'feld.json', f)
+    return m
+
+
+def feld_abgleich(pdir, katalog=None, feldfall_ordner=None):
+    """Vorhersage gegen Messung. Ist die Vorhersage optimistischer als Messung + Toleranz, wird ein Feldfall
+    (Regressionstest) unter tests/feldfaelle/ geschrieben – das Modell muss danach mindestens so pessimistisch sein."""
+    feld = lade(pdir, 'feld.json', {'messungen': []})
+    if katalog is None:
+        from . import pruefungen
+        katalog = pruefungen.alle(pdir)['module']
+    alle_e = [e for l in katalog.values() for e in l]
+    erg, faelle = [], []
+    for m in feld.get('messungen', []):
+        v = VORHERSAGE.get(m['groesse'])
+        if not v:
+            erg.append({'messung': m, 'urteil': 'keine Vorhersage zugeordnet'})
+            continue
+        pid, schluessel, umr, tol = v
+        e = next((x for x in alle_e if x['id'] == pid and (x.get('daten') or schluessel is None)), None)
+        if not e:
+            erg.append({'messung': m, 'urteil': f'{pid} hat keine Vorhersage (Eingaben fehlen)'})
+            continue
+        vorh = (e.get('daten') or {}).get(schluessel) if schluessel else e.get('wert')
+        if vorh is None:
+            erg.append({'messung': m, 'urteil': f'{pid}: Vorhersagewert fehlt'})
+            continue
+        gem = umr(m['wert'])
+        diff = vorh - gem
+        tol = tol if tol is not None else abs(gem) * 0.2
+        urteil = 'zu_optimistisch' if diff > tol else ('passt' if abs(diff) <= tol else 'zu_pessimistisch')
+        z = {'messung': m, 'pruefung': pid, 'vorhersage': round(vorh, 2), 'gemessen_umgerechnet': round(gem, 2),
+             'abweichung': round(diff, 2), 'toleranz': tol, 'urteil': urteil}
+        erg.append(z)
+        if urteil == 'zu_optimistisch':
+            ordner = feldfall_ordner or os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                                     'tests', 'feldfaelle')
+            os.makedirs(ordner, exist_ok=True)
+            name = f'{os.path.basename(pdir)}_{pid}_{m["groesse"]}_{m["datum"]}.json'
+            json.dump({'projekt': os.path.basename(pdir), 'pruefung': pid, 'schluessel': schluessel,
+                       'gemessen_umgerechnet': gem, 'toleranz': tol, 'messung': m,
+                       'soll_projekt': _soll(pdir).get('_projekt', {}),
+                       'regel': 'Modell darf nicht optimistischer als gemessen + Toleranz sein'},
+                      open(os.path.join(ordner, name), 'w', encoding='utf-8'), indent=1, ensure_ascii=False)
+            faelle.append(name)
+    return {'abgleich': erg, 'neue_feldfaelle': faelle}

@@ -1,0 +1,19 @@
+[project]
+name = "maker-bridge-2"
+version = "0.1.0"
+description = "Idee -> KiCad -> build123d -> FEM (Gmsh/CalculiX/Elmer) -> PrusaSlicer, ohne Oberflaeche"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "mcp>=1.10,<2",
+    "build123d>=0.9",
+    "gmsh>=4.13",
+    "numpy",
+    "matplotlib",
+]
+
+[dependency-groups]
+# nur fuer den Abgleich mit der alten linearen Rechnung (fem_halter.py)
+referenz = ["scikit-fem"]
+
+[tool.uv]
+package = false

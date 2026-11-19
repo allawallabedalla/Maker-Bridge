@@ -1,0 +1,99 @@
+# V-Modell in maker-bridge 2 (seit 15.11.2026)
+
+Grundsatz: **Grün heißt bewiesen, nicht „nichts gefunden“.** Jede Anforderung braucht einen bestandenen, belegten
+Nachweis auf derselben Höhe des V. Anlass und Herleitung: `audits/KERNPROBLEM_2026-11-15.md`.
+
+```
+ Entwurf (links)                                              Nachweis (rechts)
+ ───────────────                                              ─────────────────
+ system      Lastenheft: was das Gerät im Einsatz können muss  ◄──►  abnahme am Gerät + feld im Einsatz
+   subsystem   Pflichtenheft: Elektronik, Gehäuse, Firmware,   ◄──►  integration: Katalog-Systemprüfungen, FEM
+               Montage
+     komponente  Teil, Platine, Firmware-Konstante              ◄──►  komponente: cad_build, ERC/DRC, Katalog je Teil
+                       └──── Umsetzung: build123d, KiCad, Firmware ────┘
+```
+
+## Dateien je Projekt
+
+| Datei | Inhalt | wer schreibt |
+|---|---|---|
+| `projekt.md` | Idee, Anforderungen in Worten, Einsatzbedingungen, Entscheidungen | du / project_new |
+| `anforderungen.json` | Lastenheft und Pflichtenheft als Daten: id, ebene, eltern, text, herkunft, eingaben, nachweise | project_new (Standard), du (eigene) |
+| `cad/soll.json` → `_projekt` | Einsatz, Funk, Akku, Module, Firmware-Konstanten, `_herkunft`, `nicht_relevant` | project_new, Agenten |
+| `abnahme.json` | Abnahmeprotokoll: Schritt, Anweisung (lageunabhängig), Soll, **Ist**, Datum | anforderungen_erzeugen, abnahme_eintragen |
+| `feld.json` | Messungen im Einsatz (SNR, Empfangsquote, Laufzeit, Temperatur …) | feld_eintragen |
+| `pruef/katalog.json` | alle Katalog-Prüfungen | pruefkatalog/audit |
+| `pruef/v_matrix.json` | Status je Anforderung + Belege + Freigabe + Kontext-Hash | anforderungen_pruefen/audit |
+| `tests/feldfaelle/*.json` | Feldfälle als Regressionstests (Modell war zu optimistisch) | feld_abgleich |
+
+## Status und Freigabe
+
+- Je Anforderung: **bewiesen** · **vorbehalt** (bestanden, aber auf geschätzten Eingaben oder mit Reserve unter der
+  Unsicherheit) · **unbewiesen** (Nachweis fehlt, übersprungen oder Warnung nicht bewertet) · **verletzt**.
+- Eltern sind höchstens so gut wie ihr schlechtestes Kind.
+- Freigabe: **nicht_druckfertig** → **druckfertig** (alle Komponenten- und Integrationsnachweise bestanden, keine
+  Matrix-Mängel) → **fertig** (auch Abnahme am Gerät und Feldmessungen bestanden). Gedruckt wird ab druckfertig;
+  „fertig“ meldest du erst mit ausgefülltem Abnahmeprotokoll und Feldwerten.
+
+## Regeln der Matrix
+
+- Systemanforderung: hat eine `herkunft` (wer verlangt es) und einen Nachweis `abnahme` oder `feld`.
+- Subsystem/Komponente: hat `eltern` (Rückverfolgbarkeit nach oben) und Nachweise auf ihrer Ebene.
+- Eine Warnung zählt nur mit `warnung_akzeptiert: "Begründung"`.
+- Herkunft jeder Eingabe in `_projekt._herkunft`: `gemessen | datenblatt | norm | berechnet | geschaetzt | angenommen: Beleg`.
+  Die schwächste Herkunft bestimmt die Unsicherheit (relativ 5–50 %, Funk 3–15 dB). Die Reserve muss größer sein.
+- Abnahme-Anweisungen nennen Pin 1, Dreieck, Aderfarbe oder Aufdruck – nie nur links/rechts/oben/unten.
+  Neustart über Reset-Pin, nicht Batterie ziehen (Pufferkondensatoren).
+- Firmware-Konstanten mit Prüfwirkung (Sendeleistung, SF, Intervall, Abschaltspannung) stehen in
+  `_projekt.firmware.konstanten`. FW1 vergleicht sie mit der Datei.
+
+## Glaubwürdigkeit der Rechenmodelle (seit 17.11.2026, `mb2/glaubwuerdigkeit.py`)
+
+Risikobasiert nach ASME V&V 40 und dem FDA-Leitfaden von 2023. Grundlage ist der öffentliche Leitfaden, die Norm selbst lag nicht vor.
+Jeder FEM-Nachweis bekommt einen Block `modell`:
+- `frage`: Was soll das Modell beantworten?
+- `einsatz`: Was entscheidet es?
+- `einfluss` und `folge`: je `gering`, `mittel` oder `hoch`.
+
+**Risiko = 1 + Einfluss + Folge (1–5).** Jeder Faktor hat Stufen, wie in den Folien des V&V-40-Ausschusses.
+Das Risiko legt fest, welche Stufe verlangt ist:
+
+| Faktor | Stufen | verlangt bei Risiko 1–2 / 3 / 4 / 5 |
+|---|---|---|
+| Code-Verifikation | 0 keine · 1 Abgleich gegen bekannte Lösung (`tests/`) | 1 / 1 / 1 / 1 |
+| Lösungsverifikation | 0 · 1 Netzkonvergenz, F20 ok · 2 zusätzlich Richardson-Fehlerband F21 | 0 / 1 / 1 / 2 |
+| Sensitivität | 0 · 1 Studie mit Auswahl robust · 2 Standardsatz aller Eingaben robust (`fem_sensitivitaet`) | 0 / 1 / 1 / 2 |
+| Validierung (Strenge) | 0 keine · 1 Sichtvergleich · 2 Differenz gepaarter Werte · 3 mit Unsicherheit einer Seite · 4 beider Seiten | 0 / 0 / 2 / 4 |
+| Anwendbarkeit | 0 · 1 begründet | 0 / 0 / 1 / 1 |
+| Herkunft der Eingaben | 0 · 1 alle stark | 0 / 0 / 0 / 1 |
+
+Fehlt eine Stufe, gilt bei Risiko ≤ 3 `vorbehalt`. Bei Risiko ≥ 4 gilt `unbewiesen`, und das sperrt „druckfertig“.
+Kippt in der Sensitivitätsstudie eine Variante auf „nicht ok“, ist das ein Befund: mindestens `vorbehalt`, bei jedem Risiko.
+Ohne `modell`-Block gilt immer `vorbehalt`.
+Leitsatz aus V&V 40: Lässt sich der Plan nicht erfüllen, wird der Einsatzzweck enger gefasst.
+
+**`fem_sensitivitaet(projekt, fall, rel=0.2, nur=None)`** verstellt jede Eingabe um ±rel und rechnet gecacht neu. Die Varianten liegen in `fem/sens/`, Audit und Katalog sehen sie nicht.
+- Mechanik: Lasten, Wegvorgaben, E-Modul je Material, Festigkeit (analytisch).
+- Wärme: Quellen, h, Wärmeleitung.
+- Ergebnis `fem/sens/<fall>.sens.json` mit Elastizität je Parameter, `robust` und `vollstaendig`. Die Studie gilt nur, solange der Grundfall unverändert ist.
+- Erster Lauf, Schnapphaken `kraft` (67 s): Last −1,05, E-Modul 0,0 (bei Kraftvorgabe wie erwartet), Festigkeit +1,0.
+- Neues Lastfeld `material_override` {"PETG": {"E_MPa": …}} gilt nur für diesen einen Lauf.
+
+Der Bericht je Modell liegt in `pruef/glaubwuerdigkeit.md`, die Kurzfassung in `v_matrix.json` unter `glaubwuerdigkeit`.
+
+## Befehle (MCP mb2)
+
+`project_new(…, einsatz)` → `anforderungen_erzeugen` → `eingaben_offen` → Entwurf (Agenten) → `audit`
+(enthält `anforderungen_pruefen`, Feld `freigabe`) → Druck ab druckfertig → `abnahme_eintragen` am Gerät →
+`feld_eintragen` im Einsatz → `feld_abgleich` (zu optimistisch → Feldfall → Modell nachkalibrieren).
+
+## Erstes echtes Beispiel
+
+`projects/bodenklima-system/`:
+
+- Lastenheft mit Herkunft.
+- AB-ANSCHLUSS ist bewiesen, nach dem Umklemmen.
+- AB-FUNK ist verletzt: SNR −17 dB am Beet.
+- Die Feldmessungen vom 15.11.2026 sind eingetragen.
+- E16 sagt jetzt −132,7 dBm voraus, gemessen wurden −134 dBm. Das passt.
+- Das alte Freiraum-Modell hätte −84 dBm versprochen. Das ist der erste Feldfall in `tests/feldfaelle/`.
