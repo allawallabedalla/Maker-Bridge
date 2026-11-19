@@ -78,9 +78,9 @@ def test_sensitivitaeten_numerisch_gegen_analytisch():
     assert abs(z['dR_leitung']['c'] - 1 / s) < 1e-4, z['dR_leitung']                       # Leitungsdifferenz voll
     assert abs(z['dt_sensor']['c'] - 1.0) < 1e-6                                           # Element 1:1
     assert abs(z['m_idac']['c']) < 1e-6                                                    # Tausch
-    # TK R_ref: 10 ppm/K * 53 K (T_kal 23, Elektronik draussen -30 ... 50) als Rechteck
-    assert abs(z['tk_ref_rel']['u_i'] - 10e-6 * 53 / math.sqrt(3)) < 1e-12, z['tk_ref_rel']
-    assert abs(z['tk_ref_rel']['beitrag'] - 10e-6 * 53 / math.sqrt(3) * r / s) < 1e-6
+    # TK R_ref: 10 ppm/K * 8 K (T_kal 23, Elektronik drinnen am Host 15 ... 30) als Rechteck
+    assert abs(z['tk_ref_rel']['u_i'] - 10e-6 * 8 / math.sqrt(3)) < 1e-12, z['tk_ref_rel']
+    assert abs(z['tk_ref_rel']['beitrag'] - 10e-6 * 8 / math.sqrt(3) * r / s) < 1e-6
     # Quantisierung getrennt vom Rauschen, Rauschen durch sqrt(mittelung)
     assert abs(z['v_rausch']['u_i'] - 1e-6 / math.sqrt(2)) < 1e-15
     assert abs(z['v_quant']['u_i'] - rtd.lsb_eingang(mk) / 2 / math.sqrt(3)) < 1e-18
@@ -117,7 +117,7 @@ def test_demonstrator_mit_datenblattwerten():
     e = {x['id']: x for x in rtd.pruefe(mk, hk)}
     assert e['MK1']['stufe'] == 'uebersprungen' and 'dt_kal_referenz' in e['MK1']['hinweis'], e['MK1']
     plan = e['MK1']['daten']['planung']                          # Modus kalibriert: was darf die Kalibrierung kosten?
-    assert abs(plan['u_rest'] - 0.1128) < 0.002 and abs(plan['u_frei_max'] - 0.2231) < 0.002, plan
+    assert abs(plan['u_rest'] - 0.0171) < 0.001 and abs(plan['u_frei_max'] - 0.2494) < 0.001, plan
     mk['modus'] = 'ab_werk'
     e = {x['id']: x for x in rtd.pruefe(mk, hk)}
     for i in ('MK2', 'MK3', 'MK4-REF', 'MK4-IDAC', 'MK4-PGA', 'MK5'):
@@ -128,7 +128,7 @@ def test_demonstrator_mit_datenblattwerten():
     info['vernachlaessigt'] = {'dt_selbst': 'nur fuer diesen Test'}
     b = {x['id']: x for x in rtd.pruefe(info, hk)}['MK1']
     d = b['daten']
-    assert b['stufe'] == 'fehler' and 0.5 < d['U'] < 0.6 and d['schlechtester_punkt_C'] == 50, (b['stufe'], d['U'])
+    assert 0.47 < d['U'] < 0.5 and d['schlechtester_punkt_C'] == 50, (b['stufe'], d['U'])   # ab Werk knapp, ohne Reserve
     gross = max(d['beitraege'], key=lambda z: z['beitrag'])
     assert gross['name'] == 'e_gain', gross
 
@@ -217,6 +217,10 @@ def _echt_machen(d, kalibrierschein='TESTFIXTURE-KEIN-NACHWEIS', gueltig_bis='20
     for x in a['anforderungen']:
         if x['id'] == 'A-MESS-TEMP':
             x['messtechnik']['drift'] = {'max_abs': 0.1, 'einheit': '°C/Jahr'}
+        if x['id'] == 'K-KABEL':
+            x['nachweise'][0]['geprueft_von'] = 'TESTFIXTURE'
+    os.makedirs(os.path.join(d, 'pruef'), exist_ok=True)
+    open(os.path.join(d, 'pruef', 'kabel_foto.jpg'), 'w').write('TESTFIXTURE')
     json.dump(a, open(pa, 'w', encoding='utf-8'), ensure_ascii=False)
     pm = os.path.join(d, 'messung.json')
     m = json.load(open(pm, encoding='utf-8'))
@@ -452,6 +456,16 @@ def test_messreihen_aus_csv():
     assert len(g['punkte']) == 9 and len(h['punkte']) == 10 and g['eigenschaft'] == 'genauigkeit', g
     p0 = g['punkte'][0]
     assert p0['ref'] == -20 and abs(p0['ist'] - (-19.9)) < 1e-9, p0             # Dezimalkomma, auf Sollpunkt
+
+
+
+def test_raspberry_pi_programm_uebersetzt():
+    """rpi_mb2_temp_001.c muss mit -Wall -Werror uebersetzen (laeuft hier nicht: kein SPI-Geraet)."""
+    if not shutil.which('gcc'):
+        raise RuntimeError('gcc fehlt - Raspberry-Pi-Programm nicht geprueft')
+    fw = os.path.join(DEMO, 'firmware', 'mb2_temp_001')
+    subprocess.run(['gcc', '-std=c11', '-O2', '-Wall', '-Wextra', '-Werror', '-o', os.path.join(TMP, 'rpi'),
+                    os.path.join(fw, 'rpi_mb2_temp_001.c'), '-lm'], check=True)
 
 
 if __name__ == '__main__':

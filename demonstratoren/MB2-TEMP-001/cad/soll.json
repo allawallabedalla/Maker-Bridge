@@ -5,8 +5,8 @@
   "T_max_C": 40,
   "aussen": true,
   "nicht_relevant": {
-   "E16": "Annahme (vom Nutzer bestaetigen): Messwerte per USB-Seriell, WLAN/BLE des ESP32 abgeschaltet",
-   "E15": "Annahme (vom Nutzer bestaetigen): Messwerte per USB-Seriell, WLAN/BLE des ESP32 abgeschaltet"
+   "E16": "Sensormodul ohne Funk; Host (ESP32/Raspberry Pi) liegt ausserhalb der Systemgrenze (Entscheidung 19.11.2026)",
+   "E15": "Sensormodul ohne Funk; Host (ESP32/Raspberry Pi) liegt ausserhalb der Systemgrenze (Entscheidung 19.11.2026)"
   },
   "firmware": {
    "pfad": "firmware/mb2_temp_001",
@@ -79,13 +79,14 @@
     "idac_tausch": true,
     "mittelung": 2,
     "T_elektronik_C": [
-     -30,
-     50
+     15,
+     30
     ],
     "T_kal_C": 23,
     "R_filter_ohm": 0,
     "messrate_Hz": 0.1,
-    "einschwing_s": 0.001
+    "einschwing_s": 0.001,
+    "kabel_laenge_m": null
    },
    "bauteile": {
     "adc": {
@@ -151,8 +152,8 @@
    "messkette.schaltung.R_ref_tol_rel": "angenommen: Vorgabe Lastenheft 0,01 %, Bauteil noch nicht beschafft",
    "messkette.schaltung.R_ref_tk_ppm_K": "angenommen: Vorgabe Lastenheft 10 ppm/K, Bauteil noch nicht beschafft",
    "messkette.schaltung.dR_leitung_ohm": "angenommen: Leitungslaenge/-paarung unbekannt - am Aufbau messen",
-   "messkette.schaltung.R_leitung_ohm": "angenommen: Leitungslaenge unbekannt - am Aufbau messen",
-   "messkette.schaltung.T_elektronik_C": "angenommen: Elektronik draussen im Gehaeuse, -30 ... 50 °C - nach Gehaeuseentwurf (W6) pruefen",
+   "messkette.schaltung.R_leitung_ohm": "angenommen: Kabellaenge zum Fuehler unbekannt - messen; 3-Leiter-Schaltung gleicht gleiche Adern aus",
+   "messkette.schaltung.T_elektronik_C": "angenommen: Messplatine am Rechner im Innenraum 15 ... 30 °C (Entscheidung Nutzer 19.11.2026: nur Fuehler draussen) - Aufstellort bestaetigen",
    "messkette.bauteile.adc.avdd_V": "berechnet: Versorgung 3,3 V (Lastenheft)",
    "messkette.bauteile.adc.rauschen_Vrms": "datenblatt: TI ADS1220 SBAS501D (Rev. Mai 2026), S. 16, Tab. 7-1: 0,35 uVrms (1,16 uVpp) bei Gain 16, 20 SPS, Normalmodus; TYP, interne Referenz 2,048 V (externe Referenz laut S. 16 nur geringfuegig anders)",
    "messkette.bauteile.adc.verstaerkungsfehler_rel": "datenblatt: TI ADS1220 SBAS501D (Rev. Mai 2026), S. 7, Tab. 6.5 Gain error: Gain 1-128, TA 25 C, MAX 0,1 %",
@@ -175,7 +176,8 @@
    "messkette.kalibrierung": "offen: Kalibrierung noch nicht durchgefuehrt (Temperaturbad, Referenzthermometer)",
    "ziele.stueckzahl": "Nutzer 19.11.2026",
    "aussen": "Nutzer 19.11.2026: Aussenlufttemperatur",
-   "farbe": "angenommen: weiss gegen Sonnenerwaermung"
+   "farbe": "angenommen: weiss gegen Sonnenerwaermung",
+   "messkette.schaltung.kabel_laenge_m": "offen: Laenge Fuehlerkabel bis zum Strahlungsschutz"
   },
   "ziele": {
    "stueckzahl": 1

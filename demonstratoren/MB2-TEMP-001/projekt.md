@@ -2,7 +2,7 @@
 
 ## Idee
 Temperatursensor als erster messtechnischer Demonstrator von maker-bridge 2:
-PT100 (3-Leiter, Klasse A, IEC 60751) → ADS1220 (24 Bit, PGA, IDAC) → SPI → ESP32 → Messwerte an die vorhandene Software.
+PT100 (3-Leiter, Klasse A, IEC 60751) → ADS1220 (24 Bit, PGA, IDAC) auf einer Messplatine → SPI → Host (ESP32 oder Raspberry Pi) → vorhandene Software.
 
 ## Anforderungen
 Außenluft −30 … +50 °C, Genauigkeit ±0,5 °C, Linearität ≤ 0,2 °C, Hysterese ≤ 0,2 °C, Wiederholbarkeit ≤ 0,1 °C,
@@ -29,15 +29,16 @@ Kritik am bisherigen Lastenheft (vom Nutzer am 19.11.2026 angenommen, umgesetzt)
 - Elektronik steht draußen: Temperaturbereich der Elektronik −30 … +50 °C statt 10 … 40 °C, dadurch größere
   Driftbeiträge; Gehäuse UV-fest (ASA), Feuchte und Betauung beachten.
 
-## Systemgrenze (Nutzer 19.11.2026, Entscheidung offen)
+## Systemgrenze (Nutzer 19.11.2026, entschieden: Variante a)
 Gebaut wird ein **Sensormodul**, kein Gesamtgerät: Es wird über einen Bus an einen vorhandenen Rechner (ESP32,
 Raspberry Pi o. ä.) angeschlossen. Zeitstempel, Speicherung und Übertragung sind Aufgabe dieses Rechners.
-Offen: wo die Elektronik sitzt und welcher Bus. Der ADS1220 spricht SPI – SPI ist nur für kurze Leitungen
+Entschieden: Messplatine direkt am Host (SPI, kurz), nur das 3-adrige PT100-Kabel geht nach draußen. Siehe SCHNITTSTELLE.md.
+Hintergrund: Der ADS1220 spricht SPI – SPI ist nur für kurze Leitungen
 (Platinen, wenige Dezimeter) gedacht, nicht für ein Kabel nach draußen.
 
 ## Einsatzbedingungen
 - Laborbetrieb 10 … 40 °C (angenommen)
-- Datenübertragung: USB-Seriell angenommen, Funk des ESP32 aus (vom Nutzer bestätigen, sonst E15/E16 rechnen)
+- Datenübertragung: Aufgabe des Hosts; das Modul hat keinen Funk (E15/E16 nicht relevant).
 
 ## Entscheidungen
 - 19.11.2026: Verstärkung 16 (MK3: 58 % Aussteuerung bei 50 °C; 32 würde übersteuern).
@@ -48,5 +49,7 @@ Offen: wo die Elektronik sitzt und welcher Bus. Der ADS1220 spricht SPI – SPI 
 - 19.11.2026: Stückzahl 1 → Kalibrierung des ganzen Sensors im Bad (Variante b) bestätigt; Aufwand fällt einmal an.
 
 - 19.11.2026: Lastenheft auf Außenluft umgestellt: −30 … +50 °C, 1 Wert/10 s, neu A-STRAHLUNG, A-REAKTION, A-DATEN.
+
+- 19.11.2026: Elektronik am Host, nur Fühler draußen → Elektronikanteil im Budget u = 0,017 °C (vorher 0,113 °C).
 
 ## Audit

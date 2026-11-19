@@ -23,7 +23,7 @@ Ergebnis: `pruef/v_matrix.json` (Feld `messtechnische_freigabe`), `pruef/messpro
 | Erregung | 2 × 500 µA IDAC, ratiometrisch, IDAC-Tausch je Messwert | Auslegung |
 | Referenzwiderstand | 1,65 kΩ, 0,01 %, ≤ 10 ppm/K (Low-Side, beide IDACs) → V_ref = 1,65 V | Vorgabe, Bauteil nicht beschafft |
 | Verstärkung | 16 → Vollausschlag ±103,1 mV, V_in 44,1 … 59,7 mV (43–58 %) | berechnet (MK3) |
-| Mikrocontroller | ESP32, 3,3 V, SPI Modus 1, CS = GPIO5, DRDY = GPIO4 | Pins angenommen, Funk aus angenommen |
+| Host (nicht Teil des Moduls) | ESP32 oder Raspberry Pi über SPI, Modul direkt daneben, 3,3 V; nur das PT100-Kabel geht nach draußen | Schnittstelle: `SCHNITTSTELLE.md` |
 | Pinbelegung ADS1220 | AINP = AIN1, AINN = AIN0, IDAC1 → AIN2, IDAC2 → AIN3 (Tausch: umgekehrt), REFP0/REFN0 an R_ref | nach SBAS501D S. 55–58, Abb. 9-6 |
 | Referenzthermometer | kalibriert, rückführbar | **nicht vorhanden** |
 
@@ -36,8 +36,8 @@ Ergebnis: `pruef/v_matrix.json` (Feld `messtechnische_freigabe`), `pruef/messpro
 | MK4 Referenz / IDAC-Compliance / PGA-Gleichtakt | **ok**: V_ref 1,65 V (0,75 … 3,3 V); IDAC-Pin 1,72 V ≤ 2,4 V; V_CM 1,674 … 1,685 V in 0,825 … 2,546 V |
 | MK5 Zeitbudget | **ok**: 2 × (50,06 ms + 1 ms) = 102 ms je Wert, Periode 10 s |
 | MK4-SELBST, MK1 | **offen**: Eigenerwärmungskoeffizient des PT100-Elements fehlt |
-| MK1 informativ (Eigenerwärmung weggelassen) | **verfehlt ab Werk**: U = 0,54 °C bei 50 °C > 0,5 °C (Stand Außenluft; vorher 0,61 °C bei 100 °C). Beiträge: Verstärkungsfehler max. 0,1 % mit 47 %, Klasse A mit 44 %, Leitungsdifferenz mit 6 %. Ohne Verstärkungsfehler wäre U = 0,44 °C |
-| Firmware | Treiber (`ads1220.h`), Rechnung und ESP32-Sketch fertig. Treiber und Rechnung auf dem PC gegen SPI-Attrappe bzw. Python-Modell getestet. **Nicht** auf ESP32 übersetzt oder am Gerät gelaufen |
+| MK1 informativ (Eigenerwärmung weggelassen) | **ab Werk knapp ohne Reserve**: U = 0,49 °C bei 50 °C (Elektronik drinnen; mit Elektronik draußen waren es 0,54 °C). Darin fehlen noch Eigenerwärmung und Strahlung, deshalb bleibt der Abgleich nötig. Beiträge: Verstärkungsfehler max. 0,1 % mit 47 %, Klasse A mit 44 %, Leitungsdifferenz mit 6 %. Ohne Verstärkungsfehler wäre U = 0,44 °C |
+| Firmware | Treiber (`ads1220.h`), Rechnung, ESP32-Sketch und Raspberry-Pi-Programm fertig. Treiber und Rechnung auf dem PC gegen SPI-Attrappe bzw. Python-Modell getestet, Raspberry-Pi-Programm übersetzt. **Nicht** auf ESP32 übersetzt oder am Gerät gelaufen |
 | Messreihen | nur **Demonstrationsdaten**, deshalb `nicht_freigegeben` |
 
 ## Befunde aus dem Datenblatt
@@ -54,7 +54,7 @@ Ergebnis: `pruef/v_matrix.json` (Feld `messtechnische_freigabe`), `pruef/messpro
 Der ganze Sensor wird im Temperaturbad gegen ein rückführbares Referenzthermometer abgeglichen (`modus: kalibriert`).
 Die Korrektur steckt als Polynom in der Firmware (KAL_K0 … K2) und gleicht Klassentoleranz, Verstärkungs- und Offsetfehler, R_ref-Toleranz und Leitungen aus.
 Ablauf und Zielwerte stehen im PRUEFPLAN, Abschnitt 1a.
-Stand: MK1 zeigt die Planung (höchstens u = 0,223 °C für die Kalibrierung). Gerechnet wird es erst mit echten Kalibrierwerten.
+Stand: MK1 zeigt die Planung (höchstens u = 0,249 °C für die Kalibrierung). Gerechnet wird es erst mit echten Kalibrierwerten.
 
 ## Nächste Daten, die gebraucht werden
 

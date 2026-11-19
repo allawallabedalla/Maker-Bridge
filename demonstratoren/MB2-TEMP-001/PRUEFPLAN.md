@@ -22,11 +22,13 @@ Reihenfolge, damit kein Zirkelschluss entsteht:
 4. **Nachweisreihen** R-GEN, R-LIN, R-HYS, R-WDH, R-BER **neu messen**, mit Korrektur, an einem anderen Termin. Die Kalibrierreihe zählt nie als Nachweis (`kalibrierdaten_als_nachweis`).
 
 **Budget für die Kalibrierung** (Planungsrechnung MK1, Modus kalibriert, mit den ADS1220-Werten):
-- Alles außer Kalibrierung und Eigenerwärmung ergibt u = 0,113 °C. Den größten Anteil hat der Temperaturgang von R_ref (Elektronik draußen −30 … +50 °C).
-- Für Referenz, Ausgleichsrest, thermische Kopplung und Eigenerwärmung **zusammen** bleiben höchstens u = 0,223 °C, damit U ≤ 0,5 °C.
+- Alles außer Kalibrierung und Eigenerwärmung ergibt u = 0,017 °C, weil die Elektronik drinnen am Host sitzt (15 … 30 °C).
+- Für Referenz, Ausgleichsrest, thermische Kopplung und Eigenerwärmung **zusammen** bleiben höchstens u = 0,249 °C, damit U ≤ 0,5 °C.
 
 **Zielwerte (Vorgabe, noch nicht gemessen):** Referenzthermometer U ≤ 0,1 °C (k = 2), Kopplung ≤ 0,05 °C Halbbreite, Ausgleichsrest u_fit ≤ 0,05 °C.
-Damit ergäbe sich U ≈ 0,27 °C, mit Reserve für das ILAC-G8-Schutzband beim Nachweis.
+Damit ergäbe sich U ≈ 0,15 °C, mit Reserve für das ILAC-G8-Schutzband beim Nachweis.
+
+**Kalibriert wird mit dem endgültigen Fühlerkabel** (K-KABEL). Ein Foto von Kabel und Beschriftung kommt nach `pruef/kabel_foto.jpg`.
 
 ## 2 Ablauf je Temperaturpunkt
 

@@ -19,7 +19,8 @@ Die meiste Zeit wartest du, bis das Bad die Temperatur hält. Gemessen wird je T
 - ☐ **Temperaturbad oder Blockkalibrator, der −30 bis +50 °C schafft.** Reines Wasser reicht nur von etwa 1 bis 50 °C. Für −30 bis 0 °C brauchst du ein Kältebad mit Badflüssigkeit, die nicht gefriert, oder einen Trockenblock-Kalibrator. Was das Gerät verträgt, steht in seiner Anleitung.
 - ☐ **Referenzthermometer** mit **Kalibrierschein** (siehe Abschnitt 2)
 - ☐ Sensor MB2-TEMP-001 mit aufgespielter Firmware, PT100-Fühler angeschlossen
-- ☐ Laptop, USB-Kabel, Terminalprogramm, das mitschreiben kann (zum Beispiel Arduino IDE „Serieller Monitor“ oder PuTTY mit Log-Datei)
+- ☐ Host mit dem Sensormodul: Raspberry Pi mit `rpi_mb2_temp_001`, Ausgabe in eine Datei, **oder** ESP32 am Laptop mit Terminalprogramm, das mitschreibt (z. B. Arduino IDE „Serieller Monitor“ oder PuTTY mit Log-Datei)
+- ☐ **Das endgültige Fühlerkabel** in der Länge, die später draußen verwendet wird. Die Korrektur gilt nur mit genau diesem Kabel.
 - ☐ Halter oder Klebeband, um beide Fühler nebeneinander zu fixieren, dazu ein Lineal
 - ☐ Raumthermometer
 - ☐ Diese Anleitung und das Protokollblatt (letzte Seite), ausgedruckt
@@ -46,7 +47,7 @@ Notiere auf dem Protokollblatt: Gerät, Seriennummer, Schein-Nummer, Labor, U, k
 
 ## 4 Gerät starten (35 min, davon 30 min warten)
 
-1. Sensor per USB an den Laptop, Terminal mit **115200 Baud** öffnen, **Mitschreiben in eine Datei einschalten**.
+1. Raspberry Pi: `./mb2temp > termin1.log` starten. ESP32: per USB an den Laptop, Terminal mit **115200 Baud** öffnen, **Mitschreiben in eine Datei einschalten**.
 2. Die erste Zeile prüfen:
    - Termin 1: `kal=0/0/0` (noch keine Korrektur) und `start_fehler=0`
    - Termin 2: `kal=` mit den neuen Zahlen und `start_fehler=0`

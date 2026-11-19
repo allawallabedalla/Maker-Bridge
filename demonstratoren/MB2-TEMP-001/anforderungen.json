@@ -262,7 +262,7 @@
    "id": "A-DATEN",
    "ebene": "system",
    "herkunft": "Lastenheft MB2-TEMP-001 (Nutzer 19.11.2026, Aussenluft fuer ML-Daten)",
-   "text": "Datensatz ML-tauglich: jeder Wert mit Zeitstempel und Fehlerbits; Ausfaelle erscheinen als markierte Zeile, nie als fehlender, wiederholter oder geschaetzter Wert.",
+   "text": "Modul liefert je Messwert Rohcodes, Widerstand, Temperatur und Fehlerbits; der Host setzt den Zeitstempel (UTC) und schreibt Ausfaelle als markierte Zeile, nie als fehlenden, wiederholten oder geschaetzten Wert.",
    "nachweise": [
     {
      "art": "abnahme",
@@ -275,6 +275,47 @@
       "wert": 0,
       "einheit": "Zeilen"
      }
+    }
+   ],
+   "notiz": "Zeitstempel und Speicherung liegen beim Host (Systemgrenze 19.11.2026); die Beispielprogramme erfuellen das."
+  },
+  {
+   "id": "S-SCHNITTSTELLE",
+   "ebene": "subsystem",
+   "eltern": [
+    "A-DATEN"
+   ],
+   "herkunft": "Systemgrenze 19.11.2026",
+   "text": "SPI-Schnittstelle zum Host nach SCHNITTSTELLE.md (Modus 1, 3,3 V, kurze Verbindung), Treiber laeuft auf ESP32 und Raspberry Pi.",
+   "nachweise": [
+    {
+     "art": "abnahme",
+     "ref": "AB-SCHNITTSTELLE",
+     "stufe": "abnahme",
+     "anweisung": "Modul an den Host stecken, Beispielprogramm starten: Startzeile muss start_fehler=0 zeigen (Register gegengelesen).",
+     "kriterium": {
+      "groesse": "start_fehler",
+      "op": "==",
+      "wert": 0,
+      "einheit": "Bits"
+     }
+    }
+   ]
+  },
+  {
+   "id": "K-KABEL",
+   "ebene": "komponente",
+   "eltern": [
+    "S-MESSKETTE"
+   ],
+   "herkunft": "Systemgrenze 19.11.2026",
+   "text": "Kalibrierung mit dem endgueltigen Fuehlerkabel; Kabel danach nicht kuerzen oder tauschen (sonst neu kalibrieren).",
+   "nachweise": [
+    {
+     "art": "manuell",
+     "ref": "kabel",
+     "stufe": "komponente",
+     "beleg": "pruef/kabel_foto.jpg"
     }
    ]
   }
