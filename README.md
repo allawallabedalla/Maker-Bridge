@@ -85,7 +85,8 @@ eine neue Rechnung.
 | Gruppe | Werkzeuge |
 |---|---|
 | Projekt | `project_new`, `project_status`, `eingaben_offen` |
-| Anforderungen | `anforderungen_erzeugen`, `anforderungen_pruefen`, `abnahme_eintragen`, `feld_eintragen`, `feld_abgleich` |
+| Anforderungen | `anforderungen_erzeugen`, `anforderungen_pruefen`, `abnahme_eintragen`, `feld_eintragen`, `feld_abgleich`, `messreihe_eintragen`, `messreihen_aus_csv` |
+| Messtechnik | `messkette_rechnen`, `kalibrierung_auswerten` |
 | CAD | `cad_build`, `cad_plate`, `cad_check_step`, `cad_check_3mf` |
 | FEM | `fem_mech`, `fem_waerme`, `fem_sensitivitaet`, `fem_materialien` |
 | KiCad | `kicad_new`, `kicad_find`, `kicad_symbol`, `kicad_erc`, `kicad_schematic_pdf`, `kicad_sync`, `kicad_layout`, `kicad_route`, `kicad_cat`, `kicad_drc`, `kicad_render`, `kicad_board`, `kicad_fab` |
@@ -133,8 +134,8 @@ Empfohlene Regeln für die `CLAUDE.md` des neuen Kontos:
 ```
 Jede Datei unter `tests/` läuft für sich. `fem_abgleich.py`, `schnapphaken_abgleich.py` und `test_pruef_waerme.py` sind die
 Code-Verifikation der Löser (V&V 40). Einige Tests (`test_pruef_katalog`, `_mechanik`, `_schwingung`, `_fem_plausi`,
-`_elektronik`, `_dauer_toleranz`) lesen Beispielprojekte unter `projects/`; die sind nicht im Repository und werden dann übersprungen
-oder schlagen fehl. `test_fem_vorbereitung.py` baut seinen Fall seit 19.11.2026 selbst (nur Gmsh nötig). `test_messkette.py` prüft
+`_elektronik`, `_dauer_toleranz`) lesen Beispielprojekte unter `projects/`; die sind nicht im Repository – diese Funktionen
+melden dann `NichtAusgefuehrt` (nie „bestanden“). `test_fem_vorbereitung.py` baut seinen Fall seit 19.11.2026 selbst (nur Gmsh nötig). `test_messkette.py` prüft
 Messkette, Unsicherheitsbudget und Messnachweise (ohne Löser). `test_temp_demonstrator.py` prüft den PT100-Demonstrator
 (braucht g++ für die Firmware-Rechnung). **`tests/alle.py`** führt alle Dateien aus und ordnet jede einer Klasse zu:
 bestanden, werkzeug_fehlt, beispielprojekt_fehlt oder fehlgeschlagen. Ein nicht ausgeführter Test zählt nie als bestanden.
@@ -142,6 +143,6 @@ Stand der roten Dateien: `tests/TESTSTATUS.md`.
 
 ## 8. Grenzen
 
-- Nur Windows getestet (Pfade in `mb2/werkzeuge.py`).
+- Werkzeugpfade (CalculiX, Elmer, KiCad, PrusaSlicer, Blender) sind nur für Windows hinterlegt (`mb2/werkzeuge.py`). Die Python-Teile und Tests ohne diese Werkzeuge laufen auch unter Linux (Stand 19.11.2026, `tests/TESTSTATUS.md`).
 - Kein Druckerupload, keine Fusion-Anbindung (das war maker-bridge 1).
 - KiCad nur Standardbibliothek.

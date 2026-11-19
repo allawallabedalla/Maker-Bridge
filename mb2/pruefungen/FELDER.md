@@ -1,4 +1,4 @@
-# Eingabefelder der Katalog-Prüfungen (Stand 10.11.2026)
+# Eingabefelder der Katalog-Prüfungen (Stand 19.11.2026)
 
 Fehlt ein Feld, meldet die betroffene Prüfung `uebersprungen` mit Grund – nie ein stilles `ok`. **Seit 15.11.2026
 ist das nur noch erlaubt, wenn der Entwurf das Merkmal nicht enthält:** erkennt `merkmale.py` z. B. Funk, Akku,
@@ -124,7 +124,7 @@ ungünstiger Standard, Ergebnis höchstens `warnung`.
 | `abnahme.json` | `schritte: [{id, anforderung, anweisung, soll {groesse, op, wert, einheit}, ist, datum, notiz}]` | Abnahme am Gerät |
 | `feld.json` | `messungen: [{groesse, wert, einheit, ort, quelle, datum}]` | Messungen im Einsatz (snr_dB, rssi_dBm, empfangsquote_proz, laufzeit_h …) |
 
-## Messkette (seit 19.11.2026, MK1–MK3, Einzelheiten `mb2/pruefungen/messkette.py`, `VMODELL.md`)
+## Messkette (seit 19.11.2026, MK1–MK5, Einzelheiten `mb2/pruefungen/messkette.py`, `VMODELL.md`)
 
 `_projekt.messkette` – alle Unsicherheiten als Standardunsicherheit (k = 1), Bezugspunkt in Klammern:
 

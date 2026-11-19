@@ -82,9 +82,11 @@ def stufen(pdir, fall, erg, modell, katalog=None, herkunft=None):
     s['code'] = (1, f'{cv[0]}: {cv[1]}') if cv and os.path.exists(os.path.join(BASE, cv[0])) else \
         (0, f'keine Verifikation fuer Loeser {erg.get("loeser")!r}')
     f20, f21 = _katalog(katalog, 'F20', fall), _katalog(katalog, 'F21', fall)
-    schlecht20 = [e for e in f20 if e.get('stufe') in ('fehler', 'uebersprungen')]
+    schlecht20 = [e for e in f20 if e.get('stufe') not in ('ok', 'info')]
     if 'konvergenz' not in erg:
         s['loesung'] = (0, '"konvergenz" im Lastfall fehlt')
+    elif not f20:
+        s['loesung'] = (0, 'F20 fehlt im Katalog - Netzkonvergenz nicht bewertet')
     elif schlecht20:
         s['loesung'] = (0, f'F20 {schlecht20[0].get("stufe")}: {schlecht20[0].get("hinweis", "")}')
     elif f21 and all(e.get('stufe') in ('ok', 'info') for e in f21):

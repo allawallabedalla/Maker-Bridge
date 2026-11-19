@@ -835,6 +835,10 @@ def _pruefe_schrauben(k, teil, mat, dr):
             continue
         d, F_i = float(s['d_mm']), float(s['vorspannung_N'])
         d_w = s.get('kopf_d_mm') or KOPF_ISO4762.get(d)
+        if d_w is None:
+            out.append(uebersprungen('M12', f'Schrauben M{d:g}', f'Kopfdurchmesser fuer M{d:g} nicht in der Tabelle '
+                                     f'(ISO 4762) - kopf_d_mm in soll.json eintragen', Q['M12'], teil))
+            continue
         d_h, dhq = s.get('loch_d_mm'), 'soll.json'
         if d_h is None:
             d_h, dhq = _loch_aus_geometrie(k, teil, d), 'groesste passende Bohrung im STEP'
@@ -1146,7 +1150,11 @@ def _pruefe_deckel(k, teil, mat):
                                      Q['M19'], teil))
             continue
         a, b, t = float(s['a_mm']), float(s['b_mm']), float(s['t_mm'])
-        rand = s.get('rand', 'gelenkig')
+        rand = str(s.get('rand', 'gelenkig')).strip().lower()
+        if rand not in ('gelenkig', 'eingespannt'):   # Tippfehler nie still als die guenstigere Lagerung lesen
+            out.append(uebersprungen('M19', titel, f'rand {s.get("rand")!r} unbekannt (gelenkig | eingespannt)',
+                                     Q['M19'], teil))
+            continue
         art = s.get('last_art') or ('flaeche' if s.get('druck_MPa') is not None else 'punkt')
         if art == 'punkt':
             w, beiwert, D = m19_platte(m['E_MPa'], m['nu'], a, b, t, F=float(s['last_N']), rand=rand)

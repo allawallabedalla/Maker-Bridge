@@ -130,9 +130,9 @@ def teil_temperatur(k, T_fem_C=None, dT_eigen_K=0.0):
     Luft unbekannt: 40 C mit Elektronik im Gehaeuse, sonst 30 C (beides angenommen)."""
     terme, ang = [], False
     T_luft = k.get('T_max_C')
-    if T_luft is None and T_fem_C is not None:
-        T_luft = 0.0          # FEM traegt die Temperatur (unten), keine Annahme noetig
-    elif T_luft is None:
+    # Auch mit Waerme-FEM bleibt die Luft eine Annahme, solange T_max_C fehlt: die FEM rechnet ohne Angabe still mit
+    # 25 °C Umgebung (fem.py) - das ist kein Beleg (Review 19.11.2026).
+    if T_luft is None:
         T_luft = 40.0 if k.get('elektronik') else 30.0
         terme.append(f'Luft {T_luft:.0f} C angenommen (T_max_C fehlt)')
         ang = True

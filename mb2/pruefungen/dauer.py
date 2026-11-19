@@ -139,7 +139,9 @@ def temperatur(pdir, teil, s=None):
         je = erg.get('T_max_je_koerper_C')
         if not je:
             continue
-        T_umg = (ein.get('konvektion') or {}).get('T_umgebung_C', erg.get('T_min_C', 25.0))
+        # Umgebung, mit der die FEM wirklich gerechnet hat (randbedingungen), nicht das Modell-Minimum
+        T_umg = (ein.get('konvektion') or {}).get('T_umgebung_C',
+                                                  (erg.get('randbedingungen') or {}).get('T_umgebung_C', 25.0))
         kandid, eigen = [], False
         for k in ein.get('koerper', []):
             if k.get('name') not in je:
@@ -188,11 +190,11 @@ def drucker_bbox(pruefung):
     bx = pruefung['bbox_mm']
     rx, ry, rz = (math.radians(a) for a in (pruefung.get('druck_drehung') or (0, 0, 0)))
 
-    def rot(p):
+    def rot(p):   # Reihenfolge wie build123d Rotation(x, y, z) in cad.auf_bett: erst Z, dann Y, dann X
         x, y, z = p
-        y, z = y * math.cos(rx) - z * math.sin(rx), y * math.sin(rx) + z * math.cos(rx)
-        x, z = x * math.cos(ry) + z * math.sin(ry), -x * math.sin(ry) + z * math.cos(ry)
         x, y = x * math.cos(rz) - y * math.sin(rz), x * math.sin(rz) + y * math.cos(rz)
+        x, z = x * math.cos(ry) + z * math.sin(ry), -x * math.sin(ry) + z * math.cos(ry)
+        y, z = y * math.cos(rx) - z * math.sin(rx), y * math.sin(rx) + z * math.cos(rx)
         return x, y, z
     ecken = [rot((sx * bx[0] / 2, sy * bx[1] / 2, sz * bx[2] / 2)) for sx in (-1, 1) for sy in (-1, 1) for sz in (-1, 1)]
     return tuple(round(max(e[i] for e in ecken) - min(e[i] for e in ecken), 3) for i in range(3))
@@ -398,7 +400,7 @@ def _d2(pdir, teil, ts, material, kr, s):
     lim, q = kennwert(pdir, material, 'eps_dauer', s)
     if lim is None:
         lim, q = (0.005 if material == 'PLA' else 0.01), 'Katalog D2: linear bis ~1 % (PLA eher 0,5 %)'
-    eps_t, zus = eps, ''
+    eps_t, zus, gekrochen = eps, '', False
     t = _dauer_h(ts, s.get('_projekt', {}))
     if t:
         tp, _, _ = kr.zeit(t)
@@ -406,7 +408,11 @@ def _d2(pdir, teil, ts, material, kr, s):
         if v:
             eps_t = eps / v
             zus = f', nach {t} h Kriechen {eps_t:.4%} ({vt})'
+            gekrochen = True
     st = 'fehler' if eps_t > lim else ('warnung' if eps_t > 0.8 * lim else 'ok')
+    if not gekrochen and st == 'ok':   # Grenze gilt fuer die Dehnung nach Wochen, eps0 allein beweist das nicht
+        st = 'warnung'
+        zus += ' - ohne Kriechdaten bzw. lebensdauer_h nur Anfangsdehnung geprueft (angenommen)'
     return ergebnis('D2', titel, st, wert=round(eps_t, 5), grenze=lim, einheit='-', quelle=Q_LABOR, teil=teil,
                     hinweis=f'eps0 {eps:.4%}{zus}; Grenze aus {q}. {txt}. Darueber gelten D3/D4 nicht (nichtlinear)')
 
@@ -780,6 +786,9 @@ def pruefe(pdir):
         temps[teil] = temp
         kr = _Kriechen(pdir, s, material, temp)
         erg.append(_d1(teil, material, tt))
+        if material == 'ASA':
+            asa = True
+            erg.append(_d10(pdir, teil, info, material, s))
         hat_dauerlast |= bool(ts.get('dauerlast'))
         hat_schrauben |= bool(ts.get('schrauben'))
         if ts.get('dauerlast') or ts.get('schrauben'):
@@ -804,9 +813,6 @@ def pruefe(pdir):
     if not hat_schrauben:
         erg.append(uebersprungen('D4', 'Vorspannungsverlust Schrauben (Relaxation)',
                                  'kein Teil mit soll.json schrauben', '3.064 lec_8, 2.72 L10 (OCW)'))
-        if material == 'ASA':
-            asa = True
-            erg.append(_d10(pdir, teil, info, material, s))
     if not asa:
         erg.append(uebersprungen('D10', 'Verzug-Indikator ASA', 'kein ASA-Teil im Projekt',
                                  '2.75 Topic 4, 2.008 L23 (OCW qualitativ)'))

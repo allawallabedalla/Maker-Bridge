@@ -18,8 +18,9 @@ from .material import DRUCKSTOFFE
 
 def _kennzahl(erg, art):
     bw = erg.get('bewertung') or {}
-    if art == 'mechanik':
-        return bw.get('min_sicherheit_z'), bool(bw.get('ok'))
+    if art == 'mechanik':   # wirksame Sicherheit (nach Realterm-Abminderung) - nur sie entscheidet ueber 'ok'
+        w = bw.get('min_sicherheit_z_wirksam')
+        return (w if w is not None else bw.get('min_sicherheit_z')), bool(bw.get('ok'))
     return erg.get('T_max_C'), bool(bw.get('ok'))
 
 

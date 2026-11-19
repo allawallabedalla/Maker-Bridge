@@ -87,7 +87,7 @@ Der Bericht je Modell liegt in `pruef/glaubwuerdigkeit.md`, die Kurzfassung in `
 Ein Sensor ist nicht gut, weil seine Elektronik den DRC besteht. Er ist gut, wenn er seine Messgröße nachweislich richtig erfasst.
 Darum gibt es zwei Ebenen:
 
-1. **Entwurf, rechnerisch (Katalog MK1–MK3, Integration):** `_projekt.messkette` in `soll.json`.
+1. **Entwurf, rechnerisch (Katalog MK1–MK5, Integration):** `_projekt.messkette` in `soll.json`.
    - MK1: Unsicherheitsbudget als Einzelbeiträge (Quantisierung q/√12, ADC-Rauschen, Referenz, TK, Verstärkung, Offset, Sensor, Kalibrierung). Daraus u_c und U = k·u_c.
    - MK2: rauschbegrenzte Auflösung. Die nominale Bitzahl ist nicht die Auflösung.
    - MK3: Aussteuerung des ADC über den Messbereich.
