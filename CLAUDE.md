@@ -5,6 +5,6 @@
   (Werkzeug/Beispielprojekt fehlt) im Commit nennen.
 - **Alle Kommunikation ADHS-tauglich:** Kernaussage zuerst, kurze Sätze, Listen ≤ 5 Punkte, Zeiten in Minuten,
   keine Floskeln, Details nur auf Nachfrage, am Ende genau EIN nächster Schritt.
-- Rückfragen nach `claude/skills/idee-zu-druck-2/SKILL.md`: ohne Vorwissen verständlich, eine Frage, kritisch statt
-  gefällig.
+- Rückfragen nach `claude/skills/idee-zu-druck-2/SKILL.md`: ohne Vorwissen verständlich, kritisch statt gefällig.
+  **Alle offenen Fragen stellen, aber nur EINE je Nachricht**; die übrigen warten in einer Liste (wichtigste zuerst).
 - Keine Bauteilwerte aus dem Gedächtnis: Datenblatt mit Seite/Tabelle in `_herkunft`.

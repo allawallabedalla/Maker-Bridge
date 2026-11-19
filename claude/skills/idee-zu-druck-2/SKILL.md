@@ -8,7 +8,7 @@ description: Neues Hardware-Projekt von der Idee über Elektronik (KiCad 10), Ge
 Code und Projekte liegen unter `{MB2}\`, die Architektur steht in `ARCHITEKTUR.md`.
 Die Werkzeuge liefert der MCP-Server **mb2**. Jeder Schritt läuft über einen eigenen Agenten (Agent-Tool, `subagent_type`). Du steuerst den Ablauf, trägst Ergebnisse in `projekt.md` ein und sprichst mit dem Nutzer.
 
-**Regeln:** Nie drucken, nur slicen. Fusion nicht anfassen. Anhalten, wenn der Nutzer etwas tun muss (Installation, Entscheidung – F8 nicht, das macht `kicad_sync`). Antworten auf Deutsch: Kernaussage zuerst, 3–5 Punkte, eine Frage am Ende.
+**Regeln:** Nie drucken, nur slicen. Fusion nicht anfassen. Anhalten, wenn der Nutzer etwas tun muss (Installation, Entscheidung – F8 nicht, das macht `kicad_sync`). Antworten auf Deutsch: Kernaussage zuerst, höchstens 5 Punkte, eine Frage am Ende.
 
 **ADHS-taugliche Kommunikation (Pflicht für alle Antworten, seit 19.11.2026):**
 - Erste Zeile: Kernaussage oder Ergebnis. Kein Vorgeplänkel, keine Floskeln.
@@ -23,6 +23,10 @@ Die Werkzeuge liefert der MCP-Server **mb2**. Jeder Schritt läuft über einen e
 - Höchstens 2–3 Möglichkeiten, jede mit Vorteil, Nachteil und ungefährem Aufwand (Zeit, Kosten, benötigte Geräte).
 - Eine Empfehlung mit einem Satz Begründung.
 - Eine einzige, klar beantwortbare Frage am Ende („a oder b?“). Keine Sammelfragen.
+- **Alle offenen Fragen werden gestellt – aber immer nur EINE je Nachricht** (Nutzer 19.11.2026). Die übrigen kommen
+  in eine Warteschlange `## Offene Fragen` in `projekt.md` (eine Zeile je Frage, wichtigste zuerst: erst Widersprüche
+  X-`fehler`, dann Entscheidungen mit Folgen für Sicherheit/Messung, dann Ziele/KPIs, dann Komfort). Nach jeder
+  Antwort die beantwortete Frage dort abhaken und die nächste stellen. Nichts fällt weg, nichts wird gebündelt.
 
 **Kritisch statt gefällig (Pflicht, seit 19.11.2026):** Kein Nach-dem-Mund-Reden. Zustimmung muss man sich verdienen.
 - Jede Angabe des Nutzers, die die Auslegung beeinflusst (Zahl, Annahme, Priorität, Bauteilwahl), wird mit drei
@@ -51,7 +55,7 @@ Die Werkzeuge liefert der MCP-Server **mb2**. Jeder Schritt läuft über einen e
 - **Aufwand × Stückzahl:** Kalibrierung, Prüfung und Montage je Gerät mit der Stückzahl multiplizieren, bevor ein
   Verfahren gewählt wird.
 - **Widersprüche (X1–X9, `mb2/pruefungen/widerspruch.py`):** nach `project_new` und nach jeder Änderung an Zielen,
-  Einsatz oder Anforderungen `pruefkatalog` lesen. Jeden X-`fehler` und jede X-`warnung` dem Nutzer einzeln als einfache
+  Einsatz oder Anforderungen `pruefkatalog` lesen. Jeden X-`fehler` und jede X-`warnung` in die Fragen-Warteschlange und dem Nutzer einzeln als einfache
   Rückfrage stellen (was passt nicht zusammen, warum zählt es, Möglichkeiten zur Auflösung) – nie stillschweigend
   eine Seite anpassen.
 - **Entscheidung gegen die Empfehlung:** respektieren, aber als `risiko` an der betroffenen Anforderung in
@@ -139,10 +143,12 @@ Nach **jeder** Änderung:
    besorgen, wenn sie das Ergebnis ändert.
    **V-Matrix** (in `audit`): `freigabe` = nicht_druckfertig | druckfertig | fertig. Jede Anforderung mit Status
    verletzt/unbewiesen vor der Abnahme steht als Mangel drin; `v_matrix.offen_abnahme` sind die Prüfungen am Gerät.
-3. Erst bei `messbar_ok: true` (= `freigabe: druckfertig`) läuft `mb2-pruefer` mit einer vollen Runde: Druckbarkeit → Funktion → FEM → Schonung des Druckers → V-Matrix.
+3. Erst bei `messbar_ok: true` (keine Mängel; `freigabe` ist dann druckfertig oder fertig) läuft `mb2-pruefer` mit einer vollen Runde: Druckbarkeit → Funktion → FEM → Schonung des Druckers → V-Matrix.
    Er prüft das, was `audit` nicht misst: Bilder, Überhänge, Montage, Anforderungen, fehlende Lastfälle.
 
-Fertig ist es erst bei „Freigabe“ des Prüfers. Nach zwei gescheiterten Varianten mit gleichem Fehlerbild die Grundannahme prüfen, nicht Variante 3 bauen.
+Weiter geht es erst mit dem **Prüferurteil** „Freigabe“ von `mb2-pruefer` (unabhängige Durchsicht – nicht zu
+verwechseln mit `freigabe` der V-Matrix). Nach Abnahme und Feldwerten läuft `mb2-pruefer` noch einmal, bevor „fertig“
+gemeldet wird. Nach zwei gescheiterten Varianten mit gleichem Fehlerbild die Grundannahme prüfen, nicht Variante 3 bauen.
 Teure Befehle (`cad_build`, `fem_*`) sind gecacht. Bei unveränderten Eingaben kommt `aus_cache: true` zurück. `neu=true` erzwingt eine neue Rechnung.
 
 ## 6. Abschluss
@@ -158,5 +164,8 @@ Dem Nutzer „druckfertig“ melden, nicht „fertig“.
 - Im Einsatz Messwerte mit `feld_eintragen` festhalten (snr_dB, empfangsquote_proz, laufzeit_h …). Danach
   `feld_abgleich` laufen lassen. Ist eine Vorhersage zu optimistisch, entsteht ein Feldfall in `tests/feldfaelle/`.
   Dann das Modell (realterme/E16 …) so nachkalibrieren, dass `tests/test_feldfaelle.py` grün ist.
-- **Fertig** ist das Projekt erst bei `freigabe: fertig`, also wenn alle Anforderungen bewiesen sind, auch Abnahme und Feld.
+- **Begriffe:** `freigabe` (V-Matrix) = nicht_druckfertig | druckfertig | fertig; `messtechnische_freigabe` = Freigabe
+  der Messfunktion durch einen Menschen; **Prüferurteil** = Ergebnis von `mb2-pruefer`.
+- **Fertig** ist das Projekt erst bei `freigabe: fertig` (alle Anforderungen bewiesen, auch Abnahme und Feld, bei
+  Messgeräten mit `messtechnische_freigabe: freigegeben`) **und** einem zweiten Prüferurteil „Freigabe“.
 Dem Nutzer meldest du das Ergebnis und die Bilder. mb2 druckt nie: Die `.bgcode` überträgt der Nutzer selbst (USB-Stick oder PrusaConnect).
