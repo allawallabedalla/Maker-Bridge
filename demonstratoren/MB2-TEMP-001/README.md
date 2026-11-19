@@ -66,6 +66,18 @@ Stand: MK1 zeigt die Planung (höchstens u = 0,249 °C für die Kalibrierung). G
    nur der Feldvergleich (A-STRAHLUNG).
 5. Kauf nicht über Amazon (Vorgabe Nutzer).
 
+**PT100-Fühler (noch nicht vorhanden, Stand 19.11.2026).** Anforderungen an den Kauf:
+1. PT100 nach IEC 60751, **3-Leiter**. Klasse A wie im Lastenheft. Klasse B würde wegen des Abgleichs auch reichen,
+   wichtiger ist die Langzeitstabilität (Drift).
+2. **Datenblatt mit Eigenerwärmungskoeffizient** (mW/K) und Ansprechzeit (t0,5/t0,9 in Luft). Ohne den
+   Eigenerwärmungswert bleibt das Budget MK1 offen, ohne Ansprechzeit A-REAKTION.
+3. Edelstahl-Schutzrohr, **dünn (etwa 3–6 mm)** und kurz (etwa 50–100 mm): dünn reagiert schneller und leitet weniger
+   Wärme über den Schaft; Durchmesser muss in den Halter der gekauften Hütte passen.
+4. Kabel außentauglich bei −30 °C (Silikon oder PUR, kein Standard-PVC – wird in der Kälte steif), 3 gleiche Adern,
+   möglichst geschirmt (Schirm am Host auf Masse); Länge = Weg zum Host + Reserve, später nicht kürzen (K-KABEL).
+5. Übergang Rohr/Kabel wasserdicht (z. B. IP67).
+6. Nicht über Amazon.
+
 ## Nächste Daten, die gebraucht werden
 
 1. Gewähltes PT100-Element: Eigenerwärmungskoeffizient.
