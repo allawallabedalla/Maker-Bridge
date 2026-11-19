@@ -134,7 +134,8 @@ Empfohlene Regeln für die `CLAUDE.md` des neuen Kontos:
 Jede Datei unter `tests/` läuft für sich. `fem_abgleich.py`, `schnapphaken_abgleich.py` und `test_pruef_waerme.py` sind die
 Code-Verifikation der Löser (V&V 40). Einige Tests (`test_pruef_katalog`, `_mechanik`, `_schwingung`, `_fem_plausi`,
 `_elektronik`, `_dauer_toleranz`) lesen Beispielprojekte unter `projects/`; die sind nicht im Repository und werden dann übersprungen
-oder schlagen fehl. `test_fem_vorbereitung.py` nutzt noch ein altes Lagerformat und ist bekannt rot.
+oder schlagen fehl. `test_fem_vorbereitung.py` baut seinen Fall seit 19.11.2026 selbst (nur Gmsh nötig). `test_messkette.py` prüft
+Messkette, Unsicherheitsbudget und Messnachweise (ohne Löser).
 
 ## 8. Grenzen
 

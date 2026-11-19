@@ -135,6 +135,26 @@ def feld_eintragen(projekt: str, groesse: str, wert: float, einheit: str = '', o
 
 
 @befehl('anforderungen')
+def messreihe_eintragen(projekt: str, reihe: dict):
+    """Referenzmessreihe (Kalibrierung/Pruefstand) in messung.json: {id, eigenschaft, verfahren, datum, referenz {mittel,
+    U, k, einheit, rueckfuehrung, gueltig_bis}, bedingungen, punkte [{ref, ist, richtung, t_h}]}. Nachweis in
+    anforderungen.json: {art: messung, ref: <id>, eigenschaft, stufe: abnahme}. Format: mb2/pruefungen/messkette.py."""
+    from . import anforderungen as an
+    return an.messreihe_eintragen(pdir(projekt), reihe)
+
+
+@befehl('messtechnik')
+def messkette_rechnen(projekt: str):
+    """Unsicherheitsbudget (Einzelbeitraege, u_c, k, U) und rauschbegrenzte Aufloesung aus soll.json
+    _projekt.messkette. Vereinfachtes GUM-Modell, Grenzen stehen im Ergebnis unter 'modell'."""
+    from .pruefungen import messkette, projekt_soll
+    mk = projekt_soll(pdir(projekt)).get('messkette')
+    if not mk:
+        return {'fehler': 'soll.json _projekt.messkette fehlt (Felder: mb2/pruefungen/FELDER.md)'}
+    return messkette.aus_soll(mk)
+
+
+@befehl('anforderungen')
 def feld_abgleich(projekt: str):
     """Vorhersage (Katalog) gegen Feldmessung. Zu optimistisch -> Feldfall unter tests/feldfaelle/ (Regressionstest:
     das Modell muss danach mindestens so pessimistisch sein) -> realterme/E16 nachkalibrieren."""

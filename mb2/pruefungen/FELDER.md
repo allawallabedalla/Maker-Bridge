@@ -123,3 +123,26 @@ ungünstiger Standard, Ergebnis höchstens `warnung`.
 | `anforderungen.json` | `{id, ebene, eltern, text, herkunft, eingaben, nachweise: [{art, ref, teil, stufe, kriterium, warnung_akzeptiert, beleg, geprueft_von}]}` | Lastenheft/Pflichtenheft |
 | `abnahme.json` | `schritte: [{id, anforderung, anweisung, soll {groesse, op, wert, einheit}, ist, datum, notiz}]` | Abnahme am Gerät |
 | `feld.json` | `messungen: [{groesse, wert, einheit, ort, quelle, datum}]` | Messungen im Einsatz (snr_dB, rssi_dBm, empfangsquote_proz, laufzeit_h …) |
+
+## Messkette (seit 19.11.2026, MK1–MK3, Einzelheiten `mb2/pruefungen/messkette.py`, `VMODELL.md`)
+
+`_projekt.messkette` – alle Unsicherheiten als Standardunsicherheit (k = 1), Bezugspunkt in Klammern:
+
+| Feld | Bedeutung | Prüfungen |
+|---|---|---|
+| `adc_bits`, `v_ref_V` | ADC-Auflösung und Referenzspannung | MK1, MK2, MK3 |
+| `adc_rauschen_V` | ADC-Rauschen RMS (ADC-Eingang), getrennt von der Quantisierung q/√12 | MK1, MK2 |
+| `u_ref_V`, `tk_ref_ppm_K`, `delta_T_K` | Unsicherheit und Temperaturkoeffizient der Referenz, Temperaturspanne | MK1 |
+| `verstaerkung`, `u_verstaerkung_rel`, `tk_verstaerkung_ppm_K` | Verstärkung und ihre relative Toleranz/Drift | MK1, MK3 |
+| `u_offset_V` | Eingangsoffset (Verstärkereingang) | MK1 |
+| `empfindlichkeit_V_je_einheit`, `einheit` | Sensorempfindlichkeit S und Einheit der Messgröße | alle |
+| `sensor_u`, `kalibrier_u` | Sensorelement, Kalibrierfunktion (Messgröße) | MK1 |
+| `signal_V` | Signal am ADC für relative Fehler (Standard V_ref = ungünstigster Fall) | MK1 |
+| `mittelung`, `k` | Mittelung über n Werte, Erweiterungsfaktor (Standard 2) | MK1, MK2 |
+| `beitraege` | weitere Beiträge `[{name, wert, verteilung, k, c, einheit, freiheitsgrade}]` | MK1 |
+| `ziel_U`, `ziel_aufloesung` | Ziel der erweiterten Unsicherheit und der kleinsten unterscheidbaren Änderung | MK1, MK2 |
+| `messbereich {min, max}`, `offset_V_am_adc` | Aussteuerung über den Messbereich | MK3 |
+
+Herkunft je Feld unter `_projekt._herkunft["messkette.<feld>"]`. Ist eine Herkunft schwach oder offen, ergibt MK1/MK2 höchstens eine `warnung`.
+Anforderung mit `messtechnik`-Block (Format im Kopf von `mb2/anforderungen.py`) und Nachweis `art: messung`.
+Die Messreihen stehen in `messung.json`.

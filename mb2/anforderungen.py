@@ -13,6 +13,8 @@ Dateien je Projekt (alle JSON, von Menschen und Agenten lesbar):
 - ``anforderungen.json``  {"anforderungen": [Anforderung]}
 - ``abnahme.json``        Abnahmeprotokoll: Schritte mit Soll, Ist, Datum (aus den Anforderungen erzeugt, Ist bleibt erhalten)
 - ``feld.json``           Messungen im Einsatz {"messungen": [{groesse, wert, einheit, datum, ort, quelle}]}
+- ``messung.json``        Referenzmessreihen (Kalibrierung, Pruefstand) {"reihen": [Reihe]} - Format in
+                          ``mb2/pruefungen/messkette.py`` (seit 19.11.2026)
 
 Anforderung:
     {"id": "A-FUNK", "ebene": "system|subsystem|komponente", "eltern": ["A-..."], "text": "...",
@@ -26,6 +28,18 @@ Nachweis:
      "warnung_akzeptiert": "Begruendung"   # sonst zaehlt eine Warnung als NICHT bewiesen
      "beleg": "Pfad/Foto", "geprueft_von": "..."}                   # manuell
      "modell": {"frage", "einsatz", "einfluss", "folge", "validierung", "anwendbarkeit"}  # fem: V&V 40, glaubwuerdigkeit.py
+     "eigenschaft": "genauigkeit|linearitaet|hysterese|drift|wiederholbarkeit|messbereich"  # messung: ref = Reihen-ID
+Messtechnische Anforderung (seit 19.11.2026): zusaetzlich ein Block ``messtechnik``
+    {"messbereich": {"min": 0, "max": 100, "einheit": "°C"},
+     "genauigkeit": {"max_abs": 0.5, "einheit": "°C"}, "linearitaet": {"max_abs": 0.2, "einheit": "%FS"},
+     "hysterese": {"max_abs": 0.2, "einheit": "%FS"}, "drift": {"max_abs": 0.1, "einheit": "°C/Jahr"},
+     "wiederholbarkeit": {"max_abs": 0.05, "einheit": "°C"},         # Standardabweichung
+     "definition_genauigkeit": "max. Betrag der Abweichung zur Referenz ueber den Messbereich",
+     "bedingungen": {"T_umgebung_C": [20, 26], "U_V": 3.3, "einschwingzeit_s": 300, "messintervall_s": 10},
+     "wiederholungen": 10, "dauer_h": 720, "verfahren": "...", "referenzmittel": "..."}
+    Jede angegebene Eigenschaft braucht einen eigenen Nachweis ``art: messung`` mit passender ``eigenschaft``,
+    sonst Matrix-Mangel. Ohne Messreihe bleibt sie 'unbewiesen' (Grund ``ohne_referenzmessung``); Mindestverfahren,
+    Rueckfuehrung der Referenz und Pruefbedingungen prueft ``messkette.bewerte_reihe``.
 Herkunft der Eingaben: ``_projekt._herkunft`` (bzw. je Teil ``_herkunft``) {"feld.pfad": "gemessen|datenblatt|norm|
 berechnet|geschaetzt|angenommen: Beleg"}. Ein Nachweis auf geschaetzten/angenommenen Eingaben ist nur 'vorbehalt'.
 
@@ -75,7 +89,7 @@ def speichere(pdir, name, daten):
 def kontext_hash(pdir):
     """Hash aller Eingaben, von denen Urteile abhaengen (soll, projekt.md, Anforderungen, Abnahme, Feld)."""
     h = hashlib.sha1()
-    for f in ('cad/soll.json', 'projekt.md', 'anforderungen.json', 'abnahme.json', 'feld.json'):
+    for f in ('cad/soll.json', 'projekt.md', 'anforderungen.json', 'abnahme.json', 'feld.json', 'messung.json'):
         p = os.path.join(pdir, f)
         if os.path.exists(p):
             h.update(f.encode())
@@ -277,8 +291,46 @@ def _manuell_status(nw, pdir):
     return 'unbewiesen', 'manueller Nachweis ohne Beleg-Datei/Pruefer', []
 
 
-def nachweis_status(nw, pdir, katalog, abnahme, feld, extra=None):
+def _messung_status(nw, anforderung, messung):
+    """Referenzmessreihe gegen den messtechnik-Block der Anforderung. (status, text, [], info)."""
+    from .pruefungen import messkette
+    mt = (anforderung or {}).get('messtechnik')
+    eig = nw.get('eigenschaft')
+    if not mt:
+        info = {'grund': 'messtechnik_fehlt'}
+        return 'unbewiesen', 'Nachweis messung ohne messtechnik-Block in der Anforderung', [], info
+    if eig not in messkette.EIGENSCHAFTEN:
+        info = {'grund': 'verfahren_unzureichend'}
+        return 'unbewiesen', f'messung: eigenschaft {eig!r} unbekannt ({", ".join(messkette.EIGENSCHAFTEN)})', [], info
+    reihe = next((r for r in (messung or {}).get('reihen', []) if r.get('id') == nw.get('ref')), None)
+    b = messkette.bewerte_reihe(reihe, eig, mt)
+    info = {k: b[k] for k in ('grund', 'kennwert', 'U_pruef', 'grenze', 'einheit')}
+    return b['status'], f'Messung {nw.get("ref")}: {b["text"]}' + (f' [{b["grund"]}]' if b['grund'] else ''), [], info
+
+
+def _messtechnik_maengel(a):
+    """Matrix-Maengel einer messtechnischen Anforderung: Eigenschaft ohne Messnachweis, Bedingungen fehlen."""
+    from .pruefungen import messkette
+    mt = a.get('messtechnik')
+    if not mt:
+        return []
+    m = []
+    if not (mt.get('messbereich') or {}).get('einheit'):
+        m.append('messtechnik.messbereich {min, max, einheit} unvollstaendig')
+    if not mt.get('bedingungen'):
+        m.append('messtechnik.bedingungen fehlen (Temperatur, Versorgung, Einschwingzeit, Messintervall) - '
+                 'ohne sie sind Messergebnisse nicht vergleichbar')
+    belegt = {n.get('eigenschaft') for n in a.get('nachweise', []) if n.get('art') == 'messung'}
+    for e in messkette.EIGENSCHAFTEN:
+        if isinstance(mt.get(e), dict) and e not in belegt:
+            m.append(f'messtechnische Eigenschaft {e} ohne Nachweis art=messung (Verfahren: {messkette.VERFAHREN[e]})')
+    return m
+
+
+def nachweis_status(nw, pdir, katalog, abnahme, feld, extra=None, anforderung=None, messung=None):
     art = nw.get('art')
+    if art == 'messung':
+        return _messung_status(nw, anforderung, messung)[:3]
     if art == 'katalog':
         return _katalog_status(nw, katalog)
     if art == 'cad':
@@ -309,6 +361,7 @@ def pruefen(pdir, katalog=None, extra=None):
     soll = _soll(pdir)
     abnahme = lade(pdir, 'abnahme.json', {})
     feld = lade(pdir, 'feld.json', {})
+    messung = lade(pdir, 'messung.json', {})
     if katalog is None:
         from . import pruefungen
         katalog = pruefungen.alle(pdir)['module']
@@ -332,10 +385,15 @@ def pruefen(pdir, katalog=None, extra=None):
             maengel.append(f'kein Nachweis auf V-Ebene {"/".join(STUFEN_JE_EBENE[ebene])}')
         if ebene == 'system' and 'abnahme' not in stufen and 'feld' not in stufen:
             maengel.append('Systemanforderung braucht Abnahme am Geraet oder Feldmessung')
+        maengel += _messtechnik_maengel(a)
         herk, htexte = schwaechste_herkunft(soll, a.get('eingaben'))
         ergebnisse, st_gesamt = [], 'bewiesen' if nws else 'unbewiesen'
         for nw in nws:
-            st, txt, treffer = nachweis_status(nw, pdir, katalog, abnahme, feld, extra)
+            info = None
+            if nw.get('art') == 'messung':
+                st, txt, treffer, info = _messung_status(nw, a, messung)
+            else:
+                st, txt, treffer = nachweis_status(nw, pdir, katalog, abnahme, feld, extra)
             # Reserve gegen Unsicherheit (nur bei bestandenem Katalog-Nachweis mit Wert/Grenze)
             if st == 'bewiesen' and treffer:
                 for e in treffer:
@@ -355,7 +413,8 @@ def pruefen(pdir, katalog=None, extra=None):
                     if g['status'] != 'bewiesen':
                         txt += f'; {g["text"]}'
             ergebnisse.append({'art': nw.get('art'), 'ref': nw.get('ref'), 'stufe': nw.get('stufe'),
-                               'status': st, 'beleg': txt})
+                               'status': st, 'beleg': txt, **({'eigenschaft': nw.get('eigenschaft'), **info}
+                                                              if info else {})})
             if RANG[st] > RANG[st_gesamt]:
                 st_gesamt = st
         if st_gesamt == 'bewiesen' and herk in HERKUNFT_SCHWACH + (None,) and a.get('eingaben'):
@@ -458,6 +517,16 @@ def standard(pdir):
                   'nachweise': ([{'art': 'katalog', 'ref': 'M12', 'stufe': 'komponente'},
                                  {'art': 'katalog', 'ref': 'D4', 'stufe': 'integration'}] if a('schrauben') else []) +
                                ([{'art': 'katalog', 'ref': 'M1', 'stufe': 'komponente'}] if a('schnapper') else [])})
+    if a('messung') and pj.get('messkette'):
+        L.append({'id': 'S-MESSKETTE', 'ebene': 'subsystem', 'eltern': ['A-GERAET'],
+                  'herkunft': 'abgeleitet aus Merkmal Messung',
+                  'text': 'Unsicherheitsbudget der Messkette (U, k = 2) und rauschbegrenzte Aufloesung erfuellen die '
+                          'Ziele; ADC wird ueber den Messbereich nicht uebersteuert.',
+                  'eingaben': ['messkette.adc_rauschen_V', 'messkette.u_ref_V', 'messkette.empfindlichkeit_V_je_einheit'],
+                  'nachweise': [{'art': 'katalog', 'ref': 'MK1', 'stufe': 'integration'},
+                                {'art': 'katalog', 'ref': 'MK2', 'stufe': 'integration'}] +
+                               ([{'art': 'katalog', 'ref': 'MK3', 'stufe': 'komponente'}]
+                                if (pj['messkette'].get('messbereich')) else [])})
     return L
 
 
@@ -561,6 +630,19 @@ def feld_eintragen(pdir, groesse, wert, einheit='', ort='', quelle='', datum=Non
     f['messungen'].append(m)
     speichere(pdir, 'feld.json', f)
     return m
+
+
+def messreihe_eintragen(pdir, reihe):
+    """Referenzmessreihe in messung.json speichern (gleiche id wird ersetzt). Format: mb2/pruefungen/messkette.py."""
+    from .pruefungen import messkette
+    if not reihe.get('id'):
+        raise ValueError('Messreihe braucht eine id')
+    if reihe.get('eigenschaft') not in messkette.EIGENSCHAFTEN:
+        raise ValueError(f'eigenschaft muss eine von {messkette.EIGENSCHAFTEN} sein')
+    m = lade(pdir, 'messung.json', {'reihen': []})
+    m['reihen'] = [r for r in m['reihen'] if r.get('id') != reihe['id']] + [reihe]
+    speichere(pdir, 'messung.json', m)
+    return {'id': reihe['id'], 'punkte': len(reihe.get('punkte', [])), 'reihen': len(m['reihen'])}
 
 
 def feld_abgleich(pdir, katalog=None, feldfall_ordner=None):

@@ -22,6 +22,7 @@ Nachweis auf derselben Höhe des V. Anlass und Herleitung: `audits/KERNPROBLEM_2
 | `cad/soll.json` → `_projekt` | Einsatz, Funk, Akku, Module, Firmware-Konstanten, `_herkunft`, `nicht_relevant` | project_new, Agenten |
 | `abnahme.json` | Abnahmeprotokoll: Schritt, Anweisung (lageunabhängig), Soll, **Ist**, Datum | anforderungen_erzeugen, abnahme_eintragen |
 | `feld.json` | Messungen im Einsatz (SNR, Empfangsquote, Laufzeit, Temperatur …) | feld_eintragen |
+| `messung.json` | Referenzmessreihen (Kalibrierung, Prüfstand) mit Referenzmittel, Rückführung, Bedingungen | messreihe_eintragen |
 | `pruef/katalog.json` | alle Katalog-Prüfungen | pruefkatalog/audit |
 | `pruef/v_matrix.json` | Status je Anforderung + Belege + Freigabe + Kontext-Hash | anforderungen_pruefen/audit |
 | `tests/feldfaelle/*.json` | Feldfälle als Regressionstests (Modell war zu optimistisch) | feld_abgleich |
@@ -81,11 +82,39 @@ Leitsatz aus V&V 40: Lässt sich der Plan nicht erfüllen, wird der Einsatzzweck
 
 Der Bericht je Modell liegt in `pruef/glaubwuerdigkeit.md`, die Kurzfassung in `v_matrix.json` unter `glaubwuerdigkeit`.
 
+## Messtechnik (seit 19.11.2026, `mb2/pruefungen/messkette.py`)
+
+Ein Sensor ist nicht gut, weil seine Elektronik den DRC besteht. Er ist gut, wenn er seine Messgröße nachweislich richtig erfasst.
+Darum gibt es zwei Ebenen:
+
+1. **Entwurf, rechnerisch (Katalog MK1–MK3, Integration):** `_projekt.messkette` in `soll.json`.
+   - MK1: Unsicherheitsbudget als Einzelbeiträge (Quantisierung q/√12, ADC-Rauschen, Referenz, TK, Verstärkung, Offset, Sensor, Kalibrierung). Daraus u_c und U = k·u_c.
+   - MK2: rauschbegrenzte Auflösung. Die nominale Bitzahl ist nicht die Auflösung.
+   - MK3: Aussteuerung des ADC über den Messbereich.
+   - Vereinfachtes GUM-Modell: lineare Fortpflanzung, vorgegebene Sensitivitäten, Korrelationen nur wenn angegeben. Welch-Satterthwaite, sobald Freiheitsgrade angegeben sind.
+2. **Nachweis am Gerät (Nachweisart `messung`, Abnahme):** Anforderung mit Block `messtechnik`, Referenzmessreihen in `messung.json` (`messreihe_eintragen`).
+
+| Eigenschaft | Mindestverfahren (sonst `unbewiesen`, Grund `verfahren_unzureichend`) |
+|---|---|
+| messbereich | Messpunkte an beiden Bereichsgrenzen |
+| genauigkeit | ≥ 3 Punkte gegen rückführbare Referenz |
+| linearitaet | ≥ 5 Referenzwerte über ≥ 80 % der Spanne (Ausgleichsgerade) |
+| hysterese | Auf- und Abwärtsmessung an ≥ 3 gemeinsamen Punkten |
+| drift | ≥ 3 Zeitpunkte über ≥ `dauer_h` (Standard 168 h), Steigung auf Zieleinheit hochgerechnet |
+| wiederholbarkeit | ≥ `wiederholungen` (Standard 10) am selben Punkt, Standardabweichung |
+
+- **Kein neuer Status.** Fehlt der Nachweis, gilt weiter `unbewiesen`; der Grund steht in `nachweise[].grund`.
+  Mögliche Gründe: `ohne_referenzmessung`, `referenz_ohne_unsicherheit`, `referenz_nicht_rueckfuehrbar`, `referenz_abgelaufen`, `bedingungen_abweichend`, `einheit_unpassend`.
+- Jede Eigenschaft im `messtechnik`-Block braucht einen eigenen Nachweis. Fehlen dieser Nachweis oder die `bedingungen`, ist das ein Matrix-Mangel.
+- Konformität mit Schutzband (ILAC-G8): Kennwert + U_prüf ≤ Grenze → bewiesen. Kennwert ≤ Grenze < Kennwert + U_prüf → vorbehalt. Kennwert > Grenze → verletzt.
+- Merkmal `messung` (Messkette im soll oder `messtechnik` im Lastenheft) macht ein Überspringen von MK1/MK2 zum Fehler.
+- Grenze: Der KI-Prüfer organisiert und rechnet den Nachweis. Beweiskraft hat nur die Messung mit rückführbarer Referenz. Eine kritische Freigabe macht ein Mensch.
+
 ## Befehle (MCP mb2)
 
 `project_new(…, einsatz)` → `anforderungen_erzeugen` → `eingaben_offen` → Entwurf (Agenten) → `audit`
 (enthält `anforderungen_pruefen`, Feld `freigabe`) → Druck ab druckfertig → `abnahme_eintragen` am Gerät →
-`feld_eintragen` im Einsatz → `feld_abgleich` (zu optimistisch → Feldfall → Modell nachkalibrieren).
+`messreihe_eintragen` am Prüfstand → `feld_eintragen` im Einsatz → `feld_abgleich` (zu optimistisch → Feldfall → Modell nachkalibrieren).
 
 ## Erstes echtes Beispiel
 

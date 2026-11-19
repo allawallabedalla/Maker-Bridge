@@ -68,6 +68,14 @@ def _fem_mech(pdir):
     return False
 
 
+def _messtechnik(pdir):
+    p = os.path.join(pdir, 'anforderungen.json')
+    try:
+        return any(a.get('messtechnik') for a in json.load(open(p, encoding='utf-8')).get('anforderungen', []))
+    except (OSError, ValueError):
+        return False
+
+
 def merkmale(pdir):
     """{merkmal: {'aktiv': bool, 'quelle': str}} – nur aktive Merkmale tragen eine Quelle."""
     s = _soll(pdir)
@@ -135,6 +143,9 @@ def merkmale(pdir):
     setze('lautsprecher', bool(wort('lautsprecher')), wort('lautsprecher') or '')
     setze('firmware', bool(pj.get('firmware')), 'soll.json _projekt.firmware')
     setze('firmware', bool(wort('firmware')), wort('firmware') or '')
+    # Messfunktion: Messkette im soll oder messtechnische Anforderung im Lastenheft
+    setze('messung', bool(pj.get('messkette')), 'soll.json _projekt.messkette')
+    setze('messung', _messtechnik(pdir), 'anforderungen.json messtechnik')
     # Rechenstand
     setze('fem_mech', _fem_mech(pdir), 'fem/*.erg.json mit Mechanik-Lastfaellen')
     setze('gesliced', os.path.exists(os.path.join(pdir, 'print', 'slice.json')), 'print/slice.json')

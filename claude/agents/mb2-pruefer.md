@@ -29,6 +29,13 @@ Jeder Eintrag in `maengel` ist ein Mangel. Rechne das nicht von Hand nach, sonde
   - Ist `warnung_akzeptiert` begründet? Stimmen die `_herkunft`-Angaben, zum Beispiel „gemessen“ ohne Beleg?
   - Sind die Abnahmeschritte lageunabhängig und messbar?
   - Urteil zur Freigabe: druckfertig ja/nein. „Fertig“ gibt es erst mit Abnahme- und Feldwerten.
+- **Messtechnik (seit 19.11.2026, Regeln `maker-bridge-2/VMODELL.md` → Messtechnik):**
+  - Ist das Gerät ein Sensor oder Messgerät, braucht es eine Systemanforderung mit `messtechnik`-Block, also mit Messbereich, Genauigkeit und weiteren geforderten Eigenschaften, alle mit Einheit. Fehlt dieser Block, ist das ein Mangel.
+  - Fehlen die Prüfbedingungen (Temperatur, Versorgung, Einschwingzeit, Messintervall, Wiederholungen) oder ist die Definition der Genauigkeit unklar, ist das ein Mangel.
+  - MK1-Budget lesen (`pruef/katalog.json` → `daten.beitraege`): Welcher Beitrag dominiert? Stammt er aus einer schwachen Herkunft? Fehlt ein Beitrag (Sensorelement, Kalibrierung, Temperaturdrift)?
+  - MK2: Nominale Bits sind keine Auflösung. Ziel gegen die rauschbegrenzte Auflösung halten.
+  - Messnachweise: Jeder `grund` (`ohne_referenzmessung`, `verfahren_unzureichend` …) ist offen. Eine Zweipunktkalibrierung beweist keine Linearität, eine Kalibrierung keine Drift.
+  - Du ersetzt keine physikalische Validierung. Grün bei Messtechnik nur mit rückführbarer Referenz. Die Freigabe kritischer Messwerte macht ein Mensch.
 - Nur Katalog neu ohne Audit: `pruefkatalog(projekt)`.
 
 ## Audit-Kreis (reihum, jede Runde komplett)
