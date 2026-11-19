@@ -1692,9 +1692,9 @@ def _v_bat(pl):
 
 def _wandler(pl):
     """(faktor, text, angenommen) fuer I_bat = I_last * V_out / (eta * V_bat) (Kopf-KONVENTION Strom, eta 0,8).
-    V_bat = Mitte zwischen Abschaltung und Ladeschluss. LDO/direkt: Faktor 1 (I_q steht im Ruhestrom-Boden)."""
+    V_bat = Abschaltspannung (ungunstigster Fall: groesster Akkustrom). LDO/direkt: Faktor 1 (I_q im Ruhestrom-Boden)."""
     lo, hi = _v_bat(pl)
-    vb = (lo + hi) / 2
+    vb = lo
     if pl.ohne_kicad:
         w = pl.modul_wert('wandler')
         if w in ('ldo', 'keiner'):
@@ -1739,7 +1739,9 @@ def pruefe_e6(pl):
     for ref, e in pl.dbe.items():
         if pl.teile[ref].get('dnp'):
             continue
-        if e is None:
+        if e is None:   # nicht in der DB: mit Versorgungspin ist der Ruhestrom unbekannt, nie 0 A
+            if any(pl.rolle(x) == 'vdd' for x in pl.pins_von.get(ref, [])):
+                unbekannt.append(f'{ref} (nicht in bauteile.json)')
             continue
         if e.get('typ') in ('ldo', 'boost', 'buck', 'buckboost', 'akkuschutz'):
             if e.get('I_q_A') is not None:
@@ -1867,9 +1869,12 @@ def pruefe_e8(pl):
                 res.append(_e('E8', 'uebersprungen', f'{ref}: Spannung an {vnetz} unbekannt'))
                 continue
             if reg:
-                st = 'ok' if vq[0] >= vdd_min + reserve else 'fehler'
+                # Eingangsseite (Akkueinbruch I*R_int am Reglereingang, dessen Unterspannungsabschaltung) ist hier nicht
+                # gerechnet -> hoechstens 'warnung', nie 'ok'
+                st = 'warnung' if vq[0] >= vdd_min + reserve else 'fehler'
                 res.append(_e('E8', st, f'{ref} an Schaltregler {reg}: {vnetz} min {vq[0]:.2f} V vs. VDD_min {vdd_min:.2f} V + '
-                              f'{reserve} V (Regelreserve des Wandlers bei {I_netz * 1e3:.0f} mA nicht modelliert)',
+                              f'{reserve} V; Akkueinbruch am Reglereingang und dessen Abschaltung NICHT gerechnet '
+                              f'(Regelreserve bei {I_netz * 1e3:.0f} mA nicht modelliert)',
                               wert=round(vq[0], 3), grenze=vdd_min + reserve, einheit='V'))
                 continue
             am_akku = vnetz in pl.akku_netze
@@ -2364,7 +2369,10 @@ def pruefe_e16(pl):
         antenne += 4
     if fu.get('polarisation_gekreuzt'):
         antenne += 15
-    prx = (fu['P_t_dBm'] + fu.get('G_t_dBi', 0) + fu.get('G_r_dBi', 0) - pfad - hind - kabel - antenne
+    for g in ('G_t_dBi', 'G_r_dBi'):
+        if fu.get(g) is None:
+            annahmen.append(f'{g} fehlt -> 0 dBi angenommen (kleine 868-MHz-Antennen oft darunter)')
+    prx = (fu['P_t_dBm'] + (fu.get('G_t_dBi') or 0) + (fu.get('G_r_dBi') or 0) - pfad - hind - kabel - antenne
            - fu.get('verluste_dB', 0))
     m = prx - fu['P_rx_min_dBm']
     st = 'fehler' if m < 0 else ('warnung' if m < FUNK_RESERVE_DB else 'ok')

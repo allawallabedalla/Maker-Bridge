@@ -21,13 +21,12 @@
     },
     "IDAC_UA": {
      "datei": "config.h",
-     "soll": 500,
-     "herkunft": "berechnet: messkette.schaltung.I_idac_A = 500 uA"
+     "soll_aus": "messkette.schaltung.I_idac_A",
+     "faktor": 1000000.0
     },
     "IDAC_TAUSCH": {
      "datei": "config.h",
-     "soll": 1,
-     "herkunft": "berechnet: messkette.schaltung.idac_tausch"
+     "soll_aus": "messkette.schaltung.idac_tausch"
     },
     "KAL_K0": {
      "datei": "config.h",
@@ -43,8 +42,14 @@
     },
     "MESSPERIODE_MS": {
      "datei": "config.h",
-     "soll": 10000,
-     "herkunft": "berechnet: 1 / messrate_Hz"
+     "soll_aus": "messkette.schaltung.messrate_Hz",
+     "kehrwert": true,
+     "faktor": 1000
+    },
+    "EINSCHWING_US": {
+     "datei": "config.h",
+     "soll_aus": "messkette.schaltung.einschwing_s",
+     "faktor": 1000000.0
     }
    }
   },

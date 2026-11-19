@@ -73,7 +73,8 @@ def pruefe(pdir, heute=None):
     out = []
 
     # X1 Pruefmittel gegen Toleranz
-    tol = next((_toleranz(a['messtechnik']) for a in mess if _toleranz(a['messtechnik']) is not None), None)
+    tols = [t for t in (_toleranz(a['messtechnik']) for a in mess) if t is not None]
+    tol = min(tols) if tols else None          # engste Toleranz zaehlt
     u_ref = _u_referenz(pdir, pj)
     if tol is None or u_ref is None or u_ref == 0:
         out.append(uebersprungen('X1', 'Pruefmittel gegen Toleranz',
@@ -142,7 +143,12 @@ def pruefe(pdir, heute=None):
 
     # X5 Aufwand gegen Termin
     a_h, n, t, kap = z.get('aufwand_h_stueck'), z.get('stueckzahl'), z.get('termin'), z.get('zeit_h_pro_woche')
-    if not all(isinstance(x, (int, float)) for x in (a_h, n, kap)) or not isinstance(t, str):
+    def _datum(x):
+        try:
+            return datetime.date.fromisoformat(str(x))
+        except ValueError:
+            return None
+    if not all(isinstance(x, (int, float)) for x in (a_h, n, kap)) or _datum(t) is None:
         out.append(uebersprungen('X5', 'Aufwand gegen Termin', 'ziele.aufwand_h_stueck, stueckzahl, termin und '
                                                               'zeit_h_pro_woche noetig', Q))
     else:

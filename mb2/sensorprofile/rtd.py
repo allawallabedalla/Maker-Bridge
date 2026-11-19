@@ -171,7 +171,8 @@ def eingaben(mk, t, herkunft=lambda f: None):
         # was sich zwischen Kalibrierung und Einsatz aendert (Elektroniktemperatur, Eigenerwaermung im anderen Medium).
         z += [
             e('dt_kal_referenz', 'u', kal.get('u_referenz'), '°C', 'kalibrierung.u_referenz'),
-            e('dt_kal_fit', 'u', kal.get('u_fit'), '°C', 'kalibrierung.u_fit'),
+            ('dt_kal_fit', {'wert': 0.0, 'u': {'wert': kal.get('u_fit'), 'verteilung': 'u'}, 'einheit': '°C',
+                            'herkunft': herkunft('kalibrierung.u_fit'), 'freiheitsgrade': kal.get('freiheitsgrade_fit')}),
             e('dt_kal_kopplung', 'u', kal.get('u_kopplung'), '°C', 'kalibrierung.u_kopplung'),
             e('dt_selbst', 'rechteck', dts, '°C', 'sensor.eigenerwaermung_mW_K'),
         ]

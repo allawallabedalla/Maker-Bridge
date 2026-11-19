@@ -149,6 +149,9 @@ static inline ads1220_messwert_t ads1220_messen(ads1220_t *d)
     m.fehler = ads1220_phase(d, ADS1220_REG3_A, &m.code_a);
     if (IDAC_TAUSCH && !m.fehler)
         m.fehler |= ads1220_phase(d, ADS1220_REG3_B, &m.code_b);
+    /* Uebersteuerung an den ROHcodes pruefen: nach dem Offsetabzug laege ein gesaettigter Wert unter der Grenze */
+    if (m.code_a >= 0x7FFFFF || m.code_a <= -0x800000 || (IDAC_TAUSCH && (m.code_b >= 0x7FFFFF || m.code_b <= -0x800000)))
+        m.fehler |= RTD_UEBERSTEUERT;
     m.fehler |= rtd_rechnen(m.code_a - d->offset_code, m.code_b - d->offset_code, IDAC_TAUSCH, RREF_OHM, PGA_GAIN,
                             RTD_R0_OHM, &m.r_ohm, &m.t_roh_c);
     m.t_c = rtd_korrektur(m.t_roh_c, KAL_K0, KAL_K1, KAL_K2);

@@ -51,6 +51,7 @@ Teil 4 – Katalog-Pruefungen (``pruefe``) aus soll.json ``_projekt.messkette`` 
 """
 import datetime
 import math
+import re
 
 from . import ergebnis, projekt_soll, uebersprungen
 
@@ -80,12 +81,14 @@ ZEIT_H = {'h': 1.0, 'd': 24.0, 'tag': 24.0, 'woche': 168.0, 'monat': 730.5, 'jah
 # ---------------------------------------------------------------------------------------------- Teil 1: Budget
 
 def _k_aus_nu(nu):
+    """t-Faktor 95,45 % nach GUM Tabelle G.2; nu wird ABGERUNDET (GUM G.4.1), also konservativ."""
     if nu is None or nu == math.inf:
         return None
-    for n, t in T_9545:
-        if nu <= n:
-            return t
-    return 2.0
+    t = T_9545[0][1]
+    for n, tn in T_9545:
+        if n <= nu:
+            t = tn
+    return t
 
 
 def standardunsicherheit(b):
@@ -180,7 +183,7 @@ def budget_aus_modell(modell, eingaben, k=2.0, einheit='', korrelationen=None):
             nl = max(nl, abs((yp - y0) - (y0 - ym)) / (2 * abs(c * ui)))
         beitr.append({'name': n, 'wert': e['u']['wert'], 'verteilung': e['u'].get('verteilung', 'u'),
                       'k': e['u'].get('k', 2.0), 'c': c, 'einheit': e.get('einheit', ''),
-                      'herkunft': e.get('herkunft')})
+                      'herkunft': e.get('herkunft'), 'freiheitsgrade': e.get('freiheitsgrade')})
     erg = budget(beitr, k, einheit, korrelationen)
     erg['y'] = y0
     erg['nichtlinear_max'] = nl
@@ -299,11 +302,11 @@ def _bedingungen_passen(soll, ist):
             ab.append(f'{key} fehlt in der Messreihe')
             continue
         i = ist[key]
-        if key.endswith('_min') and isinstance(s, (int, float)) and isinstance(i, (int, float)):
+        if re.search(r'_min(_[a-z0-9]+)?$', key) and isinstance(s, (int, float)) and isinstance(i, (int, float)):
             if i < s:
                 ab.append(f'{key} = {i} kleiner als verlangt {s}')
             continue
-        if key.endswith('_max') and isinstance(s, (int, float)) and isinstance(i, (int, float)):
+        if re.search(r'_max(_[a-z0-9]+)?$', key) and isinstance(s, (int, float)) and isinstance(i, (int, float)):
             if i > s:
                 ab.append(f'{key} = {i} groesser als erlaubt {s}')
             continue
@@ -374,9 +377,11 @@ def _u_pruef(reihe, u_ref, stat):
     Streuung des Mittelwerts (groesstes s / sqrt(n)). Gibt (U, Budget)."""
     bt = [{'name': 'referenzthermometer', 'wert': u_ref, 'verteilung': 'u', 'herkunft': 'Kalibrierschein'}]
     bt += list(reihe.get('pruefunsicherheit') or [])
-    sm = [(z['s'] / math.sqrt(z['n'])) for z in stat if z['s'] is not None]
+    sm = [((z['s'] / math.sqrt(z['n'])), z['n'] - 1) for z in stat if z['s'] is not None]
     if sm:
-        bt.append({'name': 'streuung_mittelwert', 'wert': max(sm), 'verteilung': 'u', 'herkunft': 'berechnet: s/sqrt(n)'})
+        w, nu = max(sm)
+        bt.append({'name': 'streuung_mittelwert', 'wert': w, 'verteilung': 'u', 'herkunft': 'berechnet: s/sqrt(n)',
+                   'freiheitsgrade': nu})
     b = budget(bt, 2.0)
     return b['U'], b
 
@@ -520,7 +525,9 @@ def bewerte_reihe(reihe, eigenschaft, messtechnik, heute=None):
             return zu_wenig(f'{len(gemeinsam)} gemeinsame Referenzwerte auf/ab')
         kennwert = max(abs(auf[r] - abw[r]) for r in gemeinsam)
         sm = [z['s'] / math.sqrt(z['n']) for z in stat if z['s'] is not None]
-        u_k = 2 * math.sqrt(2) * max(sm) if sm else 0.0     # Differenz zweier Mittelwerte; Referenzoffset faellt heraus
+        if not sm:   # ohne Wiederholungen keine Unsicherheit der Differenz -> kein Schutzband moeglich
+            return zu_wenig('keine Wiederholungen je Punkt (Streuung unbekannt, kein Schutzband moeglich)')
+        u_k = 2 * math.sqrt(2) * max(sm)     # Differenz zweier Mittelwerte; Referenzoffset faellt heraus
     elif eigenschaft == 'drift':
         pt = [p for p in pk if isinstance(p.get('t_h'), (int, float))]
         dauer = float(mt.get('dauer_h', 168))

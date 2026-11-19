@@ -139,6 +139,9 @@ def test_hysterese_braucht_auf_und_ab():
     nur_auf = [{'ref': x, 'ist': x, 'richtung': 'auf'} for x in (0, 50, 100)]
     assert mk.bewerte_reihe(reihe('hysterese', nur_auf), 'hysterese', MT)['grund'] == 'verfahren_unzureichend'
     pk = nur_auf + [{'ref': x, 'ist': x + 0.4, 'richtung': 'ab'} for x in (0, 50, 100)]
+    ohne_s = mk.bewerte_reihe(reihe('hysterese', pk), 'hysterese', MT)
+    assert ohne_s['grund'] == 'verfahren_unzureichend', ohne_s                 # ohne Wiederholungen kein Schutzband
+    pk = [dict(p, ist=p['ist'] + d) for p in pk for d in (-0.01, 0.0, 0.01)]
     b = mk.bewerte_reihe(reihe('hysterese', pk), 'hysterese', MT)
     assert b['status'] == 'verletzt' and abs(b['kennwert'] - 0.4) < 1e-9, b     # 0,4 %FS > 0,2
 

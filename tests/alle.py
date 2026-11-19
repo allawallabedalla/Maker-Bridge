@@ -27,7 +27,9 @@ RANG = ('bestanden', 'lauf_nicht_angefordert', 'beispielprojekt_fehlt', 'werkzeu
         'fehlgeschlagen')
 MUSTER = (
     ('werkzeug_fehlt', r'(CalculiX|Elmer|PrusaSlicer|KiCad|kicad-cli|Blender|ccx|g\+\+)[^\n]{0,40}fehlt'),
-    ('beispielprojekt_fehlt', r"Projekt '[^']+' gibt es nicht"),
+    # nur die bekannten, nicht oeffentlichen Beispielprojekte - ein Tippfehler im Namen ist ein echter Fehler
+    ('beispielprojekt_fehlt', r"Projekt '(testdose|schnapphaken|stifthalter-fem|frag-mich-alles-gehaeuse|"
+                              r"bodenklima-sondenkopf|bodenklima-system)' gibt es nicht"),
 )
 TREIBER = r'''
 import contextlib, importlib.util, io, json, os, shutil, sys, time, traceback

@@ -379,7 +379,8 @@ def test_kaufmodul_ohne_kicad():
     t3 = {'name': 'LILYGO T3', 'funk': True, 'f_MHz': 868, 'akku': True, 'akku_mAh': 2000, 'chemie': 'lipo',
           'R_int_Ohm': 0.1, 'V_abschalt_V': 3.5, 'I_ruhe_uA': 100, 'wandler': 'ldo', 'dropout_V': 0.2,
           'I_peak_mA': 200, 'VDD_min_V': 3.0, 'I_chg_mA': 500, 'ntc': False}
-    funk = {'r_m': 1000, 'f_MHz': 868, 'P_t_dBm': 14, 'P_rx_min_dBm': -120, 'umgebung': 'frei'}
+    funk = {'r_m': 1000, 'f_MHz': 868, 'P_t_dBm': 14, 'P_rx_min_dBm': -120, 'umgebung': 'frei', 'G_t_dBi': 0,
+            'G_r_dBi': 0}
     d = _modul_projekt({'T_min_C': 20, 'aussen': False, 'laufzeit_ziel_h': 1000,
                         'elektronik': {'module': [t3], 'funk': funk}})
     assert el.merkmale_platine(d) == {}                  # keine .kicad_pcb -> leer, kein Absturz
@@ -403,16 +404,16 @@ def test_kaufmodul_ohne_kicad():
 
 
 def test_kaufmodul_wandler_und_luecken():
-    # Modus am Buck (eta 0,9, 3,3 V) an LiPo ohne V_abschalt: V_bat = (3,0 + 4,2)/2 = 3,6 V
-    # Faktor 3,3/(0,9*3,6) = 1,01852; Modus 10 mA * 0,1 = 1 mA -> I_bat = 1,01852 mA
+    # Modus am Buck (eta 0,9, 3,3 V) an LiPo ohne V_abschalt: V_bat = Abschaltung 3,0 V (ungunstigster Fall, seit
+    # 19.11.2026; vorher Mitte 3,6 V). Faktor 3,3/(0,9*3,0) = 1,22222; Modus 10 mA * 0,1 = 1 mA
     # T_min 20, Ziel 100 h (Selbstentladung 0,4 % < 1 % -> entfaellt): C_eff = 1000*0,85*0,8 = 680 mAh
-    # -> t = 0,68/1,01852e-3 = 667,6 h >= 125 h, nichts unbekannt -> ok
+    # -> t = 0,68/1,22222e-3 = 556,4 h >= 125 h, nichts unbekannt -> ok
     m = {'name': 'M', 'akku': True, 'akku_mAh': 1000, 'chemie': 'lipo', 'wandler': 'buck', 'eta': 0.9, 'V_out_V': 3.3}
     d = _modul_projekt({'T_min_C': 20, 'aussen': False, 'laufzeit_ziel_h': 100,
                         'elektronik': {'module': [m], 'modi': [{'name': 'mess', 'I_mA': 10, 'anteil': 0.1}]}})
     res = el.pruefe(d)
     e6 = eintrag(res, 'E6')
-    fw = 3.3 / (0.9 * 3.6)
+    fw = 3.3 / (0.9 * 3.0)
     assert nahe(e6['daten']['f_wandler'], fw, 1e-9), e6
     assert nahe(e6['wert'], round(0.68 / (1e-3 * fw), 1), 1e-4) and e6['stufe'] == 'ok', e6
     # E8/E21 ohne Angaben -> 'uebersprungen' mit Grund (alle() stuft bei Merkmal akku zu fehler hoch)
@@ -460,7 +461,7 @@ def test_e16_friis_hand():
     # 868 MHz, 1000 m, Freiraum: lambda = 0,3454 m, FSPL = 20 log10(4 pi 1000/0,3454) = 91,22 dB; 14 dBm -> -77,2 dBm;
     # Empf. -120 -> 42,8 dB
     pl = _platine({}, {}, projekt={'elektronik': {'funk': {'r_m': 1000, 'f_MHz': 868, 'P_t_dBm': 14, 'P_rx_min_dBm': -120,
-                                                            'umgebung': 'frei'}}})
+                                                            'umgebung': 'frei', 'G_t_dBi': 0, 'G_r_dBi': 0}}})
     e = eintrag(el.pruefe_e16(pl), 'E16')
     fspl = 20 * math.log10(4 * math.pi * 1000 / (299.792458 / 868))
     assert nahe(e['wert'], round(14 - fspl + 120, 1), 1e-3) and e['stufe'] == 'ok', e
@@ -474,6 +475,12 @@ def test_e16_bodenklima_nachgerechnet():
     e = eintrag(el.pruefe_e16(_platine({}, {}, projekt={'elektronik': {'funk': funk}})), 'E16')
     assert e['stufe'] == 'fehler', e
     assert e['daten']['pfad_dB'] - e['daten']['freiraum_dB'] > 30, e   # Dorf kostet bei 830 m > 30 dB mehr als Freiraum
+
+
+def test_e16_antennengewinn_fehlt_ist_annahme():
+    funk = {'r_m': 1000, 'f_MHz': 868, 'P_t_dBm': 14, 'P_rx_min_dBm': -120, 'umgebung': 'frei'}
+    e = eintrag(el.pruefe_e16(_platine({}, {}, projekt={'elektronik': {'funk': funk}})), 'E16')
+    assert e['stufe'] == 'warnung' and 'G_t_dBi fehlt' in e['hinweis'], e
 
 
 def test_e16_umgebung_fehlt_konservativ():

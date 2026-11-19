@@ -87,10 +87,18 @@ def speichere(pdir, name, daten):
 
 
 def kontext_hash(pdir):
-    """Hash aller Eingaben, von denen Urteile abhaengen (soll, projekt.md, Anforderungen, Abnahme, Feld)."""
+    """Hash aller Eingaben, von denen Urteile abhaengen: soll, projekt.md (Merkmale), Anforderungen, Abnahme, Feld,
+    Messungen, Kosten und die Firmware-Dateien mit Pruefwirkung (_projekt.firmware). Jede Aenderung macht eine an den
+    Hash gebundene menschliche Freigabe ungueltig."""
     h = hashlib.sha1()
-    for f in ('cad/soll.json', 'projekt.md', 'anforderungen.json', 'abnahme.json', 'feld.json', 'messung.json'):
-        p = os.path.join(pdir, f)
+    dateien = ['cad/soll.json', 'projekt.md', 'anforderungen.json', 'abnahme.json', 'feld.json', 'messung.json',
+               'kosten.json']
+    fw = (_soll(pdir).get('_projekt', {}) or {}).get('firmware') or {}
+    for k in (fw.get('konstanten') or {}).values():
+        if k.get('datei'):
+            dateien.append(os.path.join(fw.get('pfad', ''), k['datei']))
+    for f in sorted(set(dateien)):
+        p = f if os.path.isabs(f) else os.path.join(pdir, f)
         if os.path.exists(p):
             h.update(f.encode())
             h.update(open(p, 'rb').read())
@@ -199,16 +207,26 @@ def _cad_status(nw, pdir):
     out = os.path.join(pdir, 'out')
     teile = [f[:-len('.pruefung.json')] for f in os.listdir(out) if f.endswith('.pruefung.json')] \
         if os.path.isdir(out) else []
+    cd = os.path.join(pdir, 'cad')
+    skripte = [f[:-3] for f in os.listdir(cd) if f.endswith('.py')] if os.path.isdir(cd) else []
     if nw['ref'] != 'alle':
         teile = [t for t in teile if t == nw['ref']] or [None]
     if not teile or teile == [None]:
         return 'unbewiesen', f'cad {nw["ref"]}: kein Pruefbericht', []
-    schlecht = []
+    fehlend = [s for s in skripte if s not in teile] if nw['ref'] == 'alle' else []
+    veraltet, schlecht = [], []
     for t in teile:
-        b = json.load(open(os.path.join(out, t + '.pruefung.json'), encoding='utf-8'))
+        rp, sp = os.path.join(out, t + '.pruefung.json'), os.path.join(cd, t + '.py')
+        if os.path.exists(sp) and os.path.getmtime(sp) > os.path.getmtime(rp):
+            veraltet.append(t)
+        b = json.load(open(rp, encoding='utf-8'))
         if not b.get('ok'):
             schlecht.append(t)
-    return ('verletzt', f'cad: nicht bestanden {schlecht}', []) if schlecht else ('bewiesen', f'cad {teile} ok', [])
+    if schlecht:
+        return 'verletzt', f'cad: nicht bestanden {schlecht}', []
+    if fehlend or veraltet:
+        return 'unbewiesen', f'cad: ohne Pruefbericht {fehlend}, Bericht aelter als Skript {veraltet} (cad_build)', []
+    return 'bewiesen', f'cad {teile} ok', []
 
 
 def _fem_faelle(nw, pdir):
@@ -287,14 +305,27 @@ def _feld_status(nw, feld):
     return 'bewiesen', f'Feld: {len(ms)} Messungen erfuellen {_kriterium_text(k)}', []
 
 
+PROJEKTDATEIEN = ('projekt.md', 'anforderungen.json', 'cad/soll.json', 'abnahme.json', 'feld.json', 'messung.json',
+                  'freigabe.json', 'kosten.json')
+KI_PRUEFER = re.compile(r'claude|\bki\b|\bai\b|agent|gpt|assistant|mb2-|copilot|gemini', re.I)
+
+
 def _manuell_status(nw, pdir):
-    b = nw.get('beleg')
-    if b and (os.path.exists(os.path.join(pdir, b)) or os.path.exists(b)) and nw.get('geprueft_von'):
-        return 'bewiesen', f'manuell belegt: {b} ({nw["geprueft_von"]})', []
-    return 'unbewiesen', 'manueller Nachweis ohne Beleg-Datei/Pruefer', []
+    """Manueller Nachweis: eigene Beleg-Datei im Projekt (nicht eine der Projektdateien selbst) und ein menschlicher
+    Pruefer. Eine KI kann einen manuellen Nachweis nicht erbringen."""
+    b, wer = nw.get('beleg'), str(nw.get('geprueft_von') or '')
+    if not b or os.path.isabs(b) or '..' in b.replace('\\', '/').split('/'):
+        return 'unbewiesen', 'manueller Nachweis: Beleg muss eine Datei im Projektordner sein', []
+    if b.replace('\\', '/') in PROJEKTDATEIEN:
+        return 'unbewiesen', f'manueller Nachweis: {b} ist eine Projektdatei, kein Beleg', []
+    if not os.path.exists(os.path.join(pdir, b)):
+        return 'unbewiesen', f'manueller Nachweis: Beleg {b} fehlt', []
+    if not wer.strip() or KI_PRUEFER.search(wer):
+        return 'unbewiesen', f'manueller Nachweis: Pruefer {wer!r} fehlt oder ist eine KI - nur Menschen', []
+    return 'bewiesen', f'manuell belegt: {b} ({wer})', []
 
 
-def _messung_status(nw, anforderung, messung, kal_reihe=None):
+def _messung_status(nw, anforderung, messung, kal_reihe=None, kal=None):
     """Referenzmessreihe gegen den messtechnik-Block der Anforderung. (status, text, [], info).
     kal_reihe: Reihe, aus der die Kalibrierkorrektur stammt - sie darf nicht zugleich Nachweis sein (Zirkelschluss)."""
     from .pruefungen import messkette
@@ -302,6 +333,18 @@ def _messung_status(nw, anforderung, messung, kal_reihe=None):
         info = {'grund': 'kalibrierdaten_als_nachweis', 'gruende': ['kalibrierdaten_als_nachweis'], 'reihe': nw.get('ref')}
         return ('unbewiesen', f'Messung {nw.get("ref")}: dieselbe Reihe lieferte die Kalibrierkorrektur - Nachweis '
                               f'braucht eine unabhaengige Messreihe nach dem Laden der Korrektur', [], info)
+    if kal_reihe:
+        reihen = {r.get('id'): r for r in (messung or {}).get('reihen', [])}
+        rk, rn = reihen.get(kal_reihe) or {}, reihen.get(nw.get('ref')) or {}
+        gleich_csv = rk.get('quelle_csv') and rk.get('quelle_csv') == rn.get('quelle_csv')
+        k_datum = (kal or {}).get('datum') or rk.get('datum')
+        zu_frueh = rn and k_datum and str(rn.get('datum') or '') <= str(k_datum)
+        if rn and (gleich_csv or zu_frueh):
+            info = {'grund': 'kalibrierdaten_als_nachweis', 'gruende': ['kalibrierdaten_als_nachweis'],
+                    'reihe': nw.get('ref')}
+            why = 'gleiche Quelldatei wie die Kalibrierung' if gleich_csv else \
+                f'gemessen am {rn.get("datum")}, Kalibrierung vom {k_datum} - Nachweis muss danach gemessen sein'
+            return 'unbewiesen', f'Messung {nw.get("ref")}: {why}', [], info
     mt = (anforderung or {}).get('messtechnik')
     eig = nw.get('eigenschaft')
     if not mt:
@@ -373,7 +416,8 @@ def pruefen(pdir, katalog=None, extra=None):
     abnahme = lade(pdir, 'abnahme.json', {})
     feld = lade(pdir, 'feld.json', {})
     messung = lade(pdir, 'messung.json', {})
-    kal_reihe = ((soll.get('_projekt', {}).get('messkette') or {}).get('kalibrierung') or {}).get('reihe')
+    kal = (soll.get('_projekt', {}).get('messkette') or {}).get('kalibrierung') or {}
+    kal_reihe = kal.get('reihe')
     if katalog is None:
         from . import pruefungen
         katalog = pruefungen.alle(pdir)['module']
@@ -397,13 +441,17 @@ def pruefen(pdir, katalog=None, extra=None):
             maengel.append(f'kein Nachweis auf V-Ebene {"/".join(STUFEN_JE_EBENE[ebene])}')
         if ebene == 'system' and 'abnahme' not in stufen and 'feld' not in stufen:
             maengel.append('Systemanforderung braucht Abnahme am Geraet oder Feldmessung')
+        for n in nws:
+            if n.get('stufe') not in ('komponente', 'integration', 'abnahme', 'feld'):
+                maengel.append(f'Nachweis {n.get("art")} {n.get("ref")}: stufe {n.get("stufe")!r} ungueltig '
+                               f'(komponente/integration/abnahme/feld)')
         maengel += _messtechnik_maengel(a)
         herk, htexte = schwaechste_herkunft(soll, a.get('eingaben'))
         ergebnisse, st_gesamt = [], 'bewiesen' if nws else 'unbewiesen'
         for nw in nws:
             info = None
             if nw.get('art') == 'messung':
-                st, txt, treffer, info = _messung_status(nw, a, messung, kal_reihe)
+                st, txt, treffer, info = _messung_status(nw, a, messung, kal_reihe, kal)
             else:
                 st, txt, treffer = nachweis_status(nw, pdir, katalog, abnahme, feld, extra)
             # Reserve gegen Unsicherheit (nur bei bestandenem Katalog-Nachweis mit Wert/Grenze)
@@ -439,18 +487,25 @@ def pruefen(pdir, katalog=None, extra=None):
                        'nachweise': ergebnisse, 'herkunft_eingaben': herk, 'herkunft_text': htexte,
                        'matrix_maengel': maengel, 'eltern': a.get('eltern', [])})
     # Kinder erben: Eltern sind hoechstens so gut wie ihr schlechtestes Kind
+    # (wiederholen bis stabil: unabhaengig von der Reihenfolge, ueber beliebig viele Ebenen; vorbehalt wird mitgegeben)
     nach_id = {z['id']: z for z in zeilen}
-    for z in zeilen:
-        for e in z['eltern']:
-            if e in nach_id and RANG[z['status']] > RANG[nach_id[e]['status']] and z['status'] != 'vorbehalt':
-                nach_id[e]['status'] = z['status'] if z['status'] == 'verletzt' else 'unbewiesen'
-                nach_id[e].setdefault('wegen_kind', []).append(z['id'])
+    for _ in range(len(zeilen) + 1):
+        geaendert = False
+        for z in zeilen:
+            for e in z['eltern']:
+                if e in nach_id and RANG[z['status']] > RANG[nach_id[e]['status']]:
+                    nach_id[e]['status'] = z['status']
+                    if z['id'] not in nach_id[e].setdefault('wegen_kind', []):
+                        nach_id[e]['wegen_kind'].append(z['id'])
+                    geaendert = True
+        if not geaendert:
+            break
     unten = [z for z in zeilen if z['ebene'] in ('subsystem', 'komponente')]
     oben = [z for z in zeilen if z['ebene'] == 'system']
     # Druckfertig: alle Komponenten-/Integrationsnachweise bewiesen (Abnahme/Feld duerfen noch offen sein)
-    def nur_vor_abnahme(z):
+    def nur_vor_abnahme(z):    # alles ausser Abnahme/Feld muss vor dem Druck stehen (auch fehlende/falsche stufe)
         return all(n['status'] in ('bewiesen', 'vorbehalt') for n in z['nachweise']
-                   if n['stufe'] in ('komponente', 'integration'))
+                   if n['stufe'] not in ('abnahme', 'feld'))
     druckfertig = bool(zeilen) and not matrix_maengel and all(nur_vor_abnahme(z) for z in zeilen) and \
         not any(z['status'] == 'verletzt' for z in zeilen) and not any(z['matrix_maengel'] for z in zeilen)
     risiken = risiken_sammeln(lade(pdir, 'anforderungen.json', {}))
@@ -834,7 +889,8 @@ def kalibrierung_auswerten(pdir, reihe_id, grad=2):
     erg['geschrieben'] = False
     if erg.get('nachweisfaehig'):
         kal = mk.setdefault('kalibrierung', {})
-        kal.update({k: erg[k] for k in ('koeffizienten', 'grad', 'u_fit', 'u_referenz', 'u_kopplung', 'reihe', 'datum')})
+        kal.update({k: erg[k] for k in ('koeffizienten', 'grad', 'u_fit', 'freiheitsgrade_fit', 'u_referenz',
+                                        'u_kopplung', 'reihe', 'datum')})
         h = s['_projekt'].setdefault('_herkunft', {})
         quelle = f'gemessen: Kalibrierreihe {reihe_id} vom {reihe.get("datum")}, Referenz ' \
                  f'{(reihe.get("referenz") or {}).get("kalibrierschein")}'
