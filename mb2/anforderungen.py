@@ -405,6 +405,9 @@ def nachweis_status(nw, pdir, katalog, abnahme, feld, extra=None, anforderung=No
         return _feld_status(nw, feld)
     if art == 'manuell':
         return _manuell_status(nw, pdir)
+    if art == 'ml_modell':
+        st, txt = glaubwuerdigkeit.ml_bewerte(nw.get('modell'))
+        return st, txt, []
     return 'unbewiesen', f'unbekannte Nachweisart {art!r}', []
 
 
@@ -430,6 +433,12 @@ def pruefen(pdir, katalog=None, extra=None):
     if not anf:
         matrix_maengel.append('Keine Anforderungen (anforderungen.json) - ohne Lastenheft ist nichts bewiesen '
                               '(anforderungen_erzeugen)')
+    # Zwilling-Gedanke (DNV-RP-A204-Idee, seit 19.11.2026): widerspricht eine Feldmessung einer Modellvorhersage
+    # (zu optimistisch), verliert das Modell seine Beweiskraft, bis es nachkalibriert ist
+    try:
+        widerlegt = {z['pruefung'] for z in feld_vergleich(feld, katalog) if z.get('urteil') == 'zu_optimistisch'}
+    except Exception:  # noqa: BLE001 - Feldvergleich darf die Matrix nicht abbrechen
+        widerlegt = set()
     stakeholder_ids = {a['id'] for a in anf if a.get('ebene') == 'stakeholder'}
     hat_stakeholder = bool(stakeholder_ids)
     for a in anf:
@@ -465,6 +474,9 @@ def pruefen(pdir, katalog=None, extra=None):
                 st, txt, treffer, info = _messung_status(nw, a, messung, kal_reihe, kal)
             else:
                 st, txt, treffer = nachweis_status(nw, pdir, katalog, abnahme, feld, extra)
+            if nw.get('art') == 'katalog' and nw.get('ref') in widerlegt and st in ('bewiesen', 'vorbehalt'):
+                st, txt = 'unbewiesen', txt + f'; Feldmessung zeigt: {nw["ref"]} ist zu optimistisch - Modell ' \
+                                              'nachkalibrieren (feld_abgleich), bis dahin kein Nachweis'
             # Reserve gegen Unsicherheit (nur bei bestandenem Katalog-Nachweis mit Wert/Grenze)
             if st == 'bewiesen' and treffer:
                 for e in treffer:
@@ -919,8 +931,31 @@ def feld_abgleich(pdir, katalog=None, feldfall_ordner=None):
     if katalog is None:
         from . import pruefungen
         katalog = pruefungen.alle(pdir)['module']
+    erg = feld_vergleich(feld, katalog)
+    faelle = []
+    for z in erg:
+        if z.get('urteil') == 'zu_optimistisch':
+            m, pid, schluessel, gem, tol = z['messung'], z['pruefung'], z['schluessel'], z['_gem'], z['toleranz']
+            ordner = feldfall_ordner or os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                                     'tests', 'feldfaelle')
+            os.makedirs(ordner, exist_ok=True)
+            name = f'{os.path.basename(pdir)}_{pid}_{m["groesse"]}_{m["datum"]}.json'
+            json.dump({'projekt': os.path.basename(pdir), 'pruefung': pid, 'schluessel': schluessel,
+                       'gemessen_umgerechnet': gem, 'toleranz': tol, 'messung': m,
+                       'soll_projekt': _soll(pdir).get('_projekt', {}),
+                       'regel': 'Modell darf nicht optimistischer als gemessen + Toleranz sein'},
+                      open(os.path.join(ordner, name), 'w', encoding='utf-8'), indent=1, ensure_ascii=False)
+            faelle.append(name)
+    for z in erg:
+        z.pop('_gem', None)
+        z.pop('schluessel', None)
+    return {'abgleich': erg, 'neue_feldfaelle': faelle}
+
+
+def feld_vergleich(feld, katalog):
+    """Vorhersage gegen Feldmessung, ohne Seiteneffekte (fuer feld_abgleich und die V-Matrix)."""
     alle_e = [e for l in katalog.values() for e in l]
-    erg, faelle = [], []
+    erg = []
     for m in feld.get('messungen', []):
         v = VORHERSAGE.get(m['groesse'])
         if not v:
@@ -939,18 +974,8 @@ def feld_abgleich(pdir, katalog=None, feldfall_ordner=None):
         diff = vorh - gem
         tol = tol if tol is not None else abs(gem) * 0.2
         urteil = 'zu_optimistisch' if diff > tol else ('passt' if abs(diff) <= tol else 'zu_pessimistisch')
-        z = {'messung': m, 'pruefung': pid, 'vorhersage': round(vorh, 2), 'gemessen_umgerechnet': round(gem, 2),
-             'abweichung': round(diff, 2), 'toleranz': tol, 'urteil': urteil}
-        erg.append(z)
-        if urteil == 'zu_optimistisch':
-            ordner = feldfall_ordner or os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                                                     'tests', 'feldfaelle')
-            os.makedirs(ordner, exist_ok=True)
-            name = f'{os.path.basename(pdir)}_{pid}_{m["groesse"]}_{m["datum"]}.json'
-            json.dump({'projekt': os.path.basename(pdir), 'pruefung': pid, 'schluessel': schluessel,
-                       'gemessen_umgerechnet': gem, 'toleranz': tol, 'messung': m,
-                       'soll_projekt': _soll(pdir).get('_projekt', {}),
-                       'regel': 'Modell darf nicht optimistischer als gemessen + Toleranz sein'},
-                      open(os.path.join(ordner, name), 'w', encoding='utf-8'), indent=1, ensure_ascii=False)
-            faelle.append(name)
-    return {'abgleich': erg, 'neue_feldfaelle': faelle}
+        erg.append({'messung': m, 'pruefung': pid, 'vorhersage': round(vorh, 2), 'gemessen_umgerechnet': round(gem, 2),
+                    'abweichung': round(diff, 2), 'toleranz': tol, 'urteil': urteil, '_gem': gem,
+                    'schluessel': schluessel})
+    return erg
+

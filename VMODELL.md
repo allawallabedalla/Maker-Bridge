@@ -59,6 +59,12 @@ Nachweis auf derselben Höhe des V. Anlass und Herleitung: `audits/KERNPROBLEM_2
 
 ## Glaubwürdigkeit der Rechenmodelle (seit 17.11.2026, `mb2/glaubwuerdigkeit.py`)
 
+Begriffe und Quellenstand: **`VVUQ.md`**.
+Neu seit 19.11.2026:
+- Validierungsmetrik nach V&V 20. Stufe 3/4 gibt es nur mit gerechnetem E und u_val.
+- Nachweisart `ml_modell` für KI/ML-Modelle, selbst abgeleitet.
+- Feldmessungen, die eine Vorhersage widerlegen, heben deren Nachweis auf.
+
 Risikobasiert nach ASME V&V 40 und dem FDA-Leitfaden von 2023. Grundlage ist der öffentliche Leitfaden, die Norm selbst lag nicht vor.
 Jeder FEM-Nachweis bekommt einen Block `modell`:
 - `frage`: Was soll das Modell beantworten?

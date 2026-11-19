@@ -154,6 +154,40 @@ def test_stakeholder_wunsch_und_herleitung():
     assert not z['W-FOERDERN']['matrix_maengel'], z['W-FOERDERN']['matrix_maengel']
 
 
+def test_feldmessung_hebt_modellnachweis_auf():
+    """Zwilling-Gedanke: E16 sagt -100 dBm voraus (ok), gemessen SNR -17 dB -> P_rx ~ -134 dBm: zu optimistisch ->
+    der E16-Nachweis zaehlt nicht mehr, bis nachkalibriert ist."""
+    d = neu('vm_feld', {'aussen': True, 'T_min_C': -20, 'T_max_C': 35, 'farbe': 'weiss', 'material': 'ASA',
+                        'elektronik': {'funk': FUNK}})
+    kat = {'elektronik': [{'id': 'E16', 'stufe': 'ok', 'wert': 20.0, 'grenze': 10, 'einheit': 'dB',
+                           'daten': {'P_rx_dBm': -100.0}}]}
+    z = {x['id']: x for x in an.pruefen(d, katalog=kat)['anforderungen']}
+    e16 = next(n for n in z['S-FUNK']['nachweise'] if n['ref'] == 'E16')
+    assert e16['status'] in ('bewiesen', 'vorbehalt'), e16
+    an.feld_eintragen(d, 'snr_dB', -17, 'dB', 'Beet', 'TESTFIXTURE')
+    z = {x['id']: x for x in an.pruefen(d, katalog=kat)['anforderungen']}
+    e16 = next(n for n in z['S-FUNK']['nachweise'] if n['ref'] == 'E16')
+    assert e16['status'] == 'unbewiesen' and 'zu optimistisch' in e16['beleg'], e16
+
+
+def test_ml_modell_nachweis():
+    from mb2 import glaubwuerdigkeit as gw
+    m = {'version': 'abc123', 'einsatz': 'Ersatzmodell fuer Waermepfad', 'einfluss': 'mittel', 'folge': 'gering',
+         'trainingsdaten': {'quelle': 'FEM-Laeufe', 'n': 200, 'bereich': {'P_W': [0, 5]}},
+         'testdaten': {'quelle': 'eigene Laeufe', 'n': 40, 'unabhaengig': True, 'art': 'simulation'},
+         'metrik': {'name': 'RMSE_K', 'wert': 0.8, 'grenze': 1.0}, 'eingaben': {'P_W': 3.0}}
+    assert gw.ml_bewerte(m)[0] == 'vorbehalt'                                      # ohne UQ
+    assert gw.ml_bewerte({**m, 'uq': {'u': 0.5}})[0] == 'bewiesen'
+    assert gw.ml_bewerte({**m, 'eingaben': {'P_W': 7.0}})[0] == 'unbewiesen'       # Extrapolation
+    assert gw.ml_bewerte({**m, 'testdaten': {**m['testdaten'], 'unabhaengig': False}})[0] == 'unbewiesen'
+    assert gw.ml_bewerte({**m, 'metrik': {**m['metrik'], 'wert': 1.5}})[0] == 'verletzt'
+    hoch = {**m, 'einfluss': 'hoch', 'folge': 'hoch', 'uq': {'u': 0.5}}
+    assert gw.ml_bewerte(hoch)[0] == 'unbewiesen'                                  # Risiko 5 braucht Messdaten
+    hoch['testdaten'] = {**m['testdaten'], 'art': 'messung'}
+    assert gw.ml_bewerte(hoch)[0] == 'bewiesen'
+    assert gw.ml_bewerte({})[0] == 'unbewiesen'
+
+
 def test_audit_meldet_freigabe():
     alt = befehle.PROJEKTE
     befehle.PROJEKTE = TMP

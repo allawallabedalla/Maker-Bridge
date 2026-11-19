@@ -84,7 +84,7 @@ def test_relative_abweichung_bridge_grenzen():
     assert gw.bewerte(p, 'haken', m, F20_OK)['status'] == 'bewiesen'                  # Risiko 4 braucht Stufe 2
     m5 = {**m, 'folge': 'hoch', 'validierung': {**m['validierung'], 'strenge': 'unsicherheit_beidseitig'}}
     assert gw.bewerte(p, 'haken', m5, F21_OK, herkunft='gemessen')['status'] == 'unbewiesen'   # 7 % -> max Stufe 2 < 4
-    m5['validierung']['abweichung'] = 3.0
+    m5['validierung'].update(abweichung=3.0, S=10.3, D=10.0, u_num=0.1, u_input=0.1, u_D=0.1)   # V&V-20-Metrik
     assert gw.bewerte(p, 'haken', m5, F21_OK, herkunft='gemessen')['status'] == 'bewiesen'
 
 
@@ -94,9 +94,23 @@ def test_hoechstes_risiko_verlangt_hoechste_stufen():
     p = projekt(KONV, sens())
     assert gw.bewerte(p, 'haken', m, F21_OK, herkunft='gemessen')['status'] == 'unbewiesen'   # Strenge 2 < 4
     m['validierung']['strenge'] = 'unsicherheit_beidseitig'
+    assert gw.bewerte(p, 'haken', m, F21_OK, herkunft='gemessen')['status'] == 'unbewiesen'   # ohne Metrik nur Stufe 2
+    m['validierung'].update(S=10.3, D=10.0, u_num=0.1, u_input=0.1, u_D=0.1)               # |E| 0,3 <= 2*0,173
     assert gw.bewerte(p, 'haken', m, F20_OK, herkunft='gemessen')['status'] == 'unbewiesen'   # F21 fehlt
     assert gw.bewerte(p, 'haken', m, F21_OK, herkunft='geschaetzt')['status'] == 'unbewiesen'
     assert gw.bewerte(p, 'haken', m, F21_OK, herkunft='gemessen')['status'] == 'bewiesen'
+
+
+def test_vv20_metrik():
+    """E = S - D, u_val = sqrt(u_num^2 + u_input^2 + u_D^2); validiert wenn |E| <= 2 u_val."""
+    m = gw.vv20_metrik({'S': 10.3, 'D': 10.0, 'u_num': 0.1, 'u_input': 0.1, 'u_D': 0.1})
+    assert abs(m['zeilen'][0]['u_val'] - 0.1732) < 1e-3 and m['E_max_rel'] < 1 and m['beidseitig'], m
+    m = gw.vv20_metrik({'S': 11.0, 'D': 10.0, 'u_num': 0.1, 'u_D': 0.1})
+    assert m['E_max_rel'] > 1 and not m['beidseitig'], m                       # u_input fehlt -> nur einseitig
+    m = gw.vv20_metrik({'groessen': [{'name': 'w', 'S': 1, 'D': 1, 'u_num': .1, 'u_input': .1, 'u_D': .1},
+                                     {'name': 'f', 'S': 2, 'D': 1, 'u_num': .1, 'u_input': .1, 'u_D': .1}]})
+    assert m['E_max_rel'] > 1 and 'keine multivariate' in m['text'], m          # schlechteste Groesse zaehlt
+    assert gw.vv20_metrik({'S': 1}) is None
 
 
 def test_unbekannter_loeser_hat_keine_code_verifikation():

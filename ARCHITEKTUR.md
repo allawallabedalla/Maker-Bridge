@@ -192,6 +192,7 @@ Einzelheiten in `VMODELL.md`, Bewertung und Quellen in `IN_SILICO.md`. Test: `te
   - Messprotokoll `pruef/messprotokoll.md`
   - CSV-Import `messreihen_aus_csv`, Kalibrierung `kalibrierung_auswerten`
 - **Projektziele** `project_new(..., ziele=...)` und `mb2/pruefungen/kpi.py` (K1–K4): Kosten, Aufwand, Termin, Priorität. „unbekannt“ ist erlaubt und wird als Risiko geführt.
+- **VVUQ** (`VVUQ.md`): Begriffe nach der ASME-Reihe, V&V-20-Metrik, KI/ML-Nachweis (selbst abgeleitet), Feldwiderspruch hebt Modellnachweis auf.
 - **Widerspruchsprüfung** `mb2/pruefungen/widerspruch.py` (X1–X9): Prüfmittel gegen Toleranz (4:1), Messbereich gegen Einsatz, Budget gegen Toleranz, Ziele ohne Quelle, Aufwand gegen Termin, Priorität gegen Fehlerfolge, Bus gegen Leitungslänge, Kalibrierung im Aufwand, Stückzahl gegen Seriennachweis.
 - **Tests:** `tests/alle.py` klassifiziert je Funktion. Ein nicht ausgeführter Test ist nie bestanden. Stand in `tests/TESTSTATUS.md`.
 - **Anleitung** (`claude/skills/idee-zu-druck-2/SKILL.md`): Rückfragen einfach und ohne Vorwissen verständlich. Kritisch statt gefällig. Erst Systemgrenze und Ziele, dann Technik.
