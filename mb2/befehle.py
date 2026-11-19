@@ -805,3 +805,41 @@ def lauf_ende(projekt: str, grund: str = ''):
     r = karten.lauf_ende(pdir(projekt), grund)
     r['kosten_je_agent'] = karten.kosten(pdir(projekt))
     return r
+
+
+# ---------------------------------------------------------------- CFD (Stroemung, Waerme, Stofftransport; 19.11.2026)
+
+@befehl('fem')
+def cfd_vorbereiten(projekt: str, fall: str):
+    """cfd/<fall>.json als Loeserfall schreiben, ohne zu rechnen (OpenFOAM: Fallordner mit netz.msh und Allrun.mb2;
+    Elmer: netz/ und case.sif). Zum Weitergeben an einen Rechner mit dem Loeser. Format: mb2/cfd.py."""
+    from . import cfd
+    arbeit, _, info = cfd.vorbereiten(pdir(projekt), fall)
+    return dict(info, fallordner=arbeit)
+
+
+@befehl('fem')
+def cfd_rechnen(projekt: str, fall: str, neu: bool = False):
+    """Stroemung (+ Waerme/Stoff) rechnen: OpenFOAM oder Elmer laut cfd/<fall>.json. Ergebnis cfd/<fall>.erg.json:
+    dp_Pa, Q_ein/Q_aus, c_aus, T_aus, netzstudie, analytisch (Kanal). Katalog FL5-FL7 bewerten das Ergebnis.
+    Gecacht (gleiche Eingaben + mb2-Code -> gespeichertes Ergebnis); neu=true erzwingt."""
+    from . import cache, cfd, werkzeuge
+    d = pdir(projekt)
+    erg_pfad = os.path.join(d, 'cfd', fall + '.erg.json')
+    spec = cfd.lade(d, fall)
+    step = (spec.get('geometrie') or {}).get('step')
+    eingaben = [os.path.join(d, 'cfd', fall + '.json')] + ([step if os.path.isabs(step) else os.path.join(d, step)] if step else [])
+    key = cache.schluessel(eingaben, {'fall': fall, 'loeser': str(werkzeuge.openfoam() if spec.get('loeser', 'openfoam') ==
+                                                                  'openfoam' else werkzeuge.elmer_solver())})
+    if not neu and (hit := cache.treffer(erg_pfad, key)):
+        return hit
+    return cache.merken(erg_pfad, cfd.rechnen(d, fall), key)
+
+
+@befehl('projekt')
+def werkzeug_einrichten(werkzeug: str = '', ausfuehren: bool = False):
+    """Welche externen Werkzeuge fehlen und wie man sie einrichtet (ccx, elmer, openfoam, gcc, prusaslicer, kicad).
+    ausfuehren=true fuehrt NUR geprueft hinterlegte Befehle aus und NUR nachdem der Nutzer im Chat zugestimmt hat -
+    sonst nichts installieren. Ohne hinterlegten Befehl: Anleitung (offizielle Seite) nennen."""
+    from . import werkzeuge
+    return werkzeuge.einrichten(werkzeug or None, ausfuehren)

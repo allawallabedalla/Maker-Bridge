@@ -127,6 +127,14 @@ Die Werkzeuge liefert der MCP-Server **mb2**. Jeder Schritt läuft über einen e
 - Firmware mit Prüfwirkung (Sendeleistung, SF, Intervall, Abschaltspannung) → `_projekt.firmware.konstanten` (FW1).
 - Danach `anforderungen_erzeugen` (ergänzt Standard + Abnahmeschritte) und `eingaben_offen`.
 
+## 0c. Fluidik und eigene Messprinzipien → Agent `mb2-fluidik` (seit 19.11.2026)
+Bei Kanälen, Medien oder selbst gebauten Sensoren (Durchfluss, Konzentration, optisch, elektrochemisch):
+- Kanäle in `_projekt.stroemung` (FL1–FL4, FL8), Stoffkontakt in `_projekt.stoff` (CH1–CH4), Messprinzip als Profil
+  `wandler` (MK1 mit Monte-Carlo). Stoffwerte, Beständigkeiten und Driften nur mit Quelle.
+- CFD nur, wo die Analytik nicht reicht (Kammer, Verzweigung, Einbauten): `cfd/<fall>.json`, `cfd_vorbereiten`,
+  auf dem Rechner mit Löser `cfd_rechnen`. Zuerst einen Kanal-Fall zur Code-Verifikation (FL5), immer mit
+  Netzstudie (FL7). Fehlt ein Löser: `werkzeug_einrichten` zeigen, nichts ungefragt installieren. <!-- R:S36 -->
+
 ## 1. Elektronik → Agent `mb2-elektronik`
 Auftrag: Schaltplan, ERC, Layout, Freerouting, **Katze**, DRC, `kicad_board`.
 **Fertig bestücken:** Alles, was JLCPCB bestücken kann, als Chip auf die Platine und mitbestücken lassen (keine

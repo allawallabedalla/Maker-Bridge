@@ -26,7 +26,7 @@ HIER = os.path.dirname(os.path.abspath(__file__))
 RANG = ('bestanden', 'lauf_nicht_angefordert', 'beispielprojekt_fehlt', 'werkzeug_fehlt', 'zeitueberschreitung',
         'fehlgeschlagen')
 MUSTER = (
-    ('werkzeug_fehlt', r'(CalculiX|Elmer|PrusaSlicer|KiCad|kicad-cli|Blender|ccx|g\+\+)[^\n]{0,40}fehlt'),
+    ('werkzeug_fehlt', r'(CalculiX|Elmer|OpenFOAM|PrusaSlicer|KiCad|kicad-cli|Blender|ccx|g\+\+)[^\n]{0,40}fehlt'),
     # nur die bekannten, nicht oeffentlichen Beispielprojekte - ein Tippfehler im Namen ist ein echter Fehler
     ('beispielprojekt_fehlt', r"Projekt '(testdose|schnapphaken|stifthalter-fem|frag-mich-alles-gehaeuse|"
                               r"bodenklima-sondenkopf|bodenklima-system)' gibt es nicht"),

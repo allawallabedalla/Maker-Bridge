@@ -204,9 +204,15 @@ def test_proben_fuer_die_erweiterungen():
                                    'duty_max': 0.01}, 'schreibzyklen_max': 100000, 'schreibblock_bytes': 4096,
                   'puffer_datensaetze': 64}, 'lebensdauer_h': 20000,
         '_herkunft': dict(HK, messkette='datenblatt: TESTFIXTURE')}}
-    funde = P._weglassprobe('wp_erw', soll, ['messkette', 'stroemung', 'daten'])
+    soll['_projekt']['stoff'] = {'benetzt': [{'teil': 'k', 'werkstoff': 'PMMA'}], 'medien': [{'name': 'W', 'T_max_C': 30}],
+                                 'bestaendigkeit': [{'werkstoff': 'PMMA', 'medium': 'W', 'bewertung': 'A', 'T_C': 40,
+                                                     'quelle': 'TESTFIXTURE'}],
+                                 'ansprechen': {'D_m2_s': 1e-9, 'schichtdicke_mm': 0.05, 'ansprechzeit_max_s': 5},
+                                 'drift': {'drift_rel_je_h': 1e-6, 'kalibrierintervall_h': 2000, 'toleranz_rel': 0.02}}
+    soll['_projekt']['_herkunft']['stoff.drift'] = 'gemessen: TESTFIXTURE'
+    funde = P._weglassprobe('wp_erw', soll, ['messkette', 'stroemung', 'daten', 'stoff'])
     assert not funde, f'Entfernte Angabe macht ein Ergebnis besser: {funde[:10]}'
-    abst = P._randprobe('rp_erw', soll, ('messkette', 'stroemung', 'daten'))
+    abst = P._randprobe('rp_erw', soll, ('messkette', 'stroemung', 'daten', 'stoff'))
     assert not abst, f'Abstuerze bei Randwerten: {abst[:10]}'
 
 
@@ -279,6 +285,41 @@ def test_nicht_gedruckte_teile():
     assert 'S-FERTIGUNG-kanal' in a, list(a)
     nw = {n['ref']: n for n in a['S-FERTIGUNG-kanal']['nachweise']}
     assert nw['AB-WE-kanal']['kriterium']['groesse'] == 'ausser_toleranz' and 'Kanal 1.0' in nw['AB-WE-kanal']['anweisung']
+
+
+def test_stoff_und_fertigbarkeit():
+    """CH2: v 0,02 m/s, w 0,5 mm, D 1e-9: Pe = 1e4, L_mix = 0,02*0,25e-6/1e-9 m = 5 m = 5000 mm >> 20 mm -> fehler.
+    CH3: delta 0,05 mm: t = 2,5e-9/2e-9 = 1,25 s <= 5 s. CH4: 1e-5/h x 2000 h = 0,02 <= 0,02 (gemessen -> ok)."""
+    from mb2.pruefungen import stoff
+    S = {'benetzt': [{'teil': 'kanal', 'werkstoff': 'PMMA'}, {'teil': 'dichtung', 'werkstoff': 'FKM'}],
+         'medien': [{'name': 'IPA', 'T_max_C': 40}],
+         'bestaendigkeit': [{'werkstoff': 'PMMA', 'medium': 'IPA', 'bewertung': 'B', 'T_C': 40, 'quelle': 'TESTFIXTURE'}],
+         'mischung': {'D_m2_s': 1e-9, 'breite_mm': 0.5, 'v_m_s': 0.02, 'laenge_mm': 20, 'muss_mischen': True},
+         'ansprechen': {'D_m2_s': 1e-9, 'schichtdicke_mm': 0.05, 'ansprechzeit_max_s': 5},
+         'drift': {'drift_rel_je_h': 1e-5, 'kalibrierintervall_h': 2000, 'toleranz_rel': 0.02}}
+    r = stoff.pruefe(_projekt('ch', {'stoff': S, '_herkunft': {'stoff.drift': 'gemessen: TESTFIXTURE'}}))
+    ch1 = {e['teil']: e['stufe'] for e in r if e['id'] == 'CH1'}
+    assert ch1 == {'kanal': 'warnung', 'dichtung': 'fehler'}, ch1          # B bedingt; FKM ohne Eintrag
+    e = {x['id']: x for x in r if x['id'] != 'CH1'}
+    assert e['CH2']['stufe'] == 'fehler' and abs(e['CH2']['wert'] - 5000) < 1e-6, e['CH2']
+    assert e['CH3']['stufe'] == 'ok' and abs(e['CH3']['wert'] - 1.25) < 1e-9, e['CH3']
+    assert e['CH4']['stufe'] == 'ok' and 'hoechstens 2000 h' in e['CH4']['hinweis'], e['CH4']
+    r = stoff.pruefe(_projekt('ch2', {'stoff': S}))
+    assert {x['id']: x for x in r}['CH4']['stufe'] == 'warnung'           # Drift nicht gemessen
+    S2 = dict(S, bestaendigkeit=[dict(S['bestaendigkeit'][0], bewertung='A', T_C=20)], benetzt=S['benetzt'][:1])
+    assert [x['stufe'] for x in stoff.pruefe(_projekt('ch3', {'stoff': S2})) if x['id'] == 'CH1'] == ['warnung']  # 20 < 40 C
+    # FL8: Kanal 0,3 mm in extern gefertigtem Teil (min 0,2 mm) -> warnung (< 1,5 x); 0,5 mm -> ok; FDM ohne Messung -> uebersprungen
+    def fl8(d_mm, ts, pj=None):
+        d = os.path.join(TMP, f'fl8_{d_mm}_{ts.get("verfahren", "fdm")}')
+        os.makedirs(os.path.join(d, 'cad'), exist_ok=True)
+        json.dump({'_projekt': dict({'stroemung': {'medium': WASSER, 'kanaele': [
+            {'name': 'K', 'teil': 'chip', 'd_mm': d_mm, 'L_mm': 10, 'Q_max_ml_min': 1, 'dp_max_Pa': 1e5}]},
+            '_herkunft': HK}, **(pj or {})), 'chip': ts}, open(os.path.join(d, 'cad', 'soll.json'), 'w'))
+        return next(x for x in stroemung.pruefe(d) if x['id'] == 'FL8')
+    ext = {'verfahren': 'extern', 'fertigung': {'min_kanal_mm': 0.2}}
+    assert fl8(0.3, ext)['stufe'] == 'warnung' and fl8(0.5, ext)['stufe'] == 'ok' and fl8(0.1, ext)['stufe'] == 'fehler'
+    assert fl8(0.5, {})['stufe'] == 'uebersprungen'
+    assert fl8(0.5, {}, {'fdm_min_kanal_mm': 0.8})['stufe'] == 'fehler'
 
 
 if __name__ == '__main__':

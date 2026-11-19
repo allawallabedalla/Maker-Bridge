@@ -27,6 +27,16 @@ FL3 Einlauflaenge: laminar L_e ~ 0,06 Re d_h, turbulent ~ 4,4 Re^(1/6) d_h (Lehr
 FL4 Messbarkeit Differenzdruck: dp bei Q_min >= 10 x Aufloesung des Drucksensors, sonst warnung (kleinster Durchfluss
     geht im Rauschen unter -> anderes Messprinzip, z. B. thermisch, oder laengere Messstrecke).
 Stoffwerte nie aus dem Code: fehlen sie, ist alles 'uebersprungen'. Geschaetzte Herkunft -> hoechstens warnung.
+
+CFD-Ergebnisse (``cfd/<fall>.erg.json``, Befehl cfd_rechnen, mb2/cfd.py):
+FL5 Code-Verifikation: generierter Kanal gegen Hagen-Poiseuille, |Abweichung| <= 5 % ok, <= 15 % warnung, sonst fehler.
+    Ohne Kanal-Fall im Projekt: uebersprungen (Loeser auf dieser Installation nicht verifiziert).
+FL6 Massenbilanz: |Q_aus - Q_ein| / Q_ein <= 1 % ok, <= 5 % warnung (OpenFOAM; Elmer: uebersprungen).
+FL7 Netzstudie: Druckverlust der zwei feinsten Netze, Aenderung <= 2 % ok, <= 10 % warnung, sonst fehler.
+Ergebnis aelter als der Fall -> uebersprungen (veraltet, cfd_rechnen neu).
+FL8 Kanal fertigbar: kleinstes Kanalmass (d bzw. min(b, h)) gegen das kleinste Mass des Verfahrens des Teils, in dem
+    der Kanal liegt (Kanal "teil"): extern/kaufteil -> fertigung.min_kanal_mm (Anbieter); FDM -> _projekt.fdm_min_kanal_mm
+    (am Kalibrierkoerper gemessen). Kleiner -> fehler, unter 1,5-fach -> warnung. Fehlt die Angabe -> uebersprungen.
 """
 import math
 
@@ -34,7 +44,8 @@ from . import ergebnis, projekt_soll, soll as lade_soll, uebersprungen
 
 Q = 'mb2/pruefungen/stroemung.py (Hagen-Poiseuille, laminare Rohrstroemung, Lehrbuch)'
 T = {'FL1': 'Stroemungsform (Reynolds)', 'FL2': 'Druckverlust', 'FL3': 'Einlauflaenge vor dem Sensor',
-     'FL4': 'Messbarkeit Differenzdruck'}
+     'FL4': 'Messbarkeit Differenzdruck', 'FL5': 'CFD Code-Verifikation', 'FL6': 'CFD Massenbilanz',
+     'FL7': 'CFD Netzstudie', 'FL8': 'Kanal fertigbar'}
 RE_LAMINAR, RE_TURBULENT = 2000.0, 4000.0
 SCHWACH = ('geschaetzt', 'angenommen', None)
 
@@ -120,7 +131,83 @@ def _bloecke(pdir):
             yield teil, ts['stroemung'], f'{teil}.stroemung'
 
 
+def _fertigbar(soll, k, n, teil):
+    ziel = k.get('teil') or teil
+    mass = k['d_mm'] if _num(k.get('d_mm')) else min(k['b_mm'], k['h_mm'])
+    if not ziel or not isinstance(soll.get(ziel), dict):
+        return uebersprungen('FL8', f'{T["FL8"]} {n}', 'Kanal ohne "teil" (in welchem Teil liegt er?)', Q, teil)
+    ts = soll[ziel]
+    vf = ts.get('verfahren', 'fdm')
+    grenze = (ts.get('fertigung') or {}).get('min_kanal_mm') if vf != 'fdm' else (soll.get('_projekt') or {}).get('fdm_min_kanal_mm')
+    if not _num(grenze):
+        return uebersprungen('FL8', f'{T["FL8"]} {n}', ('fertigung.min_kanal_mm (Anbieter)' if vf != 'fdm' else
+                                                       '_projekt.fdm_min_kanal_mm (am Kalibrierkoerper messen)') + ' fehlt',
+                             Q, ziel)
+    st = 'fehler' if mass < grenze else 'warnung' if mass < 1.5 * grenze else 'ok'
+    return ergebnis('FL8', f'{T["FL8"]} {n}', st, wert=mass, grenze=grenze, einheit='mm', quelle=Q, teil=ziel,
+                    hinweis=f'kleinstes Kanalmass {mass} mm gegen {grenze} mm ({vf})' +
+                            ('' if st == 'ok' else ' - Verfahren wechseln (extern) oder Kanal groesser'))
+
+
+def _cfd(pdir):
+    import glob
+    import json
+    import os
+    out = []
+    faelle = sorted(glob.glob(os.path.join(pdir, 'cfd', '*.json')))
+    faelle = [f for f in faelle if not f.endswith('.erg.json')]
+    if not faelle:
+        return [uebersprungen(i, T[i], 'kein CFD-Fall (cfd/<fall>.json)', Q) for i in ('FL5', 'FL6', 'FL7')]
+    verifiziert = False
+    for f in faelle:
+        fall = os.path.basename(f)[:-5]
+        ep = f[:-5] + '.erg.json'
+        if not os.path.exists(ep):
+            out.append(uebersprungen('FL6', f'{T["FL6"]} {fall}', 'nie gerechnet (cfd_rechnen)', Q, fall))
+            continue
+        if os.path.getmtime(ep) < os.path.getmtime(f):
+            out.append(uebersprungen('FL6', f'{T["FL6"]} {fall}', 'veraltet: Fall nach dem Rechnen geaendert', Q, fall))
+            continue
+        e = json.load(open(ep, encoding='utf-8'))
+        an = e.get('analytisch')
+        if an:
+            verifiziert = True
+            a = abs(an['abweichung'])
+            st = 'ok' if a <= 0.05 else 'warnung' if a <= 0.15 else 'fehler'
+            out.append(ergebnis('FL5', f'{T["FL5"]} {fall}', st, wert=round(100 * an['abweichung'], 2), grenze=5.0,
+                                einheit='%', quelle=Q, teil=fall,
+                                hinweis=f'{e.get("loeser")}: dp {e["dp_Pa"]:.4g} Pa gegen {an["formel"]} '
+                                        f'{an["dp_Pa"]:.4g} Pa'))
+        qe, qa = e.get('Q_ein_m3_s'), e.get('Q_aus_m3_s')
+        if qe and qa is not None:
+            r = abs(qa - qe) / qe
+            out.append(ergebnis('FL6', f'{T["FL6"]} {fall}', 'ok' if r <= 0.01 else 'warnung' if r <= 0.05 else 'fehler',
+                                wert=round(100 * r, 3), grenze=1.0, einheit='%', quelle=Q, teil=fall,
+                                hinweis=f'Q ein {qe:.4g}, aus {qa:.4g} m3/s'))
+        else:
+            out.append(uebersprungen('FL6', f'{T["FL6"]} {fall}', 'Durchfluss am Aus-/Einlass nicht ausgegeben (Elmer)', Q, fall))
+        st_ = sorted(e.get('netzstudie') or [], key=lambda z: -z['groesse_mm'])
+        if len(st_) < 2:
+            out.append(uebersprungen('FL7', f'{T["FL7"]} {fall}', 'netzstudie mit mindestens 2 Netzgroessen fehlt - '
+                                     'ohne sie ist das Ergebnis nicht loesungsverifiziert', Q, fall))
+        else:
+            a, b = st_[-2]['dp_Pa'], st_[-1]['dp_Pa']
+            r = abs(b - a) / abs(b) if b else float('inf')
+            out.append(ergebnis('FL7', f'{T["FL7"]} {fall}', 'ok' if r <= 0.02 else 'warnung' if r <= 0.10 else 'fehler',
+                                wert=round(100 * r, 3), grenze=2.0, einheit='%', quelle=Q, teil=fall,
+                                hinweis=f'dp {a:.4g} Pa (h {st_[-2]["groesse_mm"]} mm) -> {b:.4g} Pa '
+                                        f'(h {st_[-1]["groesse_mm"]} mm)'))
+    if not verifiziert:
+        out.append(uebersprungen('FL5', T['FL5'], 'kein Kanal-Fall mit analytischer Referenz - Loeser auf dieser '
+                                 'Installation nicht verifiziert (cfd/verifikation.json mit geometrie.kanal anlegen)', Q))
+    return out
+
+
 def pruefe(pdir):
+    return _kanaele(pdir) + _cfd(pdir)
+
+
+def _kanaele(pdir):
     from ..anforderungen import herkunft_von
     soll = lade_soll(pdir) or {}
     out = []
@@ -168,6 +255,8 @@ def pruefe(pdir):
                     s2 = 'fehler' if dp > g else ('warnung' if schwach else 'ok')
                     out.append(ergebnis('FL2', f'{T["FL2"]} {n}', s2, wert=round(dp, 4), grenze=g, einheit='Pa',
                                         quelle=Q, teil=teil, hinweis=txt, daten={'dp_Pa': dp}))
+            # FL8
+            out.append(_fertigbar(soll, k, n, teil))
             # FL3
             ein = k.get('einlauf_vor_sensor_mm')
             # laminar 0,06 Re d_h; turbulent ~4,4 Re^(1/6) d_h (Lehrbuch-Naeherungen, White)

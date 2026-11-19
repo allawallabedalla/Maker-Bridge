@@ -6,4 +6,5 @@
 - die rauschbegrenzte Aufloesung in der Messgroesse.
 Auswahl ueber ``_projekt.messkette.profil``. Bauteilgrenzen kommen als Daten (``bauteile``), nie aus dem Profil.
 """
-PROFILE = {'rtd_ratiometrisch_3leiter': 'mb2.sensorprofile.rtd', 'modul_digital': 'mb2.sensorprofile.modul'}
+PROFILE = {'rtd_ratiometrisch_3leiter': 'mb2.sensorprofile.rtd', 'modul_digital': 'mb2.sensorprofile.modul',
+           'wandler': 'mb2.sensorprofile.wandler'}

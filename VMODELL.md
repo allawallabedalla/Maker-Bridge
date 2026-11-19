@@ -64,6 +64,10 @@ Nachweis auf derselben Höhe des V. Anlass und Herleitung: `audits/KERNPROBLEM_2
 - **Firmware-Rechenlogik** (FW2/FW3): Hosttest am PC, gebunden an den Quellstand; jeder zu erkennende Fehler auch in Software eingespielt. Firmware ohne Hosttest ist ein Auslöser-Fehler (oder `nicht_relevant` mit Grund). <!-- R:V42 -->
 - **Nicht gedruckte Teile** (`verfahren: extern|kaufteil`): T1 rechnet mit der Prozessstreuung des Verfahrens, cad_build mit dessen Wand-/Spaltgrenzen, und es entsteht eine Wareneingangsprüfung (AB-WE-*). <!-- R:V43 -->
 
+- **CFD** (`mb2/cfd.py`, OpenFOAM oder Elmer): ein CFD-Ergebnis zählt erst mit Code-Verifikation auf derselben Installation (FL5, Kanal gegen Hagen-Poiseuille) und Netzstudie (FL7); sonst bleibt es ungeprüft. <!-- R:V44 -->
+- **Selbst gebaute Messprinzipien** (Profil `wandler`): Budget aus der Modellgleichung; trägt die lineare Näherung nicht, gilt das größere U aus Monte-Carlo (JCGM 101). <!-- R:V45 -->
+- **Stoffkontakt** (CH1): jede Paarung benetzter Werkstoff × Medium braucht eine belegte Beständigkeit; fehlt sie, ist es ein Fehler. <!-- R:V46 -->
+
 ## Glaubwürdigkeit der Rechenmodelle (seit 17.11.2026, `mb2/glaubwuerdigkeit.py`)
 
 Begriffe und Quellenstand: **`VVUQ.md`**.

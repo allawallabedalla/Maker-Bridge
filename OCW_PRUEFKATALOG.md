@@ -262,6 +262,14 @@ Wärmeglied α·L·ΔT (sonst ±20 K angenommen).
 | FL2 | Druckverlust | laminar Hagen-Poiseuille (rund/Rechteck); turbulent Darcy-Weisbach mit Blasius (glatt) bzw. Colebrook (Rauigkeit); + Σζ ρv²/2 | Lehrbuch | `stroemung` | ≤ `dp_max_Pa`; Übergang 2000–4000 ohne Formel | hoch | ✅ umgesetzt |
 | FL3 | Einlauflänge vor dem Sensor | L_e ≈ 0,06 Re d_h | Lehrbuch (White) | `einlauf_vor_sensor_mm` | gerade Strecke ≥ L_e | mittel | ✅ umgesetzt |
 | FL4 | Messbarkeit Differenzdruck | Δp(Q_min) ≥ 10 × Sensorauflösung | eigen | `dp_sensor_aufloesung_Pa` | sonst warnung (Prinzip ungeeignet) | mittel | ✅ umgesetzt |
+| FL5 | CFD Code-Verifikation | generierter Kanal gegen Hagen-Poiseuille | eigen (V&V 40: Code) | `cfd/<fall>.json` mit `geometrie.kanal` | ≤ 5 % ok, ≤ 15 % warnung | hoch | ✅ umgesetzt – `stroemung.py`, `mb2/cfd.py` |
+| FL6 | CFD Massenbilanz | \|Q_aus − Q_ein\| / Q_ein | eigen | CFD-Ergebnis (OpenFOAM) | ≤ 1 % | mittel | ✅ umgesetzt |
+| FL7 | CFD Netzstudie | Δp der zwei feinsten Netze | eigen (V&V 40: Lösung) | `netzstudie` | ≤ 2 % | hoch | ✅ umgesetzt |
+| FL8 | Kanal fertigbar | kleinstes Kanalmaß ≥ Mindestmaß des Verfahrens | eigen | Kanal `teil`, `fertigung.min_kanal_mm` / `fdm_min_kanal_mm` | < 1,5-fach warnung | hoch | ✅ umgesetzt |
+| CH1 | Werkstoffverträglichkeit | jede Paarung Werkstoff × Medium belegt (A–D) | Herstellertabellen | `_projekt.stoff` | A ok, B warnung, C/D/fehlt fehler | hoch | ✅ umgesetzt – `stoff.py` |
+| CH2 | Mischung quer zum Kanal | Pe = v w/D, L_mix ≈ v w²/D | Lehrbuch | `stoff.mischung` | L ≥ L_mix, wenn gemischt werden muss | mittel | ✅ umgesetzt |
+| CH3 | Ansprechzeit Diffusion | t = δ²/(2D) | Einstein-Smoluchowski | `stoff.ansprechen` | ≤ `ansprechzeit_max_s` | mittel | ✅ umgesetzt |
+| CH4 | Drift durch Belag/Adsorption | Drift × Kalibrierintervall ≤ Toleranz | eigen | `stoff.drift` (gemessen) | sonst höchstens warnung | mittel | ✅ umgesetzt |
 | FW2 | Hosttest der Firmware-Rechenlogik | Testprogramm am PC, je Fall `MB2 {json}`; Ergebnis an den Quell-Hash gebunden | eigen | `firmware.hosttest`, Befehl `firmware_test` | alle Fälle bestanden, nicht veraltet | hoch | ✅ umgesetzt – `firmware.py`, `firmware_test.py` |
 | FW3 | Fehlerinjektion in Software | je Fehler aus `erkennung` ein bestandener Fall `fehlerinjektion` + ein Fehlalarm-Fall | eigen | Hosttest, Anforderungen | vollständig | hoch | ✅ umgesetzt |
 | DS1 | Datenspeicher | Satz × 3600/Intervall × Aufbewahrung ≤ Speicher × (1 − Reserve) | eigen | `_projekt.daten` | – | mittel | ✅ umgesetzt – `daten.py` |

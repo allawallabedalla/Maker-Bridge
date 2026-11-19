@@ -23,6 +23,12 @@ INSTALL = {
     'elmer': 'Windows: Elmer-Installer ElmerFEM-nogui-mpi-Windows-AMD64-rel26.1.exe von '
              'nic.funet.fi/pub/sci/physics/elmer/bin/windows/rel26.1/ + winget install Microsoft.msmpi; '
              'Linux: ElmerSolver in den PATH (nicht im Ubuntu-Standardbestand, siehe Elmer-Projektseite)',
+    'openfoam': 'OpenFOAM 12 (OpenFOAM Foundation): Linux Paket, Windows ueber WSL2 mit Ubuntu - Anleitung auf '
+                'openfoam.org/download (Befehle dort ablesen; die Bridge fuehrt keine ungeprueften Installationsbefehle '
+                'aus). Andere Installation: Umgebungsvariable MB2_OPENFOAM_BASHRC auf deren etc/bashrc setzen',
+    'gcc': 'Windows: MSYS2 (winget install MSYS2.MSYS2), in "MSYS2 UCRT64": pacman -S mingw-w64-ucrt-x86_64-gcc; '
+           'Linux: apt install gcc',
+    'prusaslicer': 'Windows: Installer von prusa3d.com; Linux: apt install prusa-slicer',
 }
 
 
@@ -63,6 +69,61 @@ def c_compiler(cpp=False):
         if p:
             return p
     return None
+
+
+def _wsl_pfad(p):
+    """C:\\a\\b -> /mnt/c/a/b (WSL-Standard-Mount)."""
+    if not (len(p) > 1 and p[1] == ':'):
+        p = os.path.abspath(p)
+    if len(p) > 1 and p[1] == ':':
+        return '/mnt/' + p[0].lower() + p[2:].replace('\\', '/')
+    return p.replace('\\', '/')
+
+
+@functools.lru_cache(maxsize=1)
+def openfoam():
+    """OpenFOAM finden (seit 19.11.2026): {'art': 'nativ'|'wsl', 'bashrc': Pfad oder None} oder None.
+    Reihenfolge: MB2_OPENFOAM_BASHRC, foamRun im PATH, /opt/openfoam*/etc/bashrc, ~/OpenFOAM/OpenFOAM-*/etc/bashrc;
+    unter Windows dasselbe in WSL."""
+    eigen = os.environ.get('MB2_OPENFOAM_BASHRC')
+    if os.name == 'nt':
+        if not shutil.which('wsl'):
+            return None
+        such = eigen or '$(ls -d /opt/openfoam*/etc/bashrc $HOME/OpenFOAM/OpenFOAM-*/etc/bashrc 2>/dev/null | tail -1)'
+        try:
+            r = subprocess.run(['wsl', '-e', 'bash', '-lc', f'f={such}; [ -n "$f" ] && . "$f" && command -v foamRun >/dev/null && echo "$f"'],
+                               capture_output=True, text=True, timeout=60, stdin=subprocess.DEVNULL)
+        except (OSError, subprocess.SubprocessError):
+            return None
+        f = r.stdout.strip().splitlines()
+        return {'art': 'wsl', 'bashrc': f[-1]} if r.returncode == 0 and f else None
+    if eigen and os.path.exists(eigen):
+        return {'art': 'nativ', 'bashrc': eigen}
+    if shutil.which('foamRun'):
+        return {'art': 'nativ', 'bashrc': None}
+    kand = glob.glob('/opt/openfoam*/etc/bashrc') + glob.glob(os.path.expanduser('~/OpenFOAM/OpenFOAM-*/etc/bashrc'))
+    return {'art': 'nativ', 'bashrc': _newest_liste(kand)} if kand else None
+
+
+def _newest_liste(kand):
+    key = lambda h: [int(x) if x.isdigit() else 0 for x in re.split(r'[.\-+_\\/]', h)]  # noqa: E731
+    return sorted(kand, key=key)[-1]
+
+
+def openfoam_befehl(arbeit, befehl):
+    """Befehlszeile fuer einen OpenFOAM-Aufruf im Fallordner (nativ oder ueber WSL)."""
+    of = openfoam()
+    if not of:
+        raise RuntimeError('OpenFOAM fehlt - ' + INSTALL['openfoam'])
+    quelle = f'. "{of["bashrc"]}" && ' if of.get('bashrc') else ''
+    if of['art'] == 'wsl':
+        return ['wsl', '-e', 'bash', '-lc', f'{quelle}cd "{_wsl_pfad(arbeit)}" && {befehl}']
+    return ['bash', '-lc', f'{quelle}cd "{arbeit}" && {befehl}']
+
+
+def openfoam_ausfuehren(arbeit, befehl, timeout=7200):
+    return subprocess.run(openfoam_befehl(arbeit, befehl), capture_output=True, text=True, timeout=timeout,
+                          stdin=subprocess.DEVNULL)
 
 
 def ccx_env():
@@ -169,3 +230,54 @@ def status():
 if __name__ == '__main__':
     import json
     print(json.dumps(status(), indent=1))
+
+
+# ---------------------------------------------------------------- Einrichten nach Bedarf (seit 19.11.2026)
+
+# Nur Befehle, die in diesem Projekt tatsaechlich gelaufen sind (Ubuntu 24.04); alles andere ist Anleitung.
+GEPRUEFT = {
+    'ccx': {'linux': ['sudo', '-n', 'apt-get', 'install', '-y', 'calculix-ccx']},
+    'gcc': {'linux': ['sudo', '-n', 'apt-get', 'install', '-y', 'gcc']},
+}
+ANLEITUNG_WINDOWS = {
+    'elmer': 'Windows nativ: Installer von nic.funet.fi/pub/sci/physics/elmer/bin/windows/ (siehe INSTALL). '
+             'Oder WSL laut github.com/ElmerCSC/elmer-wsl: "wsl --install --no-distribution", elmer-wsl.tar.gz aus dem '
+             'neuesten Release laden, "wsl --import Elmer --version 2 $env:USERPROFILE\\Elmer-WSL\\ elmer-wsl.tar.gz"',
+}
+
+
+def _vorhanden():
+    def probe(fn):
+        try:
+            return bool(fn())
+        except Exception:  # noqa: BLE001
+            return False
+    return {'ccx': bool(ccx()), 'elmer': bool(elmer_bin()), 'openfoam': bool(openfoam()), 'gcc': bool(c_compiler()),
+            'prusaslicer': probe(prusa_slicer), 'kicad': probe(kicad_home)}
+
+
+def einrichten(werkzeug=None, ausfuehren=False):
+    """Status + Weg zum Einrichten je Werkzeug. ausfuehren nur fuer GEPRUEFT-Befehle (nach Zustimmung des Nutzers)."""
+    da = _vorhanden()
+    ziel = [werkzeug] if werkzeug else [w for w, ok in da.items() if not ok]
+    sys_ = 'windows' if os.name == 'nt' else 'linux'
+    out = {'vorhanden': da, 'fehlt': [w for w, ok in da.items() if not ok], 'schritte': {}}
+    for w in ziel:
+        if w not in da:
+            out['schritte'][w] = {'fehler': f'unbekannt ({", ".join(da)})'}
+            continue
+        befehl = (GEPRUEFT.get(w) or {}).get(sys_)
+        s = {'vorhanden': da[w], 'anleitung': (ANLEITUNG_WINDOWS.get(w) if sys_ == 'windows' else None) or INSTALL.get(w, ''),
+             'befehl': ' '.join(befehl) if befehl else None}
+        if ausfuehren and befehl and not da[w]:
+            try:
+                r = subprocess.run(befehl, capture_output=True, text=True, timeout=1800, stdin=subprocess.DEVNULL)
+                s['ausgefuehrt'] = {'exit': r.returncode, 'ausgabe': (r.stdout + r.stderr)[-800:]}
+            except (OSError, subprocess.SubprocessError) as ex:
+                s['ausgefuehrt'] = {'exit': None, 'ausgabe': str(ex)}
+            openfoam.cache_clear()
+            s['vorhanden_danach'] = _vorhanden()[w]
+        elif ausfuehren and not befehl:
+            s['hinweis'] = 'kein geprueft hinterlegter Befehl - Anleitung von Hand ausfuehren'
+        out['schritte'][w] = s
+    return out

@@ -207,3 +207,7 @@ Pflichtzone je Funkmodul aus dem Datenblatt, in `bauteile.json → antenne.keepo
 | `_projekt.daten {datensatz_bytes, intervall_s, speicher_bytes, reserve_anteil, aufbewahrung_h, uebertragung {pakete_je_h, nutzdaten_bytes_je_paket, luftzeit_s_je_paket, duty_max \| rate_bit_s, ueberhang_bytes_je_paket, nutzanteil}, schreibzyklen_max, schreibblock_bytes, puffer_datensaetze}` | Datenbudget | DS1–DS3 |
 | Teil `verfahren: "extern" \| "kaufteil"` + `fertigung {name, sigma_mm, wand_min_mm, spalt_min_mm}`, `_herkunft.fertigung` | nicht gedruckte Teile: Prozessgrenzen des Verfahrens, Wareneingang AB-WE-* | T1, cad_build, S-FERTIGUNG-* |
 | Kanal `rauigkeit_mm`, `einzelverluste [{name, zeta}]` | turbulente Strömung, Einzelverluste | FL2 |
+| `cfd/<fall>.json {loeser: openfoam\|elmer, geometrie {step \| kanal {d_mm, L_mm}}, einlass {wo, Q_ml_min, T_C, c}, auslass {wo}, medium {...}, wand {T_C}, netz, netzstudie, iterationen, modell}` | CFD-Fall (Befehle `cfd_vorbereiten`, `cfd_rechnen`) | FL5–FL7 |
+| Kanal `teil`; Teil `fertigung.min_kanal_mm`; `_projekt.fdm_min_kanal_mm` | Mindestkanal des Verfahrens | FL8 |
+| `_projekt.stoff {benetzt, medien, bestaendigkeit, mischung, ansprechen, drift}` | Stoffkontakt | CH1–CH4 |
+| `messkette.profil: "wandler"`, `prinzip` (beer_lambert, amperometrisch_grenzstrom, differenzdruck_laminar, linear_tk, kings_law), `eingaben {name: {wert, u}}`, `arbeitspunkte`, `faktor` | selbst gebautes Messprinzip, GUM + Monte-Carlo | MK1 |

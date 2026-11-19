@@ -39,3 +39,10 @@ Lücken aus dem Machbarkeits-Challenge (Durchflusssensor als Prüffall, 19.11.20
 3. Nur FDM → `verfahren: extern|kaufteil` mit Prozessstreuung in T1, Verfahrensgrenzen in cad_build, Wareneingang AB-WE-*.
 4. Strömung nur laminar → FL2 turbulent (Blasius/Colebrook) und Einzelverluste; Übergangsbereich ehrlich ohne Formel.
 5. Handarbeit am Gerät bleibt (Bauen, Kalibrieren, Fehler auslösen) – die Bridge plant und belegt sie (Abnahme), führt sie nicht aus.
+
+Mehrphysik-Erweiterung (19.11.2026, für selbst gebaute Sensoren und Fluidik, vorbereitet für den Nutzer-Rechner):
+- CFD loeserneutral (`mb2/cfd.py`): OpenFOAM 12 (`foamRun`/`incompressibleFluid`, `scalarTransport`, `gmshToFoam`) und Elmer (FlowSolve, HeatSolve, AdvectionDiffusion). Schlüsselwörter aus den offiziellen Tutorials/Tests auf GitHub geprüft (Dokumentationsserver waren gesperrt). FL5 Code-Verifikation, FL6 Massenbilanz, FL7 Netzstudie.
+- Profil `wandler`: Beer-Lambert, amperometrischer Grenzstrom, Differenzdruck laminar, lineare Kennlinie mit TK, King; GUM + Monte-Carlo.
+- `stoff.py` CH1–CH4: Beständigkeit belegt, Mischlänge, Diffusions-Ansprechzeit, Drift durch Belag.
+- FL8 Mindestkanal des Verfahrens; Befehl `werkzeug_einrichten` (nur geprüfte Befehle, nur nach Zustimmung); Agent `mb2-fluidik`.
+- **Nicht hier gelaufen:** Löserläufe (`test_openfoam_poiseuille`, `test_elmer_poiseuille`) – erst auf dem Nutzer-Rechner. Bis dahin sind OpenFOAM-/Elmer-Fälle nur erzeugt, nicht gerechnet.
