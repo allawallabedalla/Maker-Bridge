@@ -354,6 +354,10 @@ def test_e15_gehaeuse_hoechstens_warnung():
     zone = {'netz': '', 'regel': True, 'kein_kupfer': True, 'lagen': ['F.Cu'], 'fp': None,
             'umriss': [{'aussen': [[-3, -3], [3, -3], [3, 3], [-3, 3]], 'loecher': []}]}
     pl = _platine(teile, netze, zonen=[zone])
+    e = eintrag(el.pruefe_e15(pl), 'E15')        # ohne Pflichtzone: Groesse/Lage ungeprueft -> hoechstens warnung
+    assert e['stufe'] == 'warnung' and 'Pflichtzone fehlt' in e['hinweis'], e
+    geo = {'AE1': {'rechteck_mm': [-2, -2, 2, 2], 'quelle': 'TESTFIXTURE'}}
+    pl = _platine(teile, netze, zonen=[dict(zone, lagen=['F.Cu', 'B.Cu'])], projekt={'elektronik': {'keepout': geo}})
     assert eintrag(el.pruefe_e15(pl), 'E15')['stufe'] == 'ok'
     d = tempfile.mkdtemp(prefix='mb2_e15_')
     os.makedirs(os.path.join(d, 'electronics'))
@@ -361,6 +365,32 @@ def test_e15_gehaeuse_hoechstens_warnung():
     pl.pdir = d
     e = eintrag(el.pruefe_e15(pl), 'E15')
     assert e['stufe'] == 'warnung' and 'hoechstens warnung' in e['hinweis'], e
+
+
+def test_e15_pflichtzone_groesse_lage_und_drehung():
+    teile = {'AE1': ('ANT', 'RF_Antenna:Test', {})}
+    netze = {'/RF': [('AE1', '1', 'A', 'passive')]}
+    zone = {'netz': '', 'regel': True, 'kein_kupfer': True, 'lagen': ['F.Cu', 'B.Cu'], 'fp': None,
+            'umriss': [{'aussen': [[-3, -1.5], [3, -1.5], [3, 1.5], [-3, 1.5]], 'loecher': []}]}
+    # Pflichtzone 6 x 6 mm, Sperrflaeche nur 6 x 3 mm -> zu klein -> fehler
+    geo = {'AE1': {'rechteck_mm': [-3, -3, 3, 3], 'quelle': 'TESTFIXTURE'}}
+    e = eintrag(el.pruefe_e15(_platine(teile, netze, zonen=[zone], projekt={'elektronik': {'keepout': geo}})), 'E15')
+    assert e['stufe'] == 'fehler' and '%' in e['hinweis'], e
+    # nur auf F.Cu -> B.Cu nicht abgedeckt -> fehler
+    geo = {'AE1': {'rechteck_mm': [-2, -0.5, 2, 0.5], 'quelle': 'TESTFIXTURE'}}
+    e = eintrag(el.pruefe_e15(_platine(teile, netze, zonen=[dict(zone, lagen=['F.Cu'])],
+                                       projekt={'elektronik': {'keepout': geo}})), 'E15')
+    assert e['stufe'] == 'fehler', e
+    # Kontrollpad passt nicht zur Drehung -> fehler (Pad liegt bei 0/0, erwartet 1/0)
+    geo = {'AE1': {'rechteck_mm': [-2, -0.5, 2, 0.5], 'quelle': 'TESTFIXTURE', 'kontrolle_pad': {'nr': '1', 'pos_mm': [1, 0]}}}
+    e = eintrag(el.pruefe_e15(_platine(teile, netze, zonen=[zone], projekt={'elektronik': {'keepout': geo}})), 'E15')
+    assert e['stufe'] == 'fehler' and 'Kontrollpad' in e['hinweis'], e
+
+
+def test_fp_nach_platine_drehung():
+    f = {'pos': [10, 20], 'rot': 90, 'seite': 'F'}
+    x, y = el.fp_nach_platine(f, 1, 0)      # +x lokal, 90 Grad CCW auf dem Bildschirm (y nach unten) -> -y
+    assert abs(x - 10) < 1e-9 and abs(y - 19) < 1e-9, (x, y)
 
 
 def _modul_projekt(projekt):

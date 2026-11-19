@@ -4,7 +4,7 @@ Klassifiziert wird je Testfunktion. **Nicht ausgeführt heißt nicht bestanden.*
 
 | Klasse | Funktionen | Bedeutung |
 |---|---|---|
-| bestanden | 216 | lief durch |
+| bestanden | 218 | lief durch |
 | beispielprojekt_fehlt | 16 | braucht `projects/<name>` (gitignored) oder `../maker-bridge/projects/` |
 | werkzeug_fehlt | 14 | CalculiX (8) bzw. Elmer (6) nicht installiert, im Container nicht verfügbar |
 | lauf_nicht_angefordert | 1 | `test_taster_echt_lang` nur mit `MB2_LANG=1` |

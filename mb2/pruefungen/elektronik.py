@@ -2242,6 +2242,62 @@ def _rechteck(h):
     return [[x0, y0], [x1, y0], [x1, y1], [x0, y1]]
 
 
+def fp_nach_platine(f, x, y):
+    """Punkt in Footprint-Koordinaten (mm, KiCad: y nach unten, unrotiert, Oberseite) -> Platinenkoordinaten.
+    KiCad-Drehung positiv = gegen den Uhrzeigersinn auf dem Bildschirm; Unterseite spiegelt x. Die Richtung wird mit
+    'kontrolle_pad' am echten Board gegengeprueft (pruefe_e15)."""
+    if f.get('seite') == 'B':
+        x = -x
+    a = math.radians(f.get('rot', 0) or 0)
+    return (f['pos'][0] + x * math.cos(a) + y * math.sin(a), f['pos'][1] - x * math.sin(a) + y * math.cos(a))
+
+
+def _keepout_geometrie(pl, ref):
+    """Pflicht-Sperrzone aus soll.json _projekt.elektronik.keepout[ref] oder bauteile.json antenne.keepout (dict):
+    {"rechteck_mm": [x0, y0, x1, y1] (Footprint-Koordinaten), "kontrolle_pad": {"nr": "1", "pos_mm": [x, y]},
+     "ueber_kante_erlaubt": true, "quelle": "Datenblatt S. .."}. True/fehlend -> None."""
+    p = (((pl.ps or {}).get('elektronik') or {}).get('keepout') or {}).get(ref)
+    if p is None:
+        p = ((pl.dbe.get(ref) or {}).get('antenne') or {}).get('keepout')
+    return p if isinstance(p, dict) and p.get('rechteck_mm') else None
+
+
+def _keepout_abdeckung(pl, ref, geo, sperr):
+    """(Anteil der Pflichtzone auf der Platine, der auf JEDER Kupferlage von Sperrflaechen abgedeckt ist, Text,
+    Fehler der Transformationskontrolle oder None)."""
+    f = next(b for b in pl.lay['bauteile'] if b['ref'] == ref)
+    kp, kontrolle = geo.get('kontrolle_pad'), None
+    if kp:
+        pad = next((p for p in f['pads'] if str(p['nr']) == str(kp['nr'])), None)
+        if pad is None:
+            kontrolle = f'Kontrollpad {kp["nr"]} fehlt am Footprint'
+        else:
+            soll = fp_nach_platine(f, *kp['pos_mm'])
+            d = math.dist(soll, pad['pos'])
+            if d > 0.2:
+                kontrolle = (f'Kontrollpad {kp["nr"]}: erwartet {soll[0]:.2f}/{soll[1]:.2f}, Board {pad["pos"][0]:.2f}/'
+                             f'{pad["pos"][1]:.2f} mm ({d:.2f} mm daneben) - Footprint-Koordinaten oder Drehung pruefen')
+    x0, y0, x1, y1 = geo['rechteck_mm']
+    (bx0, by0), (bx1, by1) = pl.lay['rand']
+    lagen = [l for l in pl.lay.get('lagen', ['F.Cu', 'B.Cu']) if l.endswith('.Cu')]
+    n = 24
+    innen = gedeckt = 0
+    for i in range(n + 1):
+        for j in range(n + 1):
+            px, py = fp_nach_platine(f, x0 + (x1 - x0) * i / n, y0 + (y1 - y0) * j / n)
+            if not (bx0 <= px <= bx1 and by0 <= py <= by1):
+                if not geo.get('ueber_kante_erlaubt', True):
+                    innen += 1      # ausserhalb der Platine ist nicht erlaubt -> zaehlt als nicht gedeckt
+                continue
+            innen += 1
+            if all(any(lage in z['lagen'] and in_flaeche(px, py, [{'aussen': p['aussen'], 'loecher': p['loecher']}])
+                       for z in sperr for p in z['umriss']) for lage in lagen):
+                gedeckt += 1
+    anteil = gedeckt / innen if innen else 1.0
+    return anteil, f'Pflicht-Sperrzone ({geo.get("quelle", "Quelle fehlt")}) zu {anteil * 100:.0f} % auf allen ' \
+                   f'Kupferlagen ({", ".join(lagen)}) abgedeckt', kontrolle
+
+
 def pruefe_e15(pl):
     if pl.ohne_kicad:
         fm = [m for m in pl.module if m.get('funk')]
@@ -2295,6 +2351,24 @@ def pruefe_e15(pl):
         hin = (f'{ref}: {len(sperr)} Sperrflaeche(n) am Antennenbereich, ' +
                ('Kupfer darin: ' + ', '.join(treffer[:12]) if treffer else 'kein Kupfer darin')
                + '; Metall im Gehaeuse >= lambda/10 Abstand nicht geprueft (Gehaeuse-3D)')
+        # Groesse und Lage (seit 19.11.2026): ohne Pflichtzone aus dem Datenblatt hoechstens warnung
+        geo = _keepout_geometrie(pl, ref)
+        if geo is None:
+            if st == 'ok':
+                st = 'warnung'
+            hin += ('; Groesse/Lage der Sperrflaeche NICHT geprueft: Pflichtzone fehlt (antenne.keepout.rechteck_mm in '
+                    'bauteile.json oder _projekt.elektronik.keepout aus dem Datenblatt)')
+        else:
+            anteil, txt, kontrolle = _keepout_abdeckung(pl, ref, geo, sperr)
+            hin += '; ' + txt
+            if kontrolle:
+                st = 'fehler'
+                hin += '; ' + kontrolle
+            elif anteil < 0.999:
+                st = 'fehler'
+                hin += ' - Sperrflaeche vergroessern/verschieben, bis die Pflichtzone voll abgedeckt ist'
+            if not geo.get('quelle') and st == 'ok':
+                st = 'warnung'
         geh = pl.gehaeuse_da()
         if st == 'ok' and geh:
             st = 'warnung'

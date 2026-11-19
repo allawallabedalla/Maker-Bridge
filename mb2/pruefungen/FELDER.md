@@ -184,3 +184,12 @@ Zusätzliche Eingaben:
 - `ziele.zeit_h_pro_woche` (X5)
 
 Alle übrigen Werte kommen aus `ziele`, `messkette`, `anforderungen.json`, `messung.json` und `kosten.json`.
+
+## Antennen-Sperrzone E15 (seit 19.11.2026)
+
+Pflichtzone je Funkmodul aus dem Datenblatt, in `bauteile.json → antenne.keepout` oder je Projekt in `_projekt.elektronik.keepout[ref]`:
+`{"rechteck_mm": [x0, y0, x1, y1], "kontrolle_pad": {"nr": "1", "pos_mm": [x, y]}, "ueber_kante_erlaubt": true, "quelle": "Datenblatt S. …"}`.
+- Koordinaten in Footprint-Koordinaten (KiCad, y nach unten, unrotiert, Oberseite).
+- Das Kontrollpad prüft die Umrechnung am echten Board (Abweichung über 0,2 mm ergibt `fehler`).
+- E15 verlangt, dass die Zone auf **allen** Kupferlagen von Sperrflächen abgedeckt ist. Teile außerhalb der Platine zählen nur mit `ueber_kante_erlaubt`.
+- Fehlt die Pflichtzone, gibt es höchstens `warnung`.
