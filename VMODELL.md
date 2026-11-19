@@ -108,6 +108,21 @@ Darum gibt es zwei Ebenen:
 - Jede Eigenschaft im `messtechnik`-Block braucht einen eigenen Nachweis. Fehlen dieser Nachweis oder die `bedingungen`, ist das ein Matrix-Mangel.
 - Konformität mit Schutzband (ILAC-G8): Kennwert + U_prüf ≤ Grenze → bewiesen. Kennwert ≤ Grenze < Kennwert + U_prüf → vorbehalt. Kennwert > Grenze → verletzt.
 - Merkmal `messung` (Messkette im soll oder `messtechnik` im Lastenheft) macht ein Überspringen von MK1/MK2 zum Fehler.
+- **Datenstatus je Messreihe (Pflicht):** `rueckfuehrbar_gemessen` | `gemessen_nicht_rueckfuehrbar` | `demonstrationsdaten_nicht_rueckfuehrbar` | `simuliert`.
+  - Nur `rueckfuehrbar_gemessen` kann beweisen. Dafür nötig: Sensor-ID, Seriennummer, Datum, Verfahren und an der Referenz Mittel, Seriennummer, Kalibrierschein, Rückführung, U, Gültigkeit. Fehlt etwas, gilt `nachweisdaten_unvollstaendig`.
+  - Alle anderen Datenstatus werden ausgewertet und gezeigt (`auswertung_status`), bleiben aber `unbewiesen`.
+- **Prüfunsicherheit** U_prüf = 2·√(u_ref² + Σ `pruefunsicherheit` + (s/√n)²). Dazu gehören thermische Kopplung, Eintauchtiefe und Homogenität des Mediums.
+- **Protokoll** `pruef/messprotokoll.md`. Je Nachweis: gemessene Abweichung, zulässige Abweichung, U_prüf, Akzeptanzgrenze (Grenze − U_prüf), Entscheidungsregel, Fehlentscheidungsrisiko, Status, Gründe. Dazu je Messpunkt n, Mittelwert, s und Abweichung.
+- **Messtechnische Freigabe** (`v_matrix.messtechnische_freigabe`):
+  - `nicht_freigegeben`: eine messtechnische Anforderung (Block `messtechnik` oder Nachweis MK*) ist nicht bewiesen.
+  - `bereit_zur_menschlichen_freigabe`: alles bewiesen, aber noch keine menschliche Freigabe.
+  - `freigegeben`: nur mit `freigabe.json`, die ein Mensch über `anforderungen.messtechnik_freigeben(pdir, name)` von Hand schreibt. Kein MCP-Befehl. Die Freigabe ist an den Kontext-Hash gebunden, jede Änderung macht sie ungültig.
+  - „fertig“ verlangt bei messtechnischen Projekten `freigegeben`.
+- Fehlt eine Pflichteingabe und schlägt deshalb ein Auslöser an, steht in der V-Matrix `unbewiesen`, nicht `verletzt`. Im Katalog bleibt es ein `fehler`.
+- **Sensorprofile** (`mb2/sensorprofile/`):
+  - Die Modellgleichung liefert numerische Sensitivitäten (`budget_aus_modell`).
+  - Das erste Profil ist `rtd_ratiometrisch_3leiter`: IEC 60751, IDAC-Tausch, MK4-Bauteilgrenzen. Bauteilgrenzen sind Daten, keine eingebauten Datenblattwerte.
+  - Der Demonstrator dazu liegt unter `demonstratoren/MB2-TEMP-001/`.
 - Grenze: Der KI-Prüfer organisiert und rechnet den Nachweis. Beweiskraft hat nur die Messung mit rückführbarer Referenz. Eine kritische Freigabe macht ein Mensch.
 
 ## Befehle (MCP mb2)

@@ -1,0 +1,3930 @@
+{
+ "hinweis": "ALLE Reihen sind Demonstrationsdaten (datenstatus demonstrationsdaten_nicht_rueckfuehrbar). Echte Reihen mit messreihe_eintragen und datenstatus rueckfuehrbar_gemessen ersetzen sie.",
+ "reihen": [
+  {
+   "id": "R-BER-1",
+   "eigenschaft": "messbereich",
+   "datenstatus": "demonstrationsdaten_nicht_rueckfuehrbar",
+   "herkunft_daten": "synthetisch: ist = t + 0,08 + 0,0006 (t - 40) + 0,00002 (t - 40)^2 + (i mod 5 - 2) * 0,005 (+0,03 abwaerts); demonstriert nur die Auswertung, KEINE Messung",
+   "sensor_id": "DEMO",
+   "seriennummer": null,
+   "datum": "2026-11-19",
+   "verfahren": "PRUEFPLAN.md (Demo)",
+   "referenz": {
+    "mittel": "DEMO - kein Referenzthermometer",
+    "seriennummer": null,
+    "U": 0.03,
+    "k": 2,
+    "einheit": "°C",
+    "kalibrierschein": null,
+    "rueckfuehrung": null,
+    "gueltig_bis": null
+   },
+   "bedingungen": {
+    "T_umgebung_C": 23,
+    "U_versorgung_V": 3.3,
+    "einschwingzeit_min_s": 600,
+    "messrate_Hz": 5
+   },
+   "punkte": [
+    {
+     "ref": -20,
+     "ist": -19.894,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.889,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.884,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.879,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.874,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.894,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.889,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.884,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.879,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.874,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.078,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.083,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.088,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.093,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.098,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.078,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.083,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.088,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.093,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.098,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.07,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.075,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.08,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.085,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.09,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.07,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.075,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.08,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.085,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.09,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.066,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.071,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.076,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.081,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.086,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.066,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.071,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.076,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.081,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.086,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.066,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.071,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.076,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.081,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.086,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.066,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.071,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.076,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.081,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.086,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.07,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.075,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.08,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.085,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.09,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.07,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.075,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.08,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.085,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.09,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.078,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.083,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.088,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.093,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.098,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.078,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.083,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.088,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.093,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.098,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.106,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.111,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.116,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.121,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.126,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.106,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.111,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.116,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.121,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.126,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.178,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.183,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.188,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.193,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.198,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.178,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.183,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.188,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.193,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.198,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    }
+   ],
+   "pruefunsicherheit_offen": "thermische Kopplung, Badinhomogenitaet: per Eintauchtiefenversuch bestimmen (PRUEFPLAN.md)"
+  },
+  {
+   "id": "R-GEN-1",
+   "eigenschaft": "genauigkeit",
+   "datenstatus": "demonstrationsdaten_nicht_rueckfuehrbar",
+   "herkunft_daten": "synthetisch: ist = t + 0,08 + 0,0006 (t - 40) + 0,00002 (t - 40)^2 + (i mod 5 - 2) * 0,005 (+0,03 abwaerts); demonstriert nur die Auswertung, KEINE Messung",
+   "sensor_id": "DEMO",
+   "seriennummer": null,
+   "datum": "2026-11-19",
+   "verfahren": "PRUEFPLAN.md (Demo)",
+   "referenz": {
+    "mittel": "DEMO - kein Referenzthermometer",
+    "seriennummer": null,
+    "U": 0.03,
+    "k": 2,
+    "einheit": "°C",
+    "kalibrierschein": null,
+    "rueckfuehrung": null,
+    "gueltig_bis": null
+   },
+   "bedingungen": {
+    "T_umgebung_C": 23,
+    "U_versorgung_V": 3.3,
+    "einschwingzeit_min_s": 600,
+    "messrate_Hz": 5
+   },
+   "punkte": [
+    {
+     "ref": -20,
+     "ist": -19.894,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.889,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.884,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.879,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.874,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.894,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.889,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.884,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.879,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.874,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.078,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.083,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.088,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.093,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.098,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.078,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.083,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.088,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.093,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.098,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.07,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.075,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.08,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.085,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.09,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.07,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.075,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.08,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.085,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.09,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.066,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.071,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.076,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.081,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.086,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.066,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.071,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.076,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.081,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.086,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.066,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.071,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.076,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.081,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.086,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.066,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.071,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.076,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.081,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.086,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.07,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.075,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.08,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.085,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.09,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.07,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.075,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.08,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.085,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.09,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.078,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.083,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.088,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.093,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.098,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.078,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.083,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.088,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.093,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.098,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.106,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.111,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.116,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.121,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.126,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.106,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.111,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.116,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.121,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.126,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.178,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.183,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.188,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.193,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.198,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.178,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.183,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.188,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.193,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.198,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    }
+   ],
+   "pruefunsicherheit_offen": "thermische Kopplung, Badinhomogenitaet: per Eintauchtiefenversuch bestimmen (PRUEFPLAN.md)"
+  },
+  {
+   "id": "R-LIN-1",
+   "eigenschaft": "linearitaet",
+   "datenstatus": "demonstrationsdaten_nicht_rueckfuehrbar",
+   "herkunft_daten": "synthetisch: ist = t + 0,08 + 0,0006 (t - 40) + 0,00002 (t - 40)^2 + (i mod 5 - 2) * 0,005 (+0,03 abwaerts); demonstriert nur die Auswertung, KEINE Messung",
+   "sensor_id": "DEMO",
+   "seriennummer": null,
+   "datum": "2026-11-19",
+   "verfahren": "PRUEFPLAN.md (Demo)",
+   "referenz": {
+    "mittel": "DEMO - kein Referenzthermometer",
+    "seriennummer": null,
+    "U": 0.03,
+    "k": 2,
+    "einheit": "°C",
+    "kalibrierschein": null,
+    "rueckfuehrung": null,
+    "gueltig_bis": null
+   },
+   "bedingungen": {
+    "T_umgebung_C": 23,
+    "U_versorgung_V": 3.3,
+    "einschwingzeit_min_s": 600,
+    "messrate_Hz": 5
+   },
+   "punkte": [
+    {
+     "ref": -20,
+     "ist": -19.894,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.889,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.884,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.879,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.874,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.894,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.889,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.884,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.879,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.874,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.078,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.083,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.088,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.093,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.098,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.078,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.083,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.088,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.093,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.098,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.07,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.075,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.08,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.085,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.09,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.07,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.075,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.08,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.085,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.09,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.066,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.071,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.076,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.081,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.086,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.066,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.071,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.076,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.081,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.086,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.066,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.071,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.076,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.081,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.086,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.066,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.071,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.076,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.081,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.086,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.07,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.075,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.08,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.085,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.09,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.07,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.075,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.08,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.085,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.09,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.078,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.083,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.088,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.093,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.098,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.078,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.083,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.088,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.093,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.098,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.106,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.111,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.116,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.121,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.126,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.106,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.111,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.116,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.121,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.126,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.178,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.183,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.188,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.193,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.198,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.178,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.183,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.188,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.193,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.198,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    }
+   ],
+   "pruefunsicherheit_offen": "thermische Kopplung, Badinhomogenitaet: per Eintauchtiefenversuch bestimmen (PRUEFPLAN.md)"
+  },
+  {
+   "id": "R-WDH-1",
+   "eigenschaft": "wiederholbarkeit",
+   "datenstatus": "demonstrationsdaten_nicht_rueckfuehrbar",
+   "herkunft_daten": "synthetisch: ist = t + 0,08 + 0,0006 (t - 40) + 0,00002 (t - 40)^2 + (i mod 5 - 2) * 0,005 (+0,03 abwaerts); demonstriert nur die Auswertung, KEINE Messung",
+   "sensor_id": "DEMO",
+   "seriennummer": null,
+   "datum": "2026-11-19",
+   "verfahren": "PRUEFPLAN.md (Demo)",
+   "referenz": {
+    "mittel": "DEMO - kein Referenzthermometer",
+    "seriennummer": null,
+    "U": 0.03,
+    "k": 2,
+    "einheit": "°C",
+    "kalibrierschein": null,
+    "rueckfuehrung": null,
+    "gueltig_bis": null
+   },
+   "bedingungen": {
+    "T_umgebung_C": 23,
+    "U_versorgung_V": 3.3,
+    "einschwingzeit_min_s": 600,
+    "messrate_Hz": 5
+   },
+   "punkte": [
+    {
+     "ref": -20,
+     "ist": -19.894,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.889,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.884,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.879,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.874,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.894,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.889,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.884,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.879,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.874,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.078,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.083,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.088,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.093,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.098,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.078,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.083,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.088,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.093,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.098,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.07,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.075,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.08,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.085,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.09,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.07,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.075,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.08,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.085,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.09,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.066,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.071,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.076,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.081,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.086,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.066,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.071,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.076,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.081,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.086,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.066,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.071,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.076,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.081,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.086,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.066,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.071,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.076,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.081,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.086,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.07,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.075,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.08,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.085,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.09,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.07,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.075,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.08,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.085,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.09,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.078,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.083,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.088,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.093,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.098,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.078,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.083,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.088,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.093,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.098,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.106,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.111,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.116,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.121,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.126,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.106,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.111,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.116,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.121,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.126,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.178,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.183,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.188,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.193,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.198,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.178,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.183,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.188,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.193,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.198,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    }
+   ],
+   "pruefunsicherheit_offen": "thermische Kopplung, Badinhomogenitaet: per Eintauchtiefenversuch bestimmen (PRUEFPLAN.md)"
+  },
+  {
+   "id": "R-HYS-1",
+   "eigenschaft": "hysterese",
+   "datenstatus": "demonstrationsdaten_nicht_rueckfuehrbar",
+   "herkunft_daten": "synthetisch: ist = t + 0,08 + 0,0006 (t - 40) + 0,00002 (t - 40)^2 + (i mod 5 - 2) * 0,005 (+0,03 abwaerts); demonstriert nur die Auswertung, KEINE Messung",
+   "sensor_id": "DEMO",
+   "seriennummer": null,
+   "datum": "2026-11-19",
+   "verfahren": "PRUEFPLAN.md (Demo)",
+   "referenz": {
+    "mittel": "DEMO - kein Referenzthermometer",
+    "seriennummer": null,
+    "U": 0.03,
+    "k": 2,
+    "einheit": "°C",
+    "kalibrierschein": null,
+    "rueckfuehrung": null,
+    "gueltig_bis": null
+   },
+   "bedingungen": {
+    "T_umgebung_C": 23,
+    "U_versorgung_V": 3.3,
+    "einschwingzeit_min_s": 600,
+    "messrate_Hz": 5
+   },
+   "punkte": [
+    {
+     "ref": -20,
+     "ist": -19.894,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.889,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.884,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.879,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.874,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.894,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.889,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.884,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.879,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.874,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.078,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.083,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.088,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.093,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.098,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.078,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.083,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.088,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.093,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.098,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.07,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.075,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.08,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.085,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.09,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.07,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.075,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.08,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.085,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.09,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.066,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.071,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.076,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.081,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.086,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.066,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.071,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.076,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.081,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.086,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.066,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.071,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.076,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.081,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.086,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.066,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.071,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.076,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.081,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.086,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.07,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.075,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.08,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.085,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.09,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.07,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.075,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.08,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.085,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.09,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.078,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.083,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.088,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.093,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.098,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.078,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.083,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.088,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.093,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.098,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.106,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.111,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.116,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.121,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.126,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.106,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.111,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.116,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.121,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.126,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.178,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.183,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.188,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.193,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.198,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.178,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.183,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.188,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.193,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.198,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.864,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.859,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.854,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.849,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.844,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.864,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.859,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.854,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.849,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.844,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.108,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.113,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.118,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.123,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.128,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.108,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.113,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.118,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.123,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 0,
+     "ist": 0.128,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.1,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.105,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.11,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.115,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.12,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.1,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.105,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.11,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.115,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 10,
+     "ist": 10.12,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.096,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.101,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.106,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.111,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.116,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.096,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.101,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.106,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.111,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 20,
+     "ist": 20.116,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.096,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.101,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.106,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.111,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.116,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.096,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.101,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.106,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.111,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 30,
+     "ist": 30.116,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.1,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.105,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.11,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.115,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.12,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.1,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.105,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.11,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.115,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 40,
+     "ist": 40.12,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.108,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.113,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.118,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.123,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.128,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.108,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.113,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.118,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.123,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 50,
+     "ist": 50.128,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.136,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.141,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.146,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.151,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.156,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.136,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.141,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.146,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.151,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 70,
+     "ist": 70.156,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.208,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.213,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.218,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.223,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.228,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.208,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.213,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.218,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.223,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": 100,
+     "ist": 100.228,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    }
+   ],
+   "pruefunsicherheit_offen": "thermische Kopplung, Badinhomogenitaet: per Eintauchtiefenversuch bestimmen (PRUEFPLAN.md)"
+  }
+ ]
+}

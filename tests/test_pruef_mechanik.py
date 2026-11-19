@@ -12,6 +12,8 @@ import sys
 import tempfile
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _nachweis import beispielprojekt, lang  # noqa: E402,F401
 
 from build123d import Align, Axis, Box, Pos, export_step, fillet  # noqa: E402
 
@@ -481,7 +483,7 @@ def test_m6_netz_an_echter_kehle():
 # ================================================================ Kopien echter Projekte
 
 def _kopie(name, tmp):
-    src = os.path.join(PROJEKTE, name)
+    src = beispielprojekt(os.path.join(PROJEKTE, name))
     dst = os.path.join(tmp, name)
     for sub in ('cad', 'out', 'print', 'fem', 'electronics'):
         s = os.path.join(src, sub)
@@ -566,7 +568,7 @@ def test_echt_testdose_deckel():
 
 def test_echt_alle_projekte_laufen():
     for name in ('testdose', 'schnapphaken', 'stifthalter-fem', 'frag-mich-alles-gehaeuse', 'bodenklima-sondenkopf'):
-        e = M.pruefe(os.path.join(PROJEKTE, name))
+        e = M.pruefe(beispielprojekt(os.path.join(PROJEKTE, name)))
         assert e, name
         assert not any('Absturz' in x['titel'] for x in e), (name, [x for x in e if 'Absturz' in x['titel']])
         assert all(x['stufe'] in M.RANG for x in e)

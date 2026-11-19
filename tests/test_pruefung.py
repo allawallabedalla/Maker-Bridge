@@ -1,8 +1,13 @@
 """Die Pruefungen muessen echte Fehler finden und gute Teile durchlassen. Aufruf: python -m pytest tests -q
 (oder python tests/test_pruefung.py)"""
+import os
+import sys
+
 from build123d import Align, Box, Cylinder, Pos
 
-from mb2 import cad
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from mb2 import cad  # noqa: E402
 
 MIN = (Align.CENTER, Align.CENTER, Align.MIN)
 
@@ -52,3 +57,4 @@ if __name__ == '__main__':
         if n.startswith('test_'):
             f()
             print('ok', n)
+    print('alle ok')

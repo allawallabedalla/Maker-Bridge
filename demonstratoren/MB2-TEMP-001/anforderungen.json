@@ -1,0 +1,217 @@
+{
+ "anforderungen": [
+  {
+   "id": "A-GERAET",
+   "ebene": "system",
+   "herkunft": "Lastenheft MB2-TEMP-001 (Nutzer 19.11.2026)",
+   "text": "Temperatursensor nach projekt.md funktioniert am Pruefplatz.",
+   "nachweise": [
+    {
+     "art": "abnahme",
+     "ref": "AB-FUNKTION",
+     "stufe": "abnahme"
+    }
+   ]
+  },
+  {
+   "id": "A-MESS-TEMP",
+   "ebene": "system",
+   "herkunft": "Lastenheft MB2-TEMP-001 (Nutzer 19.11.2026)",
+   "text": "Temperatur -20 ... +100 °C: Genauigkeit +-0,5 °C, Linearitaet <= 0,2 °C, Hysterese <= 0,2 °C, Wiederholbarkeit <= 0,1 °C; Drift offen.",
+   "messtechnik": {
+    "messbereich": {
+     "min": -20,
+     "max": 100,
+     "einheit": "°C"
+    },
+    "genauigkeit": {
+     "max_abs": 0.5,
+     "einheit": "°C"
+    },
+    "linearitaet": {
+     "max_abs": 0.2,
+     "einheit": "°C"
+    },
+    "hysterese": {
+     "max_abs": 0.2,
+     "einheit": "°C"
+    },
+    "wiederholbarkeit": {
+     "max_abs": 0.1,
+     "einheit": "°C"
+    },
+    "drift": {
+     "max_abs": null,
+     "einheit": "°C/Jahr",
+     "offen": "Zielwert und Langzeittest noch festzulegen"
+    },
+    "definition_genauigkeit": "groesster Betrag der Abweichung Mittelwert(Pruefling) - Referenz je Temperaturpunkt ueber den Messbereich, Pruefunsicherheit nach ILAC-G8 als Schutzband",
+    "definition_linearitaet": "groesster Restfehler der Punktmittel zur Ausgleichsgeraden (kleinste Quadrate)",
+    "definition_wiederholbarkeit": "groesste Standardabweichung (n-1) je Temperaturpunkt bei >= 10 Messungen",
+    "bedingungen": {
+     "T_umgebung_C": [
+      18,
+      28
+     ],
+     "U_versorgung_V": [
+      3.2,
+      3.4
+     ],
+     "einschwingzeit_min_s": 600,
+     "messrate_Hz": 5
+    },
+    "wiederholungen": 10,
+    "dauer_h": 720,
+    "temperaturpunkte_C": [
+     -20,
+     0,
+     10,
+     20,
+     30,
+     40,
+     50,
+     70,
+     100
+    ],
+    "verfahren": "PRUEFPLAN.md",
+    "referenzmittel": "kalibriertes Referenzthermometer, siehe PRUEFPLAN.md"
+   },
+   "nachweise": [
+    {
+     "art": "messung",
+     "ref": "R-BER-1",
+     "eigenschaft": "messbereich",
+     "stufe": "abnahme"
+    },
+    {
+     "art": "messung",
+     "ref": "R-GEN-1",
+     "eigenschaft": "genauigkeit",
+     "stufe": "abnahme"
+    },
+    {
+     "art": "messung",
+     "ref": "R-LIN-1",
+     "eigenschaft": "linearitaet",
+     "stufe": "abnahme"
+    },
+    {
+     "art": "messung",
+     "ref": "R-HYS-1",
+     "eigenschaft": "hysterese",
+     "stufe": "abnahme"
+    },
+    {
+     "art": "messung",
+     "ref": "R-WDH-1",
+     "eigenschaft": "wiederholbarkeit",
+     "stufe": "abnahme"
+    },
+    {
+     "art": "messung",
+     "ref": "R-DRI-1",
+     "eigenschaft": "drift",
+     "stufe": "feld"
+    }
+   ]
+  },
+  {
+   "id": "A-MESSRATE",
+   "ebene": "system",
+   "herkunft": "Lastenheft MB2-TEMP-001 (Nutzer 19.11.2026)",
+   "text": "Mindestens 5 Temperaturwerte je Sekunde.",
+   "nachweise": [
+    {
+     "art": "abnahme",
+     "ref": "AB-MESSRATE",
+     "stufe": "abnahme",
+     "anweisung": "Firmware 60 s laufen lassen, Zahl der Datensaetze mit gueltigem Zeitstempel zaehlen, durch 60 teilen.",
+     "kriterium": {
+      "groesse": "messrate_Hz",
+      "op": ">=",
+      "wert": 5,
+      "einheit": "Hz"
+     }
+    }
+   ]
+  },
+  {
+   "id": "S-MESSKETTE",
+   "ebene": "subsystem",
+   "eltern": [
+    "A-MESS-TEMP"
+   ],
+   "herkunft": "abgeleitet aus A-MESS-TEMP",
+   "text": "Unsicherheitsbudget der Messkette U (k = 2) <= 0,5 °C ueber den Messbereich, rauschbegrenzte Aufloesung <= 0,05 °C.",
+   "eingaben": [
+    "messkette.bauteile.adc.rauschen_Vrms",
+    "messkette.schaltung.R_ref_tol_rel"
+   ],
+   "nachweise": [
+    {
+     "art": "katalog",
+     "ref": "MK1",
+     "stufe": "integration"
+    },
+    {
+     "art": "katalog",
+     "ref": "MK2",
+     "stufe": "integration"
+    }
+   ]
+  },
+  {
+   "id": "S-SCHALTUNG",
+   "ebene": "subsystem",
+   "eltern": [
+    "A-MESS-TEMP"
+   ],
+   "herkunft": "abgeleitet aus A-MESS-TEMP",
+   "text": "Keine Uebersteuerung, Referenz-, IDAC-Compliance- und PGA-Grenzen des ADS1220 ueber den Messbereich eingehalten; Eigenerwaermung vernachlaessigbar.",
+   "nachweise": [
+    {
+     "art": "katalog",
+     "ref": "MK3",
+     "stufe": "integration"
+    },
+    {
+     "art": "katalog",
+     "ref": "MK4-REF",
+     "stufe": "integration"
+    },
+    {
+     "art": "katalog",
+     "ref": "MK4-IDAC",
+     "stufe": "integration"
+    },
+    {
+     "art": "katalog",
+     "ref": "MK4-PGA",
+     "stufe": "integration"
+    },
+    {
+     "art": "katalog",
+     "ref": "MK4-SELBST",
+     "stufe": "integration"
+    }
+   ]
+  },
+  {
+   "id": "K-FIRMWARE",
+   "ebene": "komponente",
+   "eltern": [
+    "S-MESSKETTE"
+   ],
+   "herkunft": "abgeleitet aus S-MESSKETTE",
+   "text": "Firmware-Konstanten (Verstaerkung, R_ref, IDAC-Strom, IDAC-Tausch) entsprechen der gerechneten Messkette.",
+   "nachweise": [
+    {
+     "art": "katalog",
+     "ref": "FW1",
+     "stufe": "komponente"
+    }
+   ]
+  }
+ ],
+ "hinweis": "Demonstrator MB2-TEMP-001, Regeln VMODELL.md"
+}

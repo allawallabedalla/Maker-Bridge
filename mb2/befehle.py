@@ -148,10 +148,7 @@ def messkette_rechnen(projekt: str):
     """Unsicherheitsbudget (Einzelbeitraege, u_c, k, U) und rauschbegrenzte Aufloesung aus soll.json
     _projekt.messkette. Vereinfachtes GUM-Modell, Grenzen stehen im Ergebnis unter 'modell'."""
     from .pruefungen import messkette, projekt_soll
-    mk = projekt_soll(pdir(projekt)).get('messkette')
-    if not mk:
-        return {'fehler': 'soll.json _projekt.messkette fehlt (Felder: mb2/pruefungen/FELDER.md)'}
-    return messkette.aus_soll(mk)
+    return messkette.rechne(projekt_soll(pdir(projekt)))
 
 
 @befehl('anforderungen')

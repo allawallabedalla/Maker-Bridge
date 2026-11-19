@@ -8,6 +8,8 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _nachweis import beispielprojekt, lang  # noqa: E402,F401
 
 from mb2.pruefungen import elektronik as el  # noqa: E402
 
@@ -493,9 +495,7 @@ def test_fehlende_eingaben_uebersprungen():
 
 def _echt(name, projekt=None, basis=ALT):
     pdir = os.path.join(basis, name)
-    if not os.path.isdir(os.path.join(pdir, 'electronics')):
-        print('  (fehlt, uebersprungen):', pdir)
-        return None
+    beispielprojekt(pdir, 'electronics')
     vorher = {f: os.path.getmtime(os.path.join(pdir, 'electronics', f)) for f in os.listdir(os.path.join(pdir, 'electronics'))}
     res = el.pruefe(pdir, projekt)
     nachher = {f: os.path.getmtime(os.path.join(pdir, 'electronics', f)) for f in os.listdir(os.path.join(pdir, 'electronics'))}
@@ -552,9 +552,7 @@ def test_echt_bodenklima():
 
 def test_echt_mb2_projekte():
     for name in ('testdose', 'schnapphaken', 'stifthalter-fem', 'frag-mich-alles-gehaeuse', 'bodenklima-sondenkopf'):
-        pdir = os.path.join(MB2, name)
-        if not os.path.isdir(pdir):
-            continue
+        pdir = beispielprojekt(os.path.join(MB2, name))
         res = el.pruefe(pdir)
         assert res and not any('abgestuerzt' in e['hinweis'] for e in res), (name, res)
         assert not any(e['stufe'] == 'fehler' for e in res), (name, [e for e in res if e['stufe'] == 'fehler'])

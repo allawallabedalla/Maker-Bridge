@@ -114,7 +114,15 @@ def budget(beitraege, k=2.0, einheit='', korrelationen=None):
         zeilen.append({'name': b['name'], 'wert': b['wert'], 'verteilung': b.get('verteilung', 'u'),
                        'u_i': u, 'c': c, 'beitrag': abs(c) * u, 'einheit_eingang': b.get('einheit', ''),
                        'herkunft': b.get('herkunft'), 'freiheitsgrade': b.get('freiheitsgrade')})
-    erg = {'beitraege': zeilen, 'einheit': einheit, 'modell': MODELL, 'fehlt': fehlt}
+    for z in zeilen:
+        z['einheit_ausgang'] = einheit
+    kr_ok = [kr for kr in korrelationen or [] if kr.get('a') in {z['name'] for z in zeilen}
+             and kr.get('b') in {z['name'] for z in zeilen}]
+    erg = {'beitraege': zeilen, 'einheit': einheit, 'modell': MODELL, 'fehlt': fehlt,
+           'korrelationen': kr_ok,
+           'korrelationen_hinweis': ('Korrelationen beruecksichtigt: ' + ', '.join(
+               f'{kr["a"]}~{kr["b"]} r={kr["r"]}' for kr in kr_ok)) if kr_ok else
+           'keine Korrelationen angegeben: alle Beitraege als unkorreliert behandelt (nicht geprueft)'}
     if fehlt:
         erg.update(u_c=None, k=k, U=None)
         return erg
@@ -138,6 +146,45 @@ def budget(beitraege, k=2.0, einheit='', korrelationen=None):
                dominant=max(zeilen, key=lambda z: z['beitrag'])['name'] if zeilen else None)
     if k_t and k_t > k:
         erg['hinweis'] = f'nu_eff = {nu_eff:.1f} -> k = {k_t} (t-Verteilung 95,45 %) statt {k}'
+    return erg
+
+
+def budget_aus_modell(modell, eingaben, k=2.0, einheit='', korrelationen=None):
+    """GUM-Budget aus einer Modellgleichung y = modell(x) mit NUMERISCHEN Sensitivitaeten c_i = dy/dx_i
+    (zentrale Differenz am Arbeitspunkt, Schritt = u_i). Lineare Naeherung erster Ordnung.
+
+    eingaben: {name: {"wert": x_i (Schaetzwert), "u": {"wert", "verteilung", "k"} | None, "einheit", "herkunft"}}.
+    Eingaben ohne "u" sind feste Parameter. Fehlt ein Schaetzwert oder eine Unsicherheitsangabe (wert None),
+    steht der Name in 'fehlt' und u_c ist None. Zusaetzlich 'nichtlinear_max': groesster Unterschied zwischen
+    Vorwaerts- und Rueckwaertsdifferenz relativ zum Beitrag (Hinweis, ob die lineare Naeherung traegt)."""
+    x0 = {n: e.get('wert') for n, e in eingaben.items()}
+    fehlt = [n for n, v in x0.items() if v is None]
+    fehlt += [n for n, e in eingaben.items() if e.get('u') is not None and e['u'].get('wert') is None]
+    if fehlt:
+        return {'beitraege': [], 'einheit': einheit, 'modell': MODELL + '; Sensitivitaeten numerisch', 'u_c': None,
+                'U': None, 'k': k, 'fehlt': sorted(set(fehlt)), 'y': None,
+                'korrelationen_hinweis': 'nicht gerechnet'}
+    y0 = modell(dict(x0))
+    beitr, nl = [], 0.0
+    for n, e in eingaben.items():
+        if e.get('u') is None:
+            continue
+        ui = standardunsicherheit(e['u'])
+        h = ui if ui > 0 else max(abs(x0[n]) * 1e-6, 1e-12)
+        xp, xm = dict(x0), dict(x0)
+        xp[n] = x0[n] + h
+        xm[n] = x0[n] - h
+        yp, ym = modell(xp), modell(xm)
+        c = (yp - ym) / (2 * h)
+        if ui > 0 and abs(c * ui) > 1e-15:
+            nl = max(nl, abs((yp - y0) - (y0 - ym)) / (2 * abs(c * ui)))
+        beitr.append({'name': n, 'wert': e['u']['wert'], 'verteilung': e['u'].get('verteilung', 'u'),
+                      'k': e['u'].get('k', 2.0), 'c': c, 'einheit': e.get('einheit', ''),
+                      'herkunft': e.get('herkunft')})
+    erg = budget(beitr, k, einheit, korrelationen)
+    erg['y'] = y0
+    erg['nichtlinear_max'] = nl
+    erg['modell'] = MODELL + '; Sensitivitaeten numerisch aus der Modellgleichung (zentrale Differenz, Schritt u_i)'
     return erg
 
 
@@ -244,13 +291,22 @@ def _u_referenz(ref):
 
 
 def _bedingungen_passen(soll, ist):
-    """Liste der Abweichungen. soll-Skalar: ist gleich (2 %); soll [a, b]: ist (Skalar oder Bereich) liegt darin."""
+    """Liste der Abweichungen. soll-Skalar: ist gleich (2 %); soll [a, b]: ist (Skalar oder Bereich) liegt darin;
+    Schluessel auf _min/_max: ist >= bzw. <= soll (z. B. einschwingzeit_min_s)."""
     ab = []
     for key, s in (soll or {}).items():
         if key not in (ist or {}):
             ab.append(f'{key} fehlt in der Messreihe')
             continue
         i = ist[key]
+        if key.endswith('_min') and isinstance(s, (int, float)) and isinstance(i, (int, float)):
+            if i < s:
+                ab.append(f'{key} = {i} kleiner als verlangt {s}')
+            continue
+        if key.endswith('_max') and isinstance(s, (int, float)) and isinstance(i, (int, float)):
+            if i > s:
+                ab.append(f'{key} = {i} groesser als erlaubt {s}')
+            continue
         if isinstance(s, (list, tuple)) and len(s) == 2:
             lo, hi = (i if isinstance(i, (list, tuple)) else (i, i))
             if lo < s[0] or hi > s[1]:
@@ -282,130 +338,226 @@ def _einheit_umrechnen(wert, einheit, mess_einheit, spanne, zeitbasis=False):
     return wert if e == mess_einheit else None
 
 
+DATENSTATUS = ('rueckfuehrbar_gemessen', 'gemessen_nicht_rueckfuehrbar', 'demonstrationsdaten_nicht_rueckfuehrbar',
+               'simuliert')
+REGEL = ('ILAC-G8:09/2019, geschuetztes Annehmen (guarded acceptance), Schutzband w = U_pruef (k = 2): '
+         'konform nur wenn Kennwert <= Grenze - w')
+FEHLENTSCHEIDUNG = {
+    'bewiesen': 'Wahrscheinlichkeit einer falschen Annahme <= 2,3 % (einseitig, Normalverteilung, k = 2 am '
+                'Akzeptanzgrenzwert); kleiner, je weiter der Kennwert unter der Akzeptanzgrenze liegt',
+    'vorbehalt': 'Graubereich: Kennwert zwischen Akzeptanzgrenze und Grenze - Wahrscheinlichkeit, dass die Grenze '
+                 'tatsaechlich ueberschritten ist, bis 50 %; keine Konformitaetsaussage',
+    'verletzt': 'Kennwert ueber der Grenze - Wahrscheinlichkeit einer falschen Rueckweisung hoechstens 50 % (direkt '
+                'an der Grenze), unter 2,3 % ab Grenze + U_pruef',
+    'einfach': 'einfache Akzeptanz (Streuungs-/Steigungskennwert ohne Referenzabweichung, w = 0): '
+               'Fehlentscheidung an der Grenze bis 50 %',
+}
+# Pflichtfelder eines rueckfuehrbaren Nachweises
+PFLICHT_REIHE = ('sensor_id', 'seriennummer', 'datum', 'verfahren')
+PFLICHT_REFERENZ = ('mittel', 'seriennummer', 'kalibrierschein', 'rueckfuehrung', 'gueltig_bis')
+
+
+def punkt_statistik(punkte):
+    """Je (Referenzwert, Richtung): n, Mittelwert, Standardabweichung, Abweichung Mittel - Referenz."""
+    g = {}
+    for p in punkte:
+        g.setdefault((p['ref'], p.get('richtung')), []).append(p['ist'])
+    out = []
+    for (r, ri), v in sorted(g.items(), key=lambda kv: (kv[0][0], str(kv[0][1]))):
+        m = _mittel(v)
+        out.append({'ref': r, 'richtung': ri, 'n': len(v), 'mittel': m, 's': _std(v), 'abweichung': m - r})
+    return out
+
+
+def _u_pruef(reihe, u_ref, stat):
+    """Erweiterte Pruefunsicherheit (k = 2): Referenz, weitere Pruefbeitraege (Kopplung, Badinhomogenitaet ...) und
+    Streuung des Mittelwerts (groesstes s / sqrt(n)). Gibt (U, Budget)."""
+    bt = [{'name': 'referenzthermometer', 'wert': u_ref, 'verteilung': 'u', 'herkunft': 'Kalibrierschein'}]
+    bt += list(reihe.get('pruefunsicherheit') or [])
+    sm = [(z['s'] / math.sqrt(z['n'])) for z in stat if z['s'] is not None]
+    if sm:
+        bt.append({'name': 'streuung_mittelwert', 'wert': max(sm), 'verteilung': 'u', 'herkunft': 'berechnet: s/sqrt(n)'})
+    b = budget(bt, 2.0)
+    return b['U'], b
+
+
 def bewerte_reihe(reihe, eigenschaft, messtechnik, heute=None):
-    """Bewertung einer Messreihe gegen die messtechnische Anforderung.
+    """Bewertung einer Messreihe gegen die messtechnische Anforderung (Protokollzeile).
 
-    Rueckgabe {'status', 'grund', 'text', 'kennwert', 'U_pruef', 'grenze', 'einheit'}. grund ist bei 'unbewiesen'
-    einer von: ohne_referenzmessung, referenz_ohne_unsicherheit, referenz_nicht_rueckfuehrbar, referenz_abgelaufen,
-    verfahren_unzureichend, bedingungen_abweichend, einheit_unpassend, grenze_fehlt, messbereich_fehlt."""
+    Rueckgabe u. a.: status, grund (erster sperrender Grund), gruende (alle), kennwert, grenze, U_pruef,
+    akzeptanzgrenze, sicherheitsabstand, entscheidungsregel, fehlentscheidung, auswertung_status (was die Zahlen
+    allein ergaeben), datenstatus, punkte (Statistik je Punkt), pruef_budget.
+    Sperrende Gruende (Status 'unbewiesen', die Zahlen werden trotzdem ausgewertet und gezeigt):
+      ohne_referenzmessung, datenstatus_fehlt, demonstrationsdaten_nicht_rueckfuehrbar, gemessen_nicht_rueckfuehrbar,
+      simuliert, referenz_ohne_unsicherheit, referenz_nicht_rueckfuehrbar, referenz_abgelaufen,
+      nachweisdaten_unvollstaendig, bedingungen_abweichend, verfahren_unzureichend, einheit_unpassend,
+      grenze_fehlt, messbereich_fehlt.
+    Nur datenstatus 'rueckfuehrbar_gemessen' kann 'bewiesen' werden."""
     mt = messtechnik or {}
-
-    def raus(grund, text, status='unbewiesen'):
-        return {'status': status, 'grund': grund, 'text': text, 'kennwert': None, 'U_pruef': None,
-                'grenze': None, 'einheit': None}
-
+    leer = {'status': 'unbewiesen', 'kennwert': None, 'U_pruef': None, 'grenze': None, 'einheit': None,
+            'akzeptanzgrenze': None, 'sicherheitsabstand': None, 'entscheidungsregel': REGEL,
+            'fehlentscheidung': None, 'auswertung_status': None, 'datenstatus': None, 'punkte': [],
+            'pruef_budget': None}
     if not reihe:
-        return raus('ohne_referenzmessung', f'{eigenschaft}: keine Referenzmessreihe in messung.json')
+        return {**leer, 'grund': 'ohne_referenzmessung', 'gruende': ['ohne_referenzmessung'],
+                'text': f'{eigenschaft}: keine Referenzmessreihe in messung.json'}
+    gruende, texte = [], []
+
+    def sperre(g, t):
+        gruende.append(g)
+        texte.append(t)
+
+    rid = reihe.get('id')
+    ds = reihe.get('datenstatus')
+    if ds is None:
+        sperre('datenstatus_fehlt', f'Reihe {rid}: datenstatus fehlt ({" | ".join(DATENSTATUS)})')
+    elif ds not in DATENSTATUS:
+        sperre('datenstatus_fehlt', f'Reihe {rid}: datenstatus {ds!r} unbekannt')
+    elif ds != 'rueckfuehrbar_gemessen':
+        sperre(ds, f'Reihe {rid}: {ds} - kein Nachweis')
     if reihe.get('eigenschaft') != eigenschaft:
-        return raus('verfahren_unzureichend', f'Reihe {reihe.get("id")} misst {reihe.get("eigenschaft")!r}, '
-                                              f'nicht {eigenschaft!r}')
+        sperre('verfahren_unzureichend', f'Reihe {rid} misst {reihe.get("eigenschaft")!r}, nicht {eigenschaft!r}')
     mb = mt.get('messbereich') or {}
     if mb.get('min') is None or mb.get('max') is None:
-        return raus('messbereich_fehlt', 'messtechnik.messbereich {min, max, einheit} fehlt')
+        return {**leer, 'grund': 'messbereich_fehlt', 'gruende': gruende + ['messbereich_fehlt'], 'datenstatus': ds,
+                'text': 'messtechnik.messbereich {min, max, einheit} fehlt'}
     lo, hi, me = float(mb['min']), float(mb['max']), mb.get('einheit', '')
     spanne = hi - lo
     ref = reihe.get('referenz') or {}
     u_ref = _u_referenz(ref)
     if u_ref is None:
-        return raus('referenz_ohne_unsicherheit', f'Reihe {reihe.get("id")}: Referenz ohne Unsicherheit (u oder U, k)')
+        sperre('referenz_ohne_unsicherheit', f'Reihe {rid}: Referenz ohne Unsicherheit (u oder U, k)')
+        u_ref = 0.0
     if not ref.get('rueckfuehrung'):
-        return raus('referenz_nicht_rueckfuehrbar', f'Reihe {reihe.get("id")}: Rueckfuehrung der Referenz fehlt '
-                                                    '(Kalibrierschein, Normal)')
+        sperre('referenz_nicht_rueckfuehrbar', f'Reihe {rid}: Rueckfuehrung der Referenz fehlt')
     if ref.get('einheit') and ref['einheit'] != me:
-        return raus('einheit_unpassend', f'Referenz in {ref["einheit"]}, Messbereich in {me}')
+        sperre('einheit_unpassend', f'Referenz in {ref["einheit"]}, Messbereich in {me}')
     gb = ref.get('gueltig_bis')
-    pruefdatum = reihe.get('datum') or (heute or datetime.date.today().isoformat())
-    if gb and str(pruefdatum) > str(gb):
-        return raus('referenz_abgelaufen', f'Referenz gueltig bis {gb}, Messung am {pruefdatum}')
+    pruefdatum = str(reihe.get('datum') or (heute or datetime.date.today().isoformat()))[:10]
+    if gb and pruefdatum > str(gb):
+        sperre('referenz_abgelaufen', f'Referenz gueltig bis {gb}, Messung am {pruefdatum}')
+    if ds == 'rueckfuehrbar_gemessen':
+        f1 = [f for f in PFLICHT_REIHE if not reihe.get(f)]
+        f2 = [f'referenz.{f}' for f in PFLICHT_REFERENZ if not ref.get(f)]
+        if f1 or f2:
+            sperre('nachweisdaten_unvollstaendig', f'Reihe {rid}: fehlt {", ".join(f1 + f2)}')
     ab = _bedingungen_passen(mt.get('bedingungen'), reihe.get('bedingungen'))
     if ab:
-        return raus('bedingungen_abweichend', 'Pruefbedingungen weichen ab: ' + '; '.join(ab))
+        sperre('bedingungen_abweichend', 'Pruefbedingungen weichen ab: ' + '; '.join(ab))
     pk = [p for p in reihe.get('punkte', []) if isinstance(p.get('ref'), (int, float))
           and isinstance(p.get('ist'), (int, float))]
-    U_pruef = 2.0 * u_ref
+    stat = punkt_statistik(pk)
+    U_pruef, pb = _u_pruef(reihe, u_ref, stat)
     ziel = mt.get(eigenschaft) or {}
     grenze = ziel.get('max_abs')
     einheit = ziel.get('einheit', me)
-    zu_wenig = lambda t: raus('verfahren_unzureichend', f'{eigenschaft}: {t} (verlangt: {VERFAHREN[eigenschaft]})')  # noqa: E731
+    basis = {**leer, 'datenstatus': ds, 'punkte': stat, 'pruef_budget': pb, 'einheit': einheit, 'grenze': grenze}
+
+    def fertig(kennwert=None, u=None, ausw=None, zusatz=''):
+        g0 = gruende[0] if gruende else None
+        st = 'unbewiesen' if gruende else ausw
+        if ausw == 'verletzt' and ds in ('rueckfuehrbar_gemessen', 'gemessen_nicht_rueckfuehrbar'):
+            st = 'verletzt'      # eine echte Messung ueber der Grenze ist ein Befund, auch ohne Rueckfuehrung
+        w = u
+        txt = (f'{eigenschaft}: Kennwert {kennwert:.4g} {einheit}, zulaessig {grenze} {einheit}, U_pruef '
+               f'{(u or 0):.3g}, Akzeptanzgrenze {(grenze - (u or 0)):.4g}' if isinstance(kennwert, (int, float))
+               and grenze is not None else f'{eigenschaft}: nicht ausgewertet')
+        txt += zusatz
+        if gruende:
+            txt += ' | ' + '; '.join(texte)
+        return {**basis, 'status': st, 'grund': g0 if st != 'bewiesen' else None, 'gruende': gruende,
+                'kennwert': kennwert, 'U_pruef': u, 'sicherheitsabstand': w,
+                'akzeptanzgrenze': (grenze - (u or 0)) if grenze is not None and u is not None else grenze,
+                'auswertung_status': ausw, 'text': txt,
+                'entscheidungsregel': REGEL if u is not None else FEHLENTSCHEIDUNG['einfach'],
+                'fehlentscheidung': FEHLENTSCHEIDUNG.get(ausw) if u is not None else FEHLENTSCHEIDUNG['einfach']}
+
+    def zu_wenig(t):
+        sperre('verfahren_unzureichend', f'{eigenschaft}: {t} (verlangt: {VERFAHREN.get(eigenschaft, "?")})')
+        return fertig()
 
     if eigenschaft == 'messbereich':
-        if not pk:
-            return zu_wenig('keine Messpunkte')
         rs = [p['ref'] for p in pk]
+        if not rs:
+            return zu_wenig('keine Messpunkte')
         rand = 0.02 * spanne
         if min(rs) > lo + rand or max(rs) < hi - rand:
             return zu_wenig(f'Referenz {min(rs)} ... {max(rs)} {me} deckt {lo} ... {hi} nicht ab')
-        g = (mt.get('genauigkeit') or {})
-        if g.get('max_abs') is not None:
-            e_max = max(abs(p['ist'] - p['ref']) for p in pk if p['ref'] <= lo + rand or p['ref'] >= hi - rand)
-            e_g = _einheit_umrechnen(e_max, g.get('einheit', me), me, spanne)
-            if e_g is not None and e_g > g['max_abs']:
-                return {'status': 'verletzt', 'grund': None, 'kennwert': e_g, 'U_pruef': None, 'grenze': g['max_abs'],
-                        'einheit': g.get('einheit', me),
-                        'text': f'Messbereich: Abweichung an der Grenze {e_g:.4g} > {g["max_abs"]} (Saettigung?)'}
-        return {'status': 'bewiesen', 'grund': None, 'kennwert': [min(rs), max(rs)], 'U_pruef': None,
-                'grenze': [lo, hi], 'einheit': me, 'text': f'Messbereich {min(rs)} ... {max(rs)} {me} gemessen'}
+        g = mt.get('genauigkeit') or {}
+        rnd = [z for z in stat if z['ref'] <= lo + rand or z['ref'] >= hi - rand]
+        e_max = max(abs(z['abweichung']) for z in rnd)
+        basis.update(grenze=g.get('max_abs'), einheit=g.get('einheit', me))
+        grenze = g.get('max_abs')
+        einheit = g.get('einheit', me)
+        if grenze is None:
+            return {**fertig(), 'auswertung_status': 'bewiesen' if not gruende else None,
+                    'status': 'bewiesen' if not gruende else 'unbewiesen',
+                    'text': f'Messbereich {min(rs)} ... {max(rs)} {me} angefahren (keine Genauigkeitsgrenze)'}
+        e_g = _einheit_umrechnen(e_max, einheit, me, spanne)
+        return _entscheide(fertig, e_g, _einheit_umrechnen(U_pruef, einheit, me, spanne), grenze,
+                           f' (Abweichung an den Bereichsgrenzen {min(rs)} / {max(rs)} {me})')
 
     if grenze is None:
-        return raus('grenze_fehlt', f'messtechnik.{eigenschaft}.max_abs fehlt')
+        sperre('grenze_fehlt', f'messtechnik.{eigenschaft}.max_abs fehlt')
+        return fertig()
 
-    zeitbasis = False
+    zeitbasis, u_k = False, U_pruef
     if eigenschaft == 'genauigkeit':
-        if len({p['ref'] for p in pk}) < 3:
-            return zu_wenig(f'{len({p["ref"] for p in pk})} Referenzwerte')
-        kennwert = max(abs(p['ist'] - p['ref']) for p in pk)
+        if len({z['ref'] for z in stat}) < 3:
+            return zu_wenig(f'{len({z["ref"] for z in stat})} Referenzwerte')
+        kennwert = max(abs(z['abweichung']) for z in stat)
     elif eigenschaft == 'linearitaet':
-        rs = sorted({p['ref'] for p in pk})
+        rs = sorted({z['ref'] for z in stat})
         if len(rs) < 5 or (rs[-1] - rs[0]) < 0.8 * spanne:
             return zu_wenig(f'{len(rs)} Referenzwerte ueber {rs[-1] - rs[0] if rs else 0:.4g} von {spanne:.4g}')
-        a, b = _gerade([p['ref'] for p in pk], [p['ist'] for p in pk])
-        kennwert = max(abs(p['ist'] - (a + b * p['ref'])) for p in pk)
+        a, b = _gerade([z['ref'] for z in stat], [z['mittel'] for z in stat])
+        kennwert = max(abs(z['mittel'] - (a + b * z['ref'])) for z in stat)
     elif eigenschaft == 'hysterese':
-        auf = {}
-        abw = {}
-        for p in pk:
-            (auf if p.get('richtung') == 'auf' else abw if p.get('richtung') == 'ab' else {}).setdefault(
-                p['ref'], []).append(p['ist'])
+        auf = {z['ref']: z['mittel'] for z in stat if z['richtung'] == 'auf'}
+        abw = {z['ref']: z['mittel'] for z in stat if z['richtung'] == 'ab'}
         gemeinsam = sorted(set(auf) & set(abw))
         if len(gemeinsam) < 3:
             return zu_wenig(f'{len(gemeinsam)} gemeinsame Referenzwerte auf/ab')
-        kennwert = max(abs(_mittel(auf[r]) - _mittel(abw[r])) for r in gemeinsam)
+        kennwert = max(abs(auf[r] - abw[r]) for r in gemeinsam)
+        sm = [z['s'] / math.sqrt(z['n']) for z in stat if z['s'] is not None]
+        u_k = 2 * math.sqrt(2) * max(sm) if sm else 0.0     # Differenz zweier Mittelwerte; Referenzoffset faellt heraus
     elif eigenschaft == 'drift':
         pt = [p for p in pk if isinstance(p.get('t_h'), (int, float))]
         dauer = float(mt.get('dauer_h', 168))
         ts = [p['t_h'] for p in pt]
-        if len(pt) < 3 or max(ts) - min(ts) < dauer:
-            return zu_wenig(f'{len(pt)} Zeitpunkte ueber {(max(ts) - min(ts)) if ts else 0:.4g} h (verlangt {dauer:g} h)')
+        if len({*ts}) < 3 or max(ts) - min(ts) < dauer:
+            return zu_wenig(f'{len({*ts})} Zeitpunkte ueber {(max(ts) - min(ts)) if ts else 0:.4g} h '
+                            f'(verlangt {dauer:g} h)')
         _, b = _gerade(ts, [p['ist'] - p['ref'] for p in pt])
-        kennwert, zeitbasis = abs(b), True          # je Stunde
-        U_pruef = None                               # Referenz-Offset faellt in der Steigung heraus
+        kennwert, zeitbasis, u_k = abs(b), True, None
     elif eigenschaft == 'wiederholbarkeit':
         n_min = int(mt.get('wiederholungen', 10))
-        gruppen = {}
-        for p in pk:
-            gruppen.setdefault(p['ref'], []).append(p['ist'])
-        gross = {r: v for r, v in gruppen.items() if len(v) >= n_min}
+        gross = [z for z in stat if z['n'] >= n_min]
         if not gross:
-            return zu_wenig(f'hoechstens {max((len(v) for v in gruppen.values()), default=0)} Wiederholungen '
-                            f'je Referenzwert (verlangt {n_min})')
-        kennwert = max(_std(v) for v in gross.values())
-        U_pruef = None                               # Streuung, nicht Abweichung zur Referenz
+            return zu_wenig(f'hoechstens {max((z["n"] for z in stat), default=0)} Wiederholungen je Punkt '
+                            f'(verlangt {n_min})')
+        kennwert, u_k = max(z['s'] for z in gross), None
     else:
-        return raus('verfahren_unzureichend', f'Eigenschaft {eigenschaft!r} unbekannt ({", ".join(EIGENSCHAFTEN)})')
+        sperre('verfahren_unzureichend', f'Eigenschaft {eigenschaft!r} unbekannt ({", ".join(EIGENSCHAFTEN)})')
+        return fertig()
 
     k_g = _einheit_umrechnen(kennwert, einheit, me, spanne, zeitbasis)
     if k_g is None:
-        return raus('einheit_unpassend', f'{eigenschaft}: Einheit {einheit!r} nicht aus {me!r} umrechenbar '
-                                         f'(erlaubt: {me}, %FS{", <einheit>/h|d|Jahr" if zeitbasis else ""})')
-    u_g = _einheit_umrechnen(U_pruef, einheit, me, spanne) if U_pruef is not None else 0.0
-    erg = {'kennwert': k_g, 'U_pruef': u_g, 'grenze': grenze, 'einheit': einheit, 'grund': None}
-    txt = f'{eigenschaft} {k_g:.4g} {einheit} (U_pruef {u_g:.3g}) gegen <= {grenze} {einheit}, Reihe {reihe.get("id")}'
-    if k_g > grenze:
-        return {**erg, 'status': 'verletzt', 'text': txt + ' - ueberschritten'}
-    if k_g + u_g > grenze:
-        return {**erg, 'status': 'vorbehalt', 'text': txt + ' - im Graubereich der Pruefunsicherheit (ILAC-G8)'}
-    return {**erg, 'status': 'bewiesen', 'text': txt + (' - nur Pruefzeitraum, Extrapolation' if zeitbasis else '')}
+        sperre('einheit_unpassend', f'{eigenschaft}: Einheit {einheit!r} nicht aus {me!r} umrechenbar '
+                                    f'(erlaubt: {me}, %FS{", <einheit>/h|d|Jahr" if zeitbasis else ""})')
+        return fertig()
+    u_g = _einheit_umrechnen(u_k, einheit, me, spanne) if u_k is not None else None
+    return _entscheide(fertig, k_g, u_g, grenze, ' - nur Pruefzeitraum, Extrapolation' if zeitbasis else '')
 
+
+def _entscheide(fertig, kennwert, u, grenze, zusatz=''):
+    if kennwert > grenze:
+        ausw = 'verletzt'
+    elif u is not None and kennwert + u > grenze:
+        ausw = 'vorbehalt'
+    else:
+        ausw = 'bewiesen'
+    return fertig(kennwert, u, ausw, zusatz)
 
 # ---------------------------------------------------------------------------------------------- Teil 4: Katalog
 
@@ -433,9 +585,39 @@ def _schwache_herkunft(pj):
     return [f for f in felder if herkunft_von(soll, f'messkette.{f}')[0] not in HERKUNFT_STARK]
 
 
+def _profil(mk):
+    import importlib
+    from ..sensorprofile import PROFILE
+    if mk.get('profil') not in PROFILE:
+        raise ValueError(f'messkette.profil {mk.get("profil")!r} unbekannt ({", ".join(PROFILE)})')
+    return importlib.import_module(PROFILE[mk['profil']])
+
+
+def herkunft_klasse(pj):
+    """f('bauteile.adc.rauschen_Vrms') -> Herkunftsklasse des Felds messkette.<f> (None = nicht angegeben)."""
+    from ..anforderungen import herkunft_von
+    return lambda f: herkunft_von({'_projekt': pj}, f'messkette.{f}')[0]
+
+
+def rechne(pj):
+    """Fuer den Befehl messkette_rechnen: generisch (aus_soll) oder Profil-Budget je Temperatur."""
+    mk = pj.get('messkette')
+    if not mk:
+        return {'fehler': 'soll.json _projekt.messkette fehlt (Felder: mb2/pruefungen/FELDER.md)'}
+    if mk.get('profil'):
+        pr = _profil(mk)
+        hk = herkunft_klasse(pj)
+        return {'profil': mk['profil'], 'pruefungen': pr.pruefe(mk, hk),
+                'je_temperatur': [{'t_C': t, **pr.budget_bei(mk, t, lambda f: hk(f) or 'offen')}
+                                  for t in pr._punkte(mk)]}
+    return aus_soll(mk)
+
+
 def pruefe(pdir):
     pj = projekt_soll(pdir)
     mk = pj.get('messkette')
+    if mk and mk.get('profil'):
+        return _profil(mk).pruefe(mk, herkunft_klasse(pj))
     if not mk:
         g = 'soll.json _projekt.messkette fehlt (ADC, Referenz, Rauschen, Empfindlichkeit)'
         return [uebersprungen('MK1', 'Unsicherheitsbudget Messkette', g, Q),

@@ -1,0 +1,110 @@
+{
+ "_projekt": {
+  "material": "PETG",
+  "T_min_C": 10,
+  "T_max_C": 40,
+  "aussen": false,
+  "nicht_relevant": {
+   "E16": "Annahme (vom Nutzer bestaetigen): Messwerte per USB-Seriell, WLAN/BLE des ESP32 abgeschaltet",
+   "E15": "Annahme (vom Nutzer bestaetigen): Messwerte per USB-Seriell, WLAN/BLE des ESP32 abgeschaltet"
+  },
+  "firmware": {
+   "pfad": "firmware/mb2_temp_001",
+   "konstanten": {
+    "PGA_GAIN": {
+     "datei": "config.h",
+     "soll_aus": "messkette.schaltung.gain"
+    },
+    "RREF_OHM": {
+     "datei": "config.h",
+     "soll_aus": "messkette.schaltung.R_ref_ohm"
+    },
+    "IDAC_UA": {
+     "datei": "config.h",
+     "soll": 500,
+     "herkunft": "berechnet: messkette.schaltung.I_idac_A = 500 uA"
+    },
+    "IDAC_TAUSCH": {
+     "datei": "config.h",
+     "soll": 1,
+     "herkunft": "berechnet: messkette.schaltung.idac_tausch"
+    }
+   }
+  },
+  "messkette": {
+   "profil": "rtd_ratiometrisch_3leiter",
+   "modus": "ab_werk",
+   "einheit": "°C",
+   "k": 2,
+   "messbereich": {
+    "min": -20,
+    "max": 100
+   },
+   "ziel_U": 0.5,
+   "ziel_aufloesung": 0.05,
+   "sensor": {
+    "typ": "PT100 3-Leiter",
+    "R0_ohm": 100,
+    "klasse": "A",
+    "kennlinie": "IEC 60751",
+    "eigenerwaermung_mW_K": null,
+    "element": null
+   },
+   "schaltung": {
+    "I_idac_A": 0.0005,
+    "R_ref_ohm": 1650,
+    "R_ref_tol_rel": 0.0001,
+    "R_ref_tk_ppm_K": 10,
+    "gain": 16,
+    "bits": 24,
+    "R_leitung_ohm": 0.5,
+    "dR_leitung_ohm": 0.05,
+    "idac_tausch": true,
+    "mittelung": 2,
+    "T_elektronik_C": [
+     10,
+     40
+    ],
+    "T_kal_C": 23,
+    "R_filter_ohm": 0
+   },
+   "bauteile": {
+    "adc": {
+     "name": "TI ADS1220",
+     "avdd_V": 3.3,
+     "rauschen_Vrms": null,
+     "verstaerkungsfehler_rel": null,
+     "verstaerkungsdrift_ppm_K": null,
+     "offset_V": null,
+     "offsetdrift_V_K": null,
+     "inl_ppm_fsr": null,
+     "idac_fehlanpassung_rel": null,
+     "idac_compliance_rand_V": null,
+     "pga_rand_V": null,
+     "pga_formel_geprueft": false,
+     "vref_min_V": null,
+     "vref_max_V": null,
+     "verstaerkungen": null,
+     "aussteuerung_reserve": 0.05
+    }
+   }
+  },
+  "_herkunft": {
+   "material": "angenommen: Gehaeuse noch nicht entworfen",
+   "T_min_C": "angenommen: Laborbetrieb",
+   "T_max_C": "angenommen: Laborbetrieb",
+   "messkette.sensor.klasse": "norm: IEC 60751 Klasse A (Grenzabweichung 0,15 + 0,002|t|), Element noch nicht gewaehlt",
+   "messkette.sensor.eigenerwaermung_mW_K": "offen: Datenblatt des gewaehlten Elements bzw. Messung im Pruefmedium",
+   "messkette.schaltung.I_idac_A": "berechnet: Auslegung (Vorgabe Lastenheft 500 uA)",
+   "messkette.schaltung.R_ref_ohm": "berechnet: Auslegung (Vorgabe Lastenheft 1,65 kOhm)",
+   "messkette.schaltung.gain": "berechnet: Auslegung, groesste Verstaerkung ohne Uebersteuerung (MK3)",
+   "messkette.schaltung.R_ref_tol_rel": "angenommen: Vorgabe Lastenheft 0,01 %, Bauteil noch nicht beschafft",
+   "messkette.schaltung.R_ref_tk_ppm_K": "angenommen: Vorgabe Lastenheft 10 ppm/K, Bauteil noch nicht beschafft",
+   "messkette.schaltung.dR_leitung_ohm": "angenommen: Leitungslaenge/-paarung unbekannt - am Aufbau messen",
+   "messkette.schaltung.R_leitung_ohm": "angenommen: Leitungslaenge unbekannt - am Aufbau messen",
+   "messkette.schaltung.T_elektronik_C": "angenommen: Laborbetrieb 10 ... 40 °C",
+   "messkette.bauteile.adc": "offen: TI ADS1220 Datenblatt - Wert nicht abgerufen (www.ti.com in dieser Sitzung nicht lesbar), eintragen mit Tabelle/Seite",
+   "messkette.bauteile.adc.avdd_V": "berechnet: Versorgung 3,3 V (Lastenheft)"
+  }
+ }
+}

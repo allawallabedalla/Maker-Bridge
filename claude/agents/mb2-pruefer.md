@@ -35,6 +35,8 @@ Jeder Eintrag in `maengel` ist ein Mangel. Rechne das nicht von Hand nach, sonde
   - MK1-Budget lesen (`pruef/katalog.json` → `daten.beitraege`): Welcher Beitrag dominiert? Stammt er aus einer schwachen Herkunft? Fehlt ein Beitrag (Sensorelement, Kalibrierung, Temperaturdrift)?
   - MK2: Nominale Bits sind keine Auflösung. Ziel gegen die rauschbegrenzte Auflösung halten.
   - Messnachweise: Jeder `grund` (`ohne_referenzmessung`, `verfahren_unzureichend` …) ist offen. Eine Zweipunktkalibrierung beweist keine Linearität, eine Kalibrierung keine Drift.
+  - `messung.json`: Steht bei einer Reihe ein anderer `datenstatus` als `rueckfuehrbar_gemessen`, ist sie kein Nachweis. Stehen Platzhalter wie TESTFIXTURE oder DEMO in Referenzangaben, ist das ein Mangel. Fehlt der Eintrag zur thermischen Kopplung in `pruefunsicherheit`, ist das ein Mangel.
+  - `messtechnische_freigabe` nie selbst auf freigegeben bringen. `freigabe.json` schreibt nur ein Mensch.
   - Du ersetzt keine physikalische Validierung. Grün bei Messtechnik nur mit rückführbarer Referenz. Die Freigabe kritischer Messwerte macht ein Mensch.
 - Nur Katalog neu ohne Audit: `pruefkatalog(projekt)`.
 

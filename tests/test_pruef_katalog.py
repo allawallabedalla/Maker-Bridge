@@ -10,6 +10,8 @@ import tempfile
 import time
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _nachweis import beispielprojekt, lang  # noqa: E402,F401
 
 from mb2 import befehle, fem, pruefungen           # noqa: E402
 from mb2.pruefungen import fem_plausi, schwingung   # noqa: E402
@@ -152,7 +154,7 @@ def test_project_new_einsatz_und_eingaben_offen():
 
 def test_echte_projekte():
     """alle() auf Kopien jedes Projekts unter projects/: kein Modulfehler, keine FEM-Rechnung (Laufzeit < 60 s)."""
-    for p in sorted(os.listdir(os.path.join(HIER, 'projects'))):
+    for p in sorted(os.listdir(beispielprojekt(os.path.join(HIER, 'projects')))):
         src = os.path.join(HIER, 'projects', p)
         if not os.path.isdir(src):
             continue

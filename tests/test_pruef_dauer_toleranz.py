@@ -8,6 +8,8 @@ import sys
 import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _nachweis import beispielprojekt, lang  # noqa: E402,F401
 
 from mb2 import kennwerte as kw                             # noqa: E402
 from mb2 import pruefungen                                  # noqa: E402
@@ -479,7 +481,7 @@ def test_leer_kein_absturz():
 def test_echte_projekte():
     gesamt = {}
     for p in ECHT:
-        pd = os.path.join(BASIS, 'projects', p)
+        pd = beispielprojekt(os.path.join(BASIS, 'projects', p))
         for m in (dauer, toleranz):
             for e in m.pruefe(pd):
                 assert e['stufe'] in STUFEN and e['id'] and (e['quelle'] or e['stufe'] == 'uebersprungen'), e

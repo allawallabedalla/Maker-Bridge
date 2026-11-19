@@ -181,6 +181,9 @@ def _katalog_status(nw, katalog):
         return 'unbewiesen', f'Katalog {nw["ref"]}: kein Ergebnis', []
     st = [e['stufe'] for e in treffer]
     if 'fehler' in st:
+        echte = [e for e in treffer if e['stufe'] == 'fehler' and not e.get('ausloeser')]
+        if not echte:   # nur Ausloeser-Fehler: Pflichteingabe fehlt -> nicht bewiesen, aber kein Grenzverstoss
+            return 'unbewiesen', f'Katalog {nw["ref"]}: Pflichteingabe fehlt (Ausloeser, nicht gerechnet)', treffer
         return 'verletzt', f'Katalog {nw["ref"]}: fehler', treffer
     if 'uebersprungen' in st:
         return 'unbewiesen', f'Katalog {nw["ref"]}: uebersprungen', treffer
@@ -304,7 +307,10 @@ def _messung_status(nw, anforderung, messung):
         return 'unbewiesen', f'messung: eigenschaft {eig!r} unbekannt ({", ".join(messkette.EIGENSCHAFTEN)})', [], info
     reihe = next((r for r in (messung or {}).get('reihen', []) if r.get('id') == nw.get('ref')), None)
     b = messkette.bewerte_reihe(reihe, eig, mt)
-    info = {k: b[k] for k in ('grund', 'kennwert', 'U_pruef', 'grenze', 'einheit')}
+    info = {k: b.get(k) for k in ('grund', 'gruende', 'datenstatus', 'kennwert', 'grenze', 'U_pruef', 'akzeptanzgrenze',
+                                  'sicherheitsabstand', 'einheit', 'entscheidungsregel', 'fehlentscheidung',
+                                  'auswertung_status', 'punkte')}
+    info['reihe'] = nw.get('ref')
     return b['status'], f'Messung {nw.get("ref")}: {b["text"]}' + (f' [{b["grund"]}]' if b['grund'] else ''), [], info
 
 
@@ -441,18 +447,111 @@ def pruefen(pdir, katalog=None, extra=None):
                    if n['stufe'] in ('komponente', 'integration'))
     druckfertig = bool(zeilen) and not matrix_maengel and all(nur_vor_abnahme(z) for z in zeilen) and \
         not any(z['status'] == 'verletzt' for z in zeilen) and not any(z['matrix_maengel'] for z in zeilen)
-    fertig = druckfertig and all(z['status'] in ('bewiesen',) for z in zeilen)
+    mfg = messtechnische_freigabe(pdir, anf, zeilen)
+    fertig = druckfertig and all(z['status'] in ('bewiesen',) for z in zeilen) and \
+        mfg['status'] in ('nicht_anwendbar', 'freigegeben')
     freigabe = 'fertig' if fertig else ('druckfertig' if druckfertig else 'nicht_druckfertig')
     zaehl = {s: sum(1 for z in zeilen if z['status'] == s) for s in RANG}
     erg = {'freigabe': freigabe, 'zaehlung': zaehl, 'anforderungen': zeilen, 'matrix_maengel': matrix_maengel,
            'offen_abnahme': [f'{z["id"]}: {n["beleg"]}' for z in oben + unten for n in z['nachweise']
                              if n['stufe'] in ('abnahme', 'feld') and n['status'] != 'bewiesen'],
            'kontext_hash': kontext_hash(pdir), 'zeit': datetime.datetime.now().isoformat(timespec='seconds')}
+    erg['messtechnische_freigabe'] = mfg
     erg['glaubwuerdigkeit'] = [{k: g[k] for k in ('anforderung', 'fall', 'risiko', 'status', 'text')} for g in glaub]
     os.makedirs(os.path.join(pdir, 'pruef'), exist_ok=True)
     speichere(pdir, 'pruef/v_matrix.json', erg)
     glaubwuerdigkeit.bericht(pdir, glaub)
+    messprotokoll(pdir, anf, zeilen, mfg)
     return erg
+
+
+# ---------------------------------------------------------------------------------------------- Messtechnische Freigabe
+
+def _ist_messtechnisch(a):
+    return bool(a.get('messtechnik')) or any(n.get('art') == 'katalog' and str(n.get('ref', '')).startswith('MK')
+                                             for n in a.get('nachweise', []))
+
+
+def messtechnische_freigabe(pdir, anf, zeilen):
+    """Gesamturteil zur Messfunktion. Grundsatz: KI und Software koennen hoechstens 'bereit_zur_menschlichen_freigabe'
+    melden. 'freigegeben' nur mit freigabe.json {"messtechnik": {"pruefer", "datum", "kontext_hash"}}, deren Hash dem
+    aktuellen Stand entspricht (jede Aenderung an soll/Anforderungen/Messungen macht die Freigabe ungueltig)."""
+    ids = {a['id'] for a in anf if _ist_messtechnisch(a)}
+    if not ids:
+        return {'status': 'nicht_anwendbar', 'gruende': [], 'anforderungen': []}
+    gruende = []
+    for z in zeilen:
+        if z['id'] not in ids or z['status'] == 'bewiesen':
+            continue
+        offen = sorted({g for n in z['nachweise'] for g in (n.get('gruende') or ([n['grund']] if n.get('grund') else []))})
+        gruende.append(f'{z["id"]}: {z["status"]}' + (f' ({", ".join(offen)})' if offen else '') +
+                       (f'; Matrix: {"; ".join(z["matrix_maengel"])}' if z['matrix_maengel'] else ''))
+    h = kontext_hash(pdir)
+    fg = (lade(pdir, 'freigabe.json', {}) or {}).get('messtechnik') or {}
+    if gruende:
+        st = 'nicht_freigegeben'
+    elif fg.get('pruefer') and fg.get('kontext_hash') == h:
+        st = 'freigegeben'
+    else:
+        st = 'bereit_zur_menschlichen_freigabe'
+        if fg.get('pruefer'):
+            gruende.append(f'Freigabe von {fg["pruefer"]} ({fg.get("datum")}) gilt fuer Stand {fg.get("kontext_hash")}, '
+                           f'aktuell {h} - neu freigeben')
+    return {'status': st, 'gruende': gruende, 'anforderungen': sorted(ids), 'kontext_hash': h,
+            'freigabe_durch': fg.get('pruefer') if st == 'freigegeben' else None}
+
+
+def messtechnik_freigeben(pdir, pruefer, notiz=''):
+    """Menschliche Freigabe der Messfunktion festhalten. Absichtlich KEIN MCP-Befehl: von Hand aufrufen
+    (python -c "from mb2 import anforderungen as a; a.messtechnik_freigeben('projects/x', 'Name')").
+    Verweigert, solange nicht alle messtechnischen Anforderungen bewiesen sind."""
+    v = pruefen(pdir)
+    if v['messtechnische_freigabe']['status'] != 'bereit_zur_menschlichen_freigabe':
+        raise RuntimeError(f'nicht freigebbar: {v["messtechnische_freigabe"]}')
+    f = lade(pdir, 'freigabe.json', {})
+    f['messtechnik'] = {'pruefer': pruefer, 'datum': datetime.datetime.now().isoformat(timespec='seconds'),
+                        'kontext_hash': v['kontext_hash'], 'notiz': notiz}
+    speichere(pdir, 'freigabe.json', f)
+    return pruefen(pdir)['messtechnische_freigabe']
+
+
+def _z(v, f='{:.4g}'):
+    return '-' if v is None else (f.format(v) if isinstance(v, (int, float)) else str(v))
+
+
+def messprotokoll(pdir, anf, zeilen, mfg):
+    """pruef/messprotokoll.md: je Messnachweis gemessene und zulaessige Abweichung, U_pruef, Regel, Status."""
+    mess = [(z, n) for z in zeilen for n in z['nachweise'] if n.get('art') == 'messung']
+    if not mess and mfg['status'] == 'nicht_anwendbar':
+        return None
+    L = [f'# Messprotokoll {os.path.basename(pdir)}', '',
+         f'Stand {kontext_hash(pdir)}, erzeugt {datetime.datetime.now().isoformat(timespec="seconds")} von '
+         f'mb2/anforderungen.py. **Gruen heisst bewiesen**: nur rueckfuehrbar gemessene Reihen koennen beweisen.', '',
+         f'**Messtechnische Freigabe: {mfg["status"]}**', '']
+    L += [f'- {g}' for g in mfg['gruende']] + ['']
+    L += ['| Anforderung | Eigenschaft | Reihe | Datenstatus | gemessen | zulaessig | U_pruef (k=2) | '
+          'Akzeptanzgrenze | Auswertung | Status | Grund |', '|' + '---|' * 11]
+    for z, n in mess:
+        L.append(f'| {z["id"]} | {n.get("eigenschaft")} | {n.get("reihe")} | {n.get("datenstatus") or "-"} | '
+                 f'{_z(n.get("kennwert"))} | {_z(n.get("grenze"))} {n.get("einheit") or ""} | '
+                 f'{_z(n.get("sicherheitsabstand"))} | {_z(n.get("akzeptanzgrenze"))} | '
+                 f'{n.get("auswertung_status") or "-"} | **{n["status"]}** | {", ".join(n.get("gruende") or []) or "-"} |')
+    regeln = sorted({n.get('entscheidungsregel') for _, n in mess if n.get('entscheidungsregel')})
+    fe = sorted({n.get('fehlentscheidung') for _, n in mess if n.get('fehlentscheidung')})
+    L += ['', '## Entscheidungsregel', ''] + [f'- {r}' for r in regeln] + ['', '## Fehlentscheidung', ''] + \
+         [f'- {r}' for r in fe]
+    L += ['', '## Messpunkte', '']
+    for z, n in mess:
+        if not n.get('punkte'):
+            continue
+        L += [f'### {z["id"]} / {n.get("eigenschaft")} / {n.get("reihe")}', '',
+              '| Referenz | Richtung | n | Mittel | s | Abweichung |', '|---|---|---|---|---|---|']
+        L += [f'| {_z(p["ref"])} | {p.get("richtung") or "-"} | {p["n"]} | {_z(p["mittel"], "{:.5g}")} | '
+              f'{_z(p["s"], "{:.3g}")} | {_z(p["abweichung"], "{:+.4g}")} |' for p in n['punkte']]
+        L.append('')
+    os.makedirs(os.path.join(pdir, 'pruef'), exist_ok=True)
+    open(os.path.join(pdir, 'pruef', 'messprotokoll.md'), 'w', encoding='utf-8').write('\n'.join(L) + '\n')
+    return L
 
 
 # ---------------------------------------------------------------------------------------------- Standard-Anforderungen

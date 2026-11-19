@@ -13,8 +13,10 @@ from mb2 import anforderungen as an, befehle, pruefungen   # noqa: E402
 from mb2.pruefungen import messkette as mk                 # noqa: E402
 
 TMP = tempfile.mkdtemp(prefix='mb2_messkette_')
-REF = {'mittel': 'Pt100 AA + Messbruecke', 'U': 0.02, 'k': 2, 'einheit': '°C',
-       'rueckfuehrung': 'DAkkS-Kalibrierschein D-K-00000 (Testdaten)', 'gueltig_bis': '2027-12-31'}
+# TESTFIXTURE: Alle Kennungen unten sind Platzhalter fuer Unit-Tests, KEINE Nachweise. Sie verlassen tests/ nie.
+REF = {'mittel': 'TESTFIXTURE Referenzthermometer', 'seriennummer': 'TESTFIXTURE-SN', 'U': 0.02, 'k': 2,
+       'einheit': '°C', 'kalibrierschein': 'TESTFIXTURE-KEIN-NACHWEIS', 'rueckfuehrung': 'TESTFIXTURE-KEIN-NACHWEIS',
+       'gueltig_bis': '2027-12-31'}
 BED = {'T_umgebung_C': 23, 'U_V': 3.3}
 MT = {'messbereich': {'min': 0.0, 'max': 100.0, 'einheit': '°C'},
       'genauigkeit': {'max_abs': 0.5, 'einheit': '°C'},
@@ -27,7 +29,8 @@ MT = {'messbereich': {'min': 0.0, 'max': 100.0, 'einheit': '°C'},
 
 def reihe(eig, punkte, **kw):
     r = {'id': f'R-{eig}', 'eigenschaft': eig, 'verfahren': 'Test', 'datum': '2026-11-19', 'referenz': dict(REF),
-         'bedingungen': dict(BED), 'punkte': punkte}
+         'bedingungen': dict(BED), 'punkte': punkte, 'datenstatus': 'rueckfuehrbar_gemessen',
+         'sensor_id': 'TESTFIXTURE-DUT', 'seriennummer': 'TESTFIXTURE-0001'}
     r.update(kw)
     return r
 
@@ -94,7 +97,7 @@ def test_ohne_reihe_unbewiesen():
 def test_referenz_ohne_rueckfuehrung_oder_unsicherheit():
     r = reihe('genauigkeit', [{'ref': x, 'ist': x} for x in (0, 50, 100)])
     r['referenz'].pop('rueckfuehrung')
-    assert mk.bewerte_reihe(r, 'genauigkeit', MT)['grund'] == 'referenz_nicht_rueckfuehrbar'
+    assert 'referenz_nicht_rueckfuehrbar' in mk.bewerte_reihe(r, 'genauigkeit', MT)['gruende']
     r = reihe('genauigkeit', [{'ref': x, 'ist': x} for x in (0, 50, 100)])
     r['referenz'].pop('U')
     assert mk.bewerte_reihe(r, 'genauigkeit', MT)['grund'] == 'referenz_ohne_unsicherheit'

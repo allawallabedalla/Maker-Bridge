@@ -13,6 +13,8 @@ import tempfile
 import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _nachweis import beispielprojekt, lang  # noqa: E402,F401
 
 from mb2 import fem                                   # noqa: E402
 from mb2.material import MATERIAL                     # noqa: E402
@@ -426,7 +428,7 @@ def test_kontakt_f24():
 
 def test_echte_projekte_kein_absturz():
     for p in PROJEKTE:
-        d = os.path.join(HIER, 'projects', p)
+        d = beispielprojekt(os.path.join(HIER, 'projects', p))
         out = fp.pruefe(d)
         for e in out:
             assert e['id'] in ('F20', 'F21', 'F22', 'F23', 'F24', 'F25', 'M7', 'M8', 'M9'), e
@@ -438,10 +440,8 @@ def test_echte_projekte_kein_absturz():
 
 def test_taster_echt_lang():
     """Echter Fall frag-mich-alles-gehaeuse/taster in einer Kopie (Projekt bleibt unberuehrt)."""
-    if os.environ.get('MB2_LANG') != '1':
-        print('   (MB2_LANG=1 fuer den langen Lauf)')
-        return
-    q = os.path.join(HIER, 'projects', 'frag-mich-alles-gehaeuse')
+    lang()
+    q = beispielprojekt(os.path.join(HIER, 'projects', 'frag-mich-alles-gehaeuse'))
     d = os.path.join(TMP, 'fma')
     for sub in ('fem', 'out', 'cad', 'print'):
         os.makedirs(os.path.join(d, sub), exist_ok=True)

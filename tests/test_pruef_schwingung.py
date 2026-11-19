@@ -10,6 +10,8 @@ import sys
 import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _nachweis import beispielprojekt, lang  # noqa: E402,F401
 
 from mb2.pruefungen import STUFEN, schwingung as S, soll  # noqa: E402
 
@@ -248,7 +250,7 @@ def test_akustik_synthetisch():
 # ------------------------------------------------------------------ echte Projekte
 def test_echte_projekte_laufen():
     for p in ('testdose', 'schnapphaken', 'stifthalter-fem', 'frag-mich-alles-gehaeuse', 'bodenklima-sondenkopf'):
-        r = S.pruefe(os.path.join(PROJ, p))
+        r = S.pruefe(beispielprojekt(os.path.join(PROJ, p)))
         assert r, p
         for e in r:
             assert e['stufe'] in STUFEN and e['id'].startswith('S') and e['quelle'], (p, e)
@@ -264,7 +266,7 @@ def vorschlag_frag_mich_alles():
 
 
 def test_frag_mich_alles():
-    pd = os.path.join(PROJ, 'frag-mich-alles-gehaeuse')
+    pd = beispielprojekt(os.path.join(PROJ, 'frag-mich-alles-gehaeuse'))
     so = copy.deepcopy(soll(pd))
     so['front']['lautsprecher'] = vorschlag_frag_mich_alles()
     r = S.pruefe(pd, so)

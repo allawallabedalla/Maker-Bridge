@@ -135,7 +135,10 @@ Jede Datei unter `tests/` läuft für sich. `fem_abgleich.py`, `schnapphaken_abg
 Code-Verifikation der Löser (V&V 40). Einige Tests (`test_pruef_katalog`, `_mechanik`, `_schwingung`, `_fem_plausi`,
 `_elektronik`, `_dauer_toleranz`) lesen Beispielprojekte unter `projects/`; die sind nicht im Repository und werden dann übersprungen
 oder schlagen fehl. `test_fem_vorbereitung.py` baut seinen Fall seit 19.11.2026 selbst (nur Gmsh nötig). `test_messkette.py` prüft
-Messkette, Unsicherheitsbudget und Messnachweise (ohne Löser).
+Messkette, Unsicherheitsbudget und Messnachweise (ohne Löser). `test_temp_demonstrator.py` prüft den PT100-Demonstrator
+(braucht g++ für die Firmware-Rechnung). **`tests/alle.py`** führt alle Dateien aus und ordnet jede einer Klasse zu:
+bestanden, werkzeug_fehlt, beispielprojekt_fehlt oder fehlgeschlagen. Ein nicht ausgeführter Test zählt nie als bestanden.
+Stand der roten Dateien: `tests/TESTSTATUS.md`.
 
 ## 8. Grenzen
 
