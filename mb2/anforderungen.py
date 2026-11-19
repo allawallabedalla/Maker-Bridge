@@ -750,6 +750,44 @@ def messreihe_eintragen(pdir, reihe):
     return {'id': reihe['id'], 'punkte': len(reihe.get('punkte', [])), 'reihen': len(m['reihen'])}
 
 
+CSV_SPALTEN = ('punkt_C', 'richtung', 'nr', 'zeit', 'referenz_C', 'sensor_C', 'roh_code_a', 'roh_code_b')
+
+
+def messreihen_aus_csv(pdir, csv_datei, kopf, ids):
+    """Messwert-Tabelle (Vorlage demonstratoren/MB2-TEMP-001/vorlage_messwerte.csv, Semikolon, Dezimalkomma erlaubt)
+    in messung.json einlesen. Eine Tabelle kann mehrere Eigenschaften belegen: ids = {eigenschaft: reihen_id}, z. B.
+    {"genauigkeit": "R-GEN-1", "hysterese": "R-HYS-1"}. kopf = gemeinsame Angaben jeder Reihe (datenstatus, datum,
+    sensor_id, seriennummer, verfahren, referenz {...}, bedingungen {...}, pruefunsicherheit [...]).
+    Zeilen ohne referenz_C oder sensor_C werden uebersprungen und gezaehlt (nie still ergaenzt)."""
+    import csv
+    pfad = csv_datei if os.path.isabs(csv_datei) else os.path.join(pdir, csv_datei)
+    zahl = lambda v: float(str(v).strip().replace(',', '.')) if str(v or '').strip() else None  # noqa: E731
+    punkte, leer = [], 0
+    with open(pfad, encoding='utf-8-sig', newline='') as f:
+        for z in csv.DictReader(f, delimiter=';'):
+            ref, ist = zahl(z.get('referenz_C')), zahl(z.get('sensor_C'))
+            if ref is None or ist is None:
+                leer += 1
+                continue
+            punkte.append({'ref': ref, 'ist': ist, 'punkt_C': zahl(z.get('punkt_C')),
+                           'richtung': (z.get('richtung') or 'auf').strip() or 'auf', 'nr': z.get('nr'),
+                           'zeit': (z.get('zeit') or '').strip() or None,
+                           'roh_code': [zahl(z.get('roh_code_a')), zahl(z.get('roh_code_b'))]})
+    if not punkte:
+        raise ValueError(f'{pfad}: keine Zeile mit referenz_C und sensor_C')
+    # Gleiche Referenzwerte je Punkt: die Statistik gruppiert nach ref - bei schwankender Referenz nach Sollpunkt
+    # gruppieren und die Abweichung je Einzelwert erhalten (ist - ref wird auf den Sollpunkt verschoben)
+    for p in punkte:
+        if p['punkt_C'] is not None:
+            p['ist'], p['ref'] = p['punkt_C'] + (p['ist'] - p['ref']), p['punkt_C']
+    erg = []
+    for eig, rid in ids.items():
+        r = {**kopf, 'id': rid, 'eigenschaft': eig, 'quelle_csv': os.path.basename(pfad),
+             'punkte': [dict(p) for p in punkte if eig == 'hysterese' or p['richtung'] == 'auf']}
+        erg.append(messreihe_eintragen(pdir, r))
+    return {'reihen': erg, 'zeilen': len(punkte), 'uebersprungen_leer': leer}
+
+
 def kalibrierung_auswerten(pdir, reihe_id, grad=2):
     """Kalibrierreihe (messung.json) auswerten und - nur wenn nachweisfaehig (rueckfuehrbar gemessen, Referenz- und
     Kopplungsunsicherheit bekannt) - Koeffizienten und Unsicherheiten in soll.json _projekt.messkette.kalibrierung

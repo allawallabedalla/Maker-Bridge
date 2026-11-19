@@ -143,6 +143,16 @@ def messreihe_eintragen(projekt: str, reihe: dict):
     return an.messreihe_eintragen(pdir(projekt), reihe)
 
 
+@befehl('anforderungen')
+def messreihen_aus_csv(projekt: str, csv_datei: str, kopf: dict, ids: dict):
+    """Messwert-Tabelle (Semikolon-CSV: punkt_C;richtung;nr;zeit;referenz_C;sensor_C;roh_code_a;roh_code_b) als
+    Messreihen in messung.json einlesen. ids = {eigenschaft: reihen_id}; kopf = datenstatus, datum, sensor_id,
+    seriennummer, verfahren, referenz {mittel, seriennummer, kalibrierschein, rueckfuehrung, U, k, einheit,
+    gueltig_bis}, bedingungen, pruefunsicherheit."""
+    from . import anforderungen as an
+    return an.messreihen_aus_csv(pdir(projekt), csv_datei, kopf, ids)
+
+
 @befehl('messtechnik')
 def kalibrierung_auswerten(projekt: str, reihe: str, grad: int = 2):
     """Kalibrierreihe aus messung.json auswerten (Korrekturpolynom, u_fit, u_referenz, u_kopplung). Schreibt die

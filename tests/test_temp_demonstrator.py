@@ -435,6 +435,25 @@ int main() {
     assert ende == ['4C 70 ', '08 ', '10 00 00 00 ', '4C 8C ', '08 ', '10 00 00 00 '], ende   # Phase A, B getauscht
 
 
+def test_messreihen_aus_csv():
+    d = _kopie('csv')
+    zeilen = ['punkt_C;richtung;nr;zeit;referenz_C;sensor_C;roh_code_a;roh_code_b']
+    for t in (-20, 50, 100):
+        for i in range(1, 4):
+            zeilen.append(f'{t};auf;{i};10:00;{t + 0.02:.2f};{t + 0.12:.2f}'.replace('.', ',') + ';;')
+    zeilen += ['50;ab;1;11:00;50,02;50,17;;', '50;ab;2;;;;;']          # letzte Zeile leer -> gezaehlt
+    p = os.path.join(d, 'werte.csv')
+    open(p, 'w', encoding='utf-8').write('\n'.join(zeilen) + '\n')
+    kopf = {'datenstatus': 'demonstrationsdaten_nicht_rueckfuehrbar', 'datum': '2026-11-19'}
+    r = an.messreihen_aus_csv(d, 'werte.csv', kopf, {'genauigkeit': 'R-CSV-G', 'hysterese': 'R-CSV-H'})
+    assert r['zeilen'] == 10 and r['uebersprungen_leer'] == 1, r
+    m = {x['id']: x for x in json.load(open(os.path.join(d, 'messung.json'), encoding='utf-8'))['reihen']}
+    g, h = m['R-CSV-G'], m['R-CSV-H']
+    assert len(g['punkte']) == 9 and len(h['punkte']) == 10 and g['eigenschaft'] == 'genauigkeit', g
+    p0 = g['punkte'][0]
+    assert p0['ref'] == -20 and abs(p0['ist'] - (-19.9)) < 1e-9, p0             # Dezimalkomma, auf Sollpunkt
+
+
 if __name__ == '__main__':
     try:
         for n, f in list(globals().items()):
