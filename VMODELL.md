@@ -38,6 +38,15 @@ Nachweis auf derselben Höhe des V. Anlass und Herleitung: `audits/KERNPROBLEM_2
 
 ## Regeln der Matrix
 
+- **Wunsch und Spezifikation getrennt** (seit 19.11.2026, nach Liu et al. 2025, Int J Adv Manuf Technol 139:2103):
+  - Ebene `stakeholder`: Wunsch in Worten des Nutzers oder Kunden. Er braucht eine Herkunft und wird im Einsatz validiert (Abnahme oder Feld).
+  - Ebene `system`: daraus **hergeleitete** messbare Spezifikation, mit `eltern` (welcher Wunsch) und `herleitung` (Rechnung oder Begründung, z. B. „P = ρgQH = 63 W, mit Reserve 70 W“).
+  - Die Regel gilt, sobald ein Projekt Stakeholder-Wünsche führt. Ältere Projekte ohne sie bleiben gültig.
+- **Simulationsfehler bei relativer Abweichung** (Glaubwürdigkeit, `validierung.einheit: "%"`):
+  - über 10 %: nie validiert, auch nicht bei lockerer Projektgrenze
+  - 5–10 %: höchstens Stufe 2
+  - unter 5 %: volle Stufe
+
 - Systemanforderung: hat eine `herkunft` (wer verlangt es) und einen Nachweis `abnahme` oder `feld`.
 - Subsystem/Komponente: hat `eltern` (Rückverfolgbarkeit nach oben) und Nachweise auf ihrer Ebene.
 - Eine Warnung zählt nur mit `warnung_akzeptiert: "Begründung"`.

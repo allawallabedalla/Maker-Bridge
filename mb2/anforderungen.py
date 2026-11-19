@@ -56,8 +56,11 @@ import re
 
 from . import glaubwuerdigkeit
 
-EBENEN = ('system', 'subsystem', 'komponente')
-STUFEN_JE_EBENE = {'system': ('abnahme', 'feld'), 'subsystem': ('integration', 'abnahme', 'feld'),
+EBENEN = ('stakeholder', 'system', 'subsystem', 'komponente')
+# stakeholder (seit 19.11.2026, nach Liu et al. 2025): Wunsch in Worten des Nutzers/Kunden, validiert im Einsatz;
+# system = daraus HERGELEITETE messbare Spezifikation (Feld 'herleitung': Rechnung oder Begruendung).
+STUFEN_JE_EBENE = {'stakeholder': ('feld', 'abnahme'), 'system': ('abnahme', 'feld'),
+                   'subsystem': ('integration', 'abnahme', 'feld'),
                    'komponente': ('komponente', 'integration')}
 HERKUNFT_STARK = ('gemessen', 'datenblatt', 'norm', 'berechnet')
 HERKUNFT_SCHWACH = ('geschaetzt', 'angenommen')
@@ -427,21 +430,28 @@ def pruefen(pdir, katalog=None, extra=None):
     if not anf:
         matrix_maengel.append('Keine Anforderungen (anforderungen.json) - ohne Lastenheft ist nichts bewiesen '
                               '(anforderungen_erzeugen)')
+    stakeholder_ids = {a['id'] for a in anf if a.get('ebene') == 'stakeholder'}
+    hat_stakeholder = bool(stakeholder_ids)
     for a in anf:
         ebene = a.get('ebene')
         maengel = []
         if ebene not in EBENEN:
             maengel.append(f'Ebene {ebene!r} unbekannt ({"/".join(EBENEN)})')
-        if ebene == 'system' and not a.get('herkunft'):
-            maengel.append('Systemanforderung ohne Herkunft (wer verlangt es?)')
+        if ebene in ('stakeholder', 'system') and not a.get('herkunft'):
+            maengel.append(f'{ebene}-Anforderung ohne Herkunft (wer verlangt es?)')
+        if ebene == 'system' and hat_stakeholder:
+            if not [e for e in a.get('eltern', []) if e in stakeholder_ids]:
+                maengel.append('Systemanforderung ohne Stakeholder-Wunsch als Eltern (wessen Wunsch erfuellt sie?)')
+            if not a.get('herleitung'):
+                maengel.append('Systemanforderung ohne herleitung (wie folgt die Zahl aus dem Wunsch? Rechnung/Begruendung)')
         if ebene in ('subsystem', 'komponente') and not [e for e in a.get('eltern', []) if e in ids]:
             maengel.append('keine Elternanforderung (Rueckverfolgbarkeit nach oben fehlt)')
         nws = a.get('nachweise', [])
         stufen = {n.get('stufe') for n in nws}
         if ebene in STUFEN_JE_EBENE and not stufen & set(STUFEN_JE_EBENE[ebene]):
             maengel.append(f'kein Nachweis auf V-Ebene {"/".join(STUFEN_JE_EBENE[ebene])}')
-        if ebene == 'system' and 'abnahme' not in stufen and 'feld' not in stufen:
-            maengel.append('Systemanforderung braucht Abnahme am Geraet oder Feldmessung')
+        if ebene in ('stakeholder', 'system') and 'abnahme' not in stufen and 'feld' not in stufen:
+            maengel.append(f'{ebene}-Anforderung braucht Abnahme am Geraet oder Feldmessung')
         for n in nws:
             if n.get('stufe') not in ('komponente', 'integration', 'abnahme', 'feld'):
                 maengel.append(f'Nachweis {n.get("art")} {n.get("ref")}: stufe {n.get("stufe")!r} ungueltig '
@@ -502,7 +512,7 @@ def pruefen(pdir, katalog=None, extra=None):
         if not geaendert:
             break
     unten = [z for z in zeilen if z['ebene'] in ('subsystem', 'komponente')]
-    oben = [z for z in zeilen if z['ebene'] == 'system']
+    oben = [z for z in zeilen if z['ebene'] in ('stakeholder', 'system')]
     # Druckfertig: alle Komponenten-/Integrationsnachweise bewiesen (Abnahme/Feld duerfen noch offen sein)
     def nur_vor_abnahme(z):    # alles ausser Abnahme/Feld muss vor dem Druck stehen (auch fehlende/falsche stufe)
         return all(n['status'] in ('bewiesen', 'vorbehalt') for n in z['nachweise']

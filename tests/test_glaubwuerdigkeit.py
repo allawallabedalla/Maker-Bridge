@@ -73,6 +73,21 @@ def test_hohes_risiko_braucht_messung_mit_differenz():
     assert gw.bewerte(p, 'haken', m, F20_OK)['status'] == 'unbewiesen'
 
 
+def test_relative_abweichung_bridge_grenzen():
+    """Seit 19.11.2026 (nach Liu et al. 2025): relative Abweichung > 10 % ist nie validiert, auch wenn das Projekt eine
+    lockere Grenze setzt; 5-10 % hoechstens Stufe 2 (reicht bei Risiko 4, nicht bei Risiko 5)."""
+    m = {**M, 'einfluss': 'hoch', 'folge': 'mittel', 'anwendbarkeit': 'ja',
+         'validierung': {'beleg': 'x', 'strenge': 'differenz', 'abweichung': 12.0, 'grenze': 30.0, 'einheit': '%'}}
+    p = projekt(KONV, sens())
+    assert gw.bewerte(p, 'haken', m, F20_OK)['status'] == 'unbewiesen'                # 12 % > Bridge-Grenze 10 %
+    m['validierung']['abweichung'] = 7.0
+    assert gw.bewerte(p, 'haken', m, F20_OK)['status'] == 'bewiesen'                  # Risiko 4 braucht Stufe 2
+    m5 = {**m, 'folge': 'hoch', 'validierung': {**m['validierung'], 'strenge': 'unsicherheit_beidseitig'}}
+    assert gw.bewerte(p, 'haken', m5, F21_OK, herkunft='gemessen')['status'] == 'unbewiesen'   # 7 % -> max Stufe 2 < 4
+    m5['validierung']['abweichung'] = 3.0
+    assert gw.bewerte(p, 'haken', m5, F21_OK, herkunft='gemessen')['status'] == 'bewiesen'
+
+
 def test_hoechstes_risiko_verlangt_hoechste_stufen():
     m = {**M, 'einfluss': 'hoch', 'folge': 'hoch', 'anwendbarkeit': 'ja',
          'validierung': {'beleg': 'x', 'strenge': 'differenz', 'abweichung': 1, 'grenze': 5}}

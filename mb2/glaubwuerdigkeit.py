@@ -96,8 +96,17 @@ def stufen(pdir, fall, erg, modell, katalog=None, herkunft=None):
     v = modell.get('validierung') or {}
     st = STRENGE.get(v.get('strenge'), 2 if v.get('beleg') else 0) if v else 0
     ab, gr = v.get('abweichung'), v.get('grenze')
+    # Bridge-weite Obergrenze fuer relative Abweichungen (seit 19.11.2026, nach Liu et al. 2025: < 5 % zuverlaessig,
+    # 5-10 % brauchbar mit Nachjustieren, > 15 % gescheitert; die Luecke 10-15 % schliessen wir konservativ bei 10 %)
+    relativ = str(v.get('einheit', '')).strip() == '%'
+    if relativ and isinstance(gr, (int, float)) and gr > 10:
+        gr = 10.0
     if st >= 2 and not (isinstance(ab, (int, float)) and isinstance(gr, (int, float)) and abs(ab) <= gr):
-        s['vergleich'] = (0, f'{v.get("beleg")}: Abweichung {ab} ueber Grenze {gr} oder nicht angegeben')
+        s['vergleich'] = (0, f'{v.get("beleg")}: Abweichung {ab} ueber Grenze {gr}'
+                             f'{" (Bridge-Obergrenze 10 %)" if relativ else ""} oder nicht angegeben')
+    elif relativ and isinstance(ab, (int, float)) and 5 < abs(ab) <= 10:
+        s['vergleich'] = (min(st, 2), f'{v.get("beleg")}: Abweichung {ab} % zwischen 5 und 10 % - brauchbar, aber '
+                                      f'nachjustieren; hoechstens Stufe 2')
     else:
         s['vergleich'] = (st, f'{v.get("beleg")}: {v.get("strenge", "differenz")}, Abweichung {ab} '
                               f'{v.get("einheit", "")} bei Grenze {gr}' if v else 'keine Messung zum Vergleich')

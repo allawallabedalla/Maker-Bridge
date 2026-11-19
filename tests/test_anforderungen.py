@@ -129,6 +129,31 @@ def test_firmware_konstante_gegen_soll():
     assert fw and fw[0]['stufe'] == 'fehler', fw
 
 
+def test_stakeholder_wunsch_und_herleitung():
+    """Wunsch (stakeholder) -> messbare Spezifikation (system) mit herleitung; ohne beides Matrix-Mangel."""
+    d = neu('vm_stakeholder', {'T_max_C': 30, 'material': 'PETG'})
+    p = os.path.join(d, 'anforderungen.json')
+    a = json.load(open(p, encoding='utf-8'))
+    a['anforderungen'] += [
+        {'id': 'W-FOERDERN', 'ebene': 'stakeholder', 'herkunft': 'Kunde 19.11.2026', 'text': 'Pumpe foerdert genug',
+         'nachweise': [{'art': 'abnahme', 'ref': 'AB-FUNKTION', 'stufe': 'abnahme'}]},
+        {'id': 'A-LEISTUNG', 'ebene': 'system', 'herkunft': 'abgeleitet aus W-FOERDERN',
+         'text': 'Motor >= 70 W', 'nachweise': [{'art': 'abnahme', 'ref': 'AB-FUNKTION', 'stufe': 'abnahme'}]}]
+    json.dump(a, open(p, 'w', encoding='utf-8'), ensure_ascii=False)
+    z = {x['id']: x for x in an.pruefen(d)['anforderungen']}
+    m = ' '.join(z['A-LEISTUNG']['matrix_maengel'])
+    assert 'Stakeholder-Wunsch' in m and 'herleitung' in m, m
+    assert any('Stakeholder-Wunsch' in ' '.join(z[i]['matrix_maengel']) for i in ('A-GERAET', 'A-MONTAGE'))
+    for x in a['anforderungen']:
+        if x['ebene'] == 'system':
+            x['eltern'] = ['W-FOERDERN']
+            x['herleitung'] = 'P = rho g Q H = 63 W, mit Reserve 70 W'
+    json.dump(a, open(p, 'w', encoding='utf-8'), ensure_ascii=False)
+    z = {x['id']: x for x in an.pruefen(d)['anforderungen']}
+    assert not z['A-LEISTUNG']['matrix_maengel'], z['A-LEISTUNG']['matrix_maengel']
+    assert not z['W-FOERDERN']['matrix_maengel'], z['W-FOERDERN']['matrix_maengel']
+
+
 def test_audit_meldet_freigabe():
     alt = befehle.PROJEKTE
     befehle.PROJEKTE = TMP

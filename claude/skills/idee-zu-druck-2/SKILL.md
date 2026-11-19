@@ -48,6 +48,8 @@ Die Werkzeuge liefert der MCP-Server **mb2**. Jeder Schritt läuft über einen e
 - **Leitungslängen prüfen:** SPI und I²C sind Platinenbusse (Zentimeter bis wenige Meter). Muss ein Sensor weiter weg,
   dann nur das analoge Fühlerkabel verlängern (z. B. 3-Leiter-PT100) oder einen Bus für lange Leitungen vorsehen
   (RS-485, I²C-Verlängerer).
+- **Erst Wunsch, dann Zahl:** Was der Nutzer will, steht in seinen Worten als `stakeholder`-Anforderung. Die messbare
+  `system`-Anforderung nennt diesen Wunsch als `eltern` und ihre `herleitung` (Rechnung oder Begründung).
 - **Zahlen gegen die Anwendung halten:** Messbereich, Messrate, Genauigkeit, Laufzeit aus der Anwendung ableiten,
   nicht übernehmen. (Lehre MB2-TEMP-001: 100 °C für Außenluft, 5 Werte/s ohne Grund.)
 - **Einbau beeinflusst die Messung:** Bei Sensoren den Einbau als Teil der Messkette behandeln (Strahlungsschutz,
