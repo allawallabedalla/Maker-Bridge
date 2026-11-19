@@ -622,6 +622,17 @@ def standard(pdir):
                   'nachweise': ([{'art': 'katalog', 'ref': 'M12', 'stufe': 'komponente'},
                                  {'art': 'katalog', 'ref': 'D4', 'stufe': 'integration'}] if a('schrauben') else []) +
                                ([{'art': 'katalog', 'ref': 'M1', 'stufe': 'komponente'}] if a('schnapper') else [])})
+    zl = pj.get('ziele') or {}
+    if isinstance(zl.get('zielkosten_eur_stueck'), (int, float)):
+        L.append({'id': 'S-KOSTEN', 'ebene': 'subsystem', 'eltern': ['A-GERAET'], 'herkunft': 'Projektziel (ziele)',
+                  'text': f'Bauteil- und Materialkosten je Geraet <= {zl["zielkosten_eur_stueck"]} EUR (kosten.json).',
+                  'eingaben': ['ziele.zielkosten_eur_stueck'],
+                  'nachweise': [{'art': 'katalog', 'ref': 'K1', 'stufe': 'integration'}]})
+    if isinstance(zl.get('aufwand_h_stueck'), (int, float)):
+        L.append({'id': 'S-AUFWAND', 'ebene': 'subsystem', 'eltern': ['A-GERAET'], 'herkunft': 'Projektziel (ziele)',
+                  'text': f'Arbeitszeit je Geraet <= {zl["aufwand_h_stueck"]} h (Bau, Abgleich, Pruefung).',
+                  'eingaben': ['ziele.aufwand_h_stueck'],
+                  'nachweise': [{'art': 'katalog', 'ref': 'K2', 'stufe': 'integration'}]})
     if a('messung') and pj.get('messkette'):
         L.append({'id': 'S-MESSKETTE', 'ebene': 'subsystem', 'eltern': ['A-GERAET'],
                   'herkunft': 'abgeleitet aus Merkmal Messung',

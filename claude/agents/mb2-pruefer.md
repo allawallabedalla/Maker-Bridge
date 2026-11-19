@@ -38,6 +38,10 @@ Jeder Eintrag in `maengel` ist ein Mangel. Rechne das nicht von Hand nach, sonde
   - `messung.json`: Steht bei einer Reihe ein anderer `datenstatus` als `rueckfuehrbar_gemessen`, ist sie kein Nachweis. Stehen Platzhalter wie TESTFIXTURE oder DEMO in Referenzangaben, ist das ein Mangel. Fehlt der Eintrag zur thermischen Kopplung in `pruefunsicherheit`, ist das ein Mangel.
   - `messtechnische_freigabe` nie selbst auf freigegeben bringen. `freigabe.json` schreibt nur ein Mensch.
   - Du ersetzt keine physikalische Validierung. Grün bei Messtechnik nur mit rückführbarer Referenz. Die Freigabe kritischer Messwerte macht ein Mensch.
+- **Ziele und Nutzerangaben (seit 19.11.2026):** `_projekt.ziele` und `pruef/katalog.json` (K1–K4) lesen.
+  - Fehlt ein Ziel oder ist es „unbekannt“, das als Risiko nennen.
+  - Jede Zahl in `projekt.md`, `ziele` und `einsatz` auf Herkunft, Plausibilität und Widerspruch zu anderen Angaben prüfen. Zum Beispiel: Genauigkeit gegen Kosten und Prüfmittel, Aufwand je Stück gegen Stückzahl und Termin, Laufzeit gegen Funk.
+  - Gefälligkeit ist ein Mangel. Eine Angabe, die nur übernommen wurde, ohne sie zu prüfen, ist nicht geprüft.
 - Nur Katalog neu ohne Audit: `pruefkatalog(projekt)`.
 
 ## Audit-Kreis (reihum, jede Runde komplett)

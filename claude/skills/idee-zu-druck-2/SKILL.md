@@ -16,9 +16,28 @@ Die Werkzeuge liefert der MCP-Server **mb2**. Jeder Schritt läuft über einen e
 - Eine Empfehlung mit einem Satz Begründung.
 - Eine einzige, klar beantwortbare Frage am Ende („a oder b?“). Keine Sammelfragen.
 
+**Kritisch statt gefällig (Pflicht, seit 19.11.2026):** Kein Nach-dem-Mund-Reden. Zustimmung muss man sich verdienen.
+- Jede Angabe des Nutzers, die die Auslegung beeinflusst (Zahl, Annahme, Priorität, Bauteilwahl), wird mit drei
+  Fragen geprüft: **Woher kommt der Wert?** (gemessen, Datenblatt, Schätzung, Wunsch) – **Ist er plausibel?**
+  (Größenordnung, Stand der Technik, Preis) – **Widerspricht er einer anderen Angabe?** (Genauigkeit gegen Kosten,
+  Messrate gegen Rauschen, Laufzeit gegen Funk, Aufwand je Stück gegen Stückzahl, Prüfmittel gegen Toleranz).
+- Gefundene Schwächen sofort und konkret benennen, mit Zahl und Folge („±0,1 °C für 15 € ist mit diesem Chip nicht
+  erreichbar, weil …“). Nicht abschwächen, nicht entschuldigen.
+- Hält eine Angabe der Prüfung stand, das kurz sagen und begründen – kein Lob ohne Grund.
+- Widerspricht der Nutzer einer Kritik, zählt das Argument, nicht die Wiederholung. Ohne neues Argument bleibt die
+  Kritik stehen und wird im Lastenheft als Risiko vermerkt.
+- Nicht kritisieren um des Kritisierens willen: reine Geschmacksfragen (Farbe, Form ohne Funktion) nur auf technische
+  Folgen prüfen.
+
 ## 0. Idee schärfen (du selbst)
+- **Ziele zuerst (KPIs):** vor der Technik `ZIEL_FELDER` abfragen und an `project_new(..., ziele=...)` geben:
+  Zielkosten je Gerät, Stückzahl, Termin, Arbeitszeit je Gerät, Fehlerfolge (was passiert, wenn es falsch arbeitet),
+  Priorität als Reihenfolge von Qualität/Kosten/Zeit, vorhandene Prüfmittel. Einfach fragen, je Feld „weiß nicht“
+  erlauben (dann `"unbekannt"` eintragen, nie raten). „Alles gleich wichtig“ als Priorität nicht annehmen: nachfragen,
+  was bei einem Konflikt nachgibt. Jede Antwort nach der Regel oben hinterfragen. Kosten und Arbeitsschritte mit Quelle
+  in `kosten.json` (K1/K2, `mb2/pruefungen/kpi.py`).
 - Nur fragen, was wirklich offen ist: Funktion, Strom (USB-C/Akku), Bedienelemente, Anschlüsse, Zielgröße, Einsatzort (Wärme oder außen → PETG/ASA), Lasten (Klemmen, Schnappen, Fallen).
-- Angaben des Nutzers zu Bauteilen übernehmen, nicht nach Datenblattdetails fragen.
+- Angaben des Nutzers zu Bauteilen übernehmen, nicht nach Datenblattdetails fragen – übernehmen heißt aber nicht ungeprüft lassen: Eignung selbst prüfen und Bedenken nennen.
 - **Gleichteile zuerst:** Vor jeder Teilewahl (Schrauben, Einsätze, Module, Taster, Stecker, Filament) die zentrale
   `{BESTELLLISTE}` lesen (JSON-Block `<script id="daten">`: `shops[].posten`
   = vorgemerkt/offen, `erledigt` = schon gekauft) und den Vorrat (`{MB2}\VORRAT.md`: Filament, Einschmelzmuttern,

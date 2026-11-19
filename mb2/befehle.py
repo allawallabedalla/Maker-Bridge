@@ -41,12 +41,27 @@ EINSATZ_FELDER = {
 }
 
 
+# Projektziele: werden beim Start abgefragt. "unbekannt" ist eine erlaubte Antwort (wird als Risiko gefuehrt).
+ZIEL_FELDER = {
+    'zielkosten_eur_stueck': 'Bauteil- und Materialkosten je Geraet in EUR (ohne Arbeitszeit)',
+    'stueckzahl': 'wie viele Geraete gebaut werden',
+    'termin': 'bis wann das erste Geraet fertig und geprueft sein muss (JJJJ-MM-TT)',
+    'aufwand_h_stueck': 'Arbeitszeit je Geraet in Stunden (Bau, Abgleich, Pruefung)',
+    'fehlerfolge': 'was passiert, wenn das Geraet falsch arbeitet: gering | mittel | hoch',
+    'prioritaet': 'Reihenfolge von qualitaet, kosten, zeit - was gibt bei einem Konflikt nach?',
+    'pruefmittel': 'vorhandene Mess- und Pruefgeraete (Liste)',
+}
+
+
 @befehl('projekt')
-def project_new(projekt: str, idee: str, anforderungen: str = '', einsatz: dict | None = None):
+def project_new(projekt: str, idee: str, anforderungen: str = '', einsatz: dict | None = None,
+                ziele: dict | None = None):
     """Projektordner anlegen: electronics/ cad/ out/ fem/ print/ + projekt.md + cad/soll.json mit _projekt-Vorlage.
     einsatz = Einsatzbedingungen {aussen, T_min_C, T_max_C, farbe, material, lebensdauer_h, akku_mAh, akku_chemie,
     laufzeit_ziel_h, fallhoehe_m, elektronik: {funk: {r_m, umgebung, hindernisse, kabel, ...}, module: [...]},
-    nicht_relevant: {ID: Grund}} – was unbekannt ist, weglassen (dann ungünstig gerechnet). Danach eingaben_offen."""
+    nicht_relevant: {ID: Grund}} – was unbekannt ist, weglassen (dann ungünstig gerechnet).
+    ziele = Projektziele (ZIEL_FELDER: Zielkosten, Stueckzahl, Termin, Aufwand, Fehlerfolge, Prioritaet, Pruefmittel);
+    jede Angabe vorher hinterfragen (Quelle, Plausibilitaet, Widerspruch), "unbekannt" ist erlaubt. Danach eingaben_offen."""
     d = os.path.join(PROJEKTE, projekt)
     if os.path.exists(d):
         raise RuntimeError('Gibt es schon: ' + d)
@@ -56,8 +71,13 @@ def project_new(projekt: str, idee: str, anforderungen: str = '', einsatz: dict 
     zeilen = [f'- {k}: {einsatz[k]}' if k in einsatz else f'- {k}: **offen** ({v})' for k, v in EINSATZ_FELDER.items()]
     if (einsatz.get('elektronik') or {}).get('funk'):
         zeilen.append(f'- Funkstrecke: {einsatz["elektronik"]["funk"]}')
+    ziele = dict(ziele or {})
+    zielzeilen = [f'- {k}: {ziele[k]}' if k in ziele else f'- {k}: **offen** ({v})' for k, v in ZIEL_FELDER.items()]
+    if ziele:
+        einsatz['ziele'] = ziele
     with open(os.path.join(d, 'projekt.md'), 'w', encoding='utf-8') as f:
         f.write(f'# {projekt}\n\n## Idee\n{idee}\n\n## Anforderungen\n{anforderungen or "-"}\n\n'
+                '## Ziele (KPIs)\n' + '\n'.join(zielzeilen) + '\n\n'
                 '## Einsatzbedingungen\n' + '\n'.join(zeilen) + '\n\n## Entscheidungen\n\n## Audit\n')
     einsatz.setdefault('nicht_relevant', {})
     einsatz.setdefault('_herkunft', {})
@@ -67,6 +87,7 @@ def project_new(projekt: str, idee: str, anforderungen: str = '', einsatz: dict 
     an.erzeugen(d)
     an.abnahme_erzeugen(d)
     return {'projekt': d, 'offen': [k for k in EINSATZ_FELDER if k not in einsatz],
+            'ziele_offen': [k for k in ZIEL_FELDER if k not in ziele],
             'naechstes': 'Lastenheft: eigene Anforderungen des Nutzers in anforderungen.json (Ebene system, herkunft), '
                          '_projekt._herkunft je Einsatzwert (gemessen|datenblatt|geschaetzt|angenommen: Beleg), '
                          'dann eingaben_offen'}
@@ -90,8 +111,9 @@ def eingaben_offen(projekt: str):
             elif e['stufe'] == 'warnung' and 'angenommen' in (e.get('hinweis') or ''):
                 annahmen.append(f'{e["id"]}{" [" + e["teil"] + "]" if e.get("teil") else ""}: {e["hinweis"][:160]}')
     offen = {k: v for k, v in EINSATZ_FELDER.items() if pj.get(k) is None}
+    zo = {k: v for k, v in ZIEL_FELDER.items() if (pj.get('ziele') or {}).get(k) is None}
     return {'merkmale': r.get('merkmale', {}), 'pflicht_fehlt': pflicht, 'wartet_auf_entwurf': entwurf,
-            'annahmen': annahmen[:40], 'einsatz_offen': offen, 'nicht_relevant': pj.get('nicht_relevant', {}),
+            'annahmen': annahmen[:40], 'einsatz_offen': offen, 'ziele_offen': zo, 'nicht_relevant': pj.get('nicht_relevant', {}),
             'fertig': not pflicht and not entwurf,
             'hinweis': 'pflicht_fehlt: Eingabe nachtragen (FELDER.md) oder _projekt.nicht_relevant mit echter Begruendung; '
                        'Umgebung/Hindernisse/Temperaturen nie geschoent eintragen, nur damit es gruen wird.'}

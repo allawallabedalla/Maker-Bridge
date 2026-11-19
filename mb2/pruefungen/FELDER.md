@@ -161,3 +161,17 @@ Die Messreihen stehen in `messung.json`.
 
 MK4-REF (Referenzspannung), MK4-IDAC (Compliance), MK4-PGA (Gleichtaktbereich: max(AVSS + Rand + G·V_in,max/2, Anteil·AVDD) ≤ V_CM ≤ AVDD − Rand − G·V_in,max/2), MK4-SELBST (Eigenerwärmung), MK5 (Zeitbudget: mittelung × (wandlungszeit + einschwing) ≤ 1/messrate).
 Messreihe in `messung.json`: `datenstatus`, `sensor_id`, `seriennummer`, `datum`, `verfahren`, `referenz {mittel, seriennummer, kalibrierschein, rueckfuehrung, U, k, einheit, gueltig_bis}`, `bedingungen` (Schlüssel `_min`/`_max` als Mindest- bzw. Höchstwert), `pruefunsicherheit [Beiträge]`, `punkte [{ref, ist, richtung, t_h, zeit, roh_code}]`.
+
+## Projektziele (seit 19.11.2026, K1–K4, `mb2/pruefungen/kpi.py`)
+
+`project_new(..., ziele={...})` → `_projekt.ziele`. Jedes Feld darf `"unbekannt"` sein und wird dann als Risiko gemeldet.
+
+| Feld | Bedeutung | Prüfung |
+|---|---|---|
+| `zielkosten_eur_stueck` | Bauteil- und Materialkosten je Gerät | K1 gegen `kosten.json → posten [{name, menge, preis_eur, quelle}]` |
+| `aufwand_h_stueck` | Arbeitszeit je Gerät (Bau, Abgleich, Prüfung) | K2 gegen `kosten.json → arbeitsschritte [{name, h, quelle}]` |
+| `termin` | erstes Gerät fertig und geprüft (JJJJ-MM-TT) | K3: liegt in der Zukunft |
+| `prioritaet` | Reihenfolge von `qualitaet`, `kosten`, `zeit` | K4: eindeutig, jedes genau einmal |
+| `stueckzahl`, `fehlerfolge` (gering/mittel/hoch), `pruefmittel` | Grundlage der Widerspruchsprüfung (folgt) | – |
+
+Posten ohne Preis oder Quelle zählen als Lücke, nie als 0 €.

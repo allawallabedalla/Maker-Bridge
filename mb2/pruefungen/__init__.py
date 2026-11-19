@@ -20,7 +20,7 @@ import json
 import os
 
 MODULE = ('fem_plausi', 'waerme', 'mechanik', 'dauer', 'toleranz', 'schwingung', 'elektronik', 'druck', 'firmware',
-          'messkette')
+          'messkette', 'kpi')
 STUFEN = ('ok', 'info', 'warnung', 'fehler', 'uebersprungen')
 
 
@@ -68,6 +68,8 @@ AUSLOESER = {
     'lautsprecher': (('S5',), '_projekt.lautsprecher / elektronik.lautsprecher_Ohm'),
     'fem_mech': (('M7', 'M9'), 'Druckrichtung (druck_drehung) bzw. Slice'),
     'firmware': (('FW1',), '_projekt.firmware {pfad, konstanten: {NAME: {datei, soll|soll_aus}}}'),
+    'ziele': (('K1', 'K2'), '_projekt.ziele {zielkosten_eur_stueck, aufwand_h_stueck} und kosten.json {posten, '
+                            'arbeitsschritte} (Ziel "unbekannt" ist erlaubt und wird als Risiko gemeldet)'),
     'messung': (('MK1', 'MK2'), '_projekt.messkette {adc_bits, v_ref_V, adc_rauschen_V, u_ref_V, '
                                 'empfindlichkeit_V_je_einheit, ziel_U, ziel_aufloesung, ...}'),
 }

@@ -143,6 +143,7 @@ def merkmale(pdir):
     setze('lautsprecher', bool(wort('lautsprecher')), wort('lautsprecher') or '')
     setze('firmware', bool(pj.get('firmware')), 'soll.json _projekt.firmware')
     setze('firmware', bool(wort('firmware')), wort('firmware') or '')
+    setze('ziele', bool(pj.get('ziele')), 'soll.json _projekt.ziele')
     # Messfunktion: Messkette im soll oder messtechnische Anforderung im Lastenheft
     setze('messung', bool(pj.get('messkette')), 'soll.json _projekt.messkette')
     setze('messung', _messtechnik(pdir), 'anforderungen.json messtechnik')
