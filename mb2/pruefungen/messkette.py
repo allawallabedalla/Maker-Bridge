@@ -386,6 +386,18 @@ def _u_pruef(reihe, u_ref, stat):
     return b['U'], b
 
 
+def _bezug(mt):
+    """Worauf sich die Genauigkeitsgrenze bezieht: 'einzelwert' (Voreinstellung, streng) oder 'mittelwert' (nur wenn die
+    Anforderung es ausdruecklich sagt, z. B. weil das Geraet immer mittelt)."""
+    return ((mt.get('genauigkeit') or {}).get('bezug') or 'einzelwert').lower()
+
+
+def _u_einzel(reihe, u_ref):
+    """Pruefunsicherheit fuer Einzelwerte: Referenz und Pruefbeitraege, ohne s/sqrt(n) (die Streuung ist im Kennwert)."""
+    bt = [{'name': 'referenzthermometer', 'wert': u_ref, 'verteilung': 'u'}] + list(reihe.get('pruefunsicherheit') or [])
+    return budget(bt, 2.0)['U']
+
+
 def bewerte_reihe(reihe, eigenschaft, messtechnik, heute=None):
     """Bewertung einer Messreihe gegen die messtechnische Anforderung (Protokollzeile).
 
@@ -490,7 +502,8 @@ def bewerte_reihe(reihe, eigenschaft, messtechnik, heute=None):
             return zu_wenig(f'Referenz {min(rs)} ... {max(rs)} {me} deckt {lo} ... {hi} nicht ab')
         g = mt.get('genauigkeit') or {}
         rnd = [z for z in stat if z['ref'] <= lo + rand or z['ref'] >= hi - rand]
-        e_max = max(abs(z['abweichung']) for z in rnd)
+        e_max = max(abs(z['abweichung']) for z in rnd) if _bezug(mt) == 'mittelwert' else \
+            max(abs(p['ist'] - p['ref']) for p in pk if p['ref'] <= lo + rand or p['ref'] >= hi - rand)
         basis.update(grenze=g.get('max_abs'), einheit=g.get('einheit', me))
         grenze = g.get('max_abs')
         einheit = g.get('einheit', me)
@@ -510,7 +523,11 @@ def bewerte_reihe(reihe, eigenschaft, messtechnik, heute=None):
     if eigenschaft == 'genauigkeit':
         if len({z['ref'] for z in stat}) < 3:
             return zu_wenig(f'{len({z["ref"] for z in stat})} Referenzwerte')
-        kennwert = max(abs(z['abweichung']) for z in stat)
+        if _bezug(mt) == 'mittelwert':
+            kennwert = max(abs(z['abweichung']) for z in stat)
+        else:   # Einzelwert (Voreinstellung): jeder Messwert muss passen; Streuung steckt im Kennwert selbst
+            kennwert = max(abs(p['ist'] - p['ref']) for p in pk)
+            u_k = _u_einzel(reihe, u_ref)
     elif eigenschaft == 'linearitaet':
         rs = sorted({z['ref'] for z in stat})
         if len(rs) < 5 or (rs[-1] - rs[0]) < 0.8 * spanne:

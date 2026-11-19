@@ -31,7 +31,8 @@ Nachweis:
      "eigenschaft": "genauigkeit|linearitaet|hysterese|drift|wiederholbarkeit|messbereich"  # messung: ref = Reihen-ID
 Messtechnische Anforderung (seit 19.11.2026): zusaetzlich ein Block ``messtechnik``
     {"messbereich": {"min": 0, "max": 100, "einheit": "°C"},
-     "genauigkeit": {"max_abs": 0.5, "einheit": "°C"}, "linearitaet": {"max_abs": 0.2, "einheit": "%FS"},
+     "genauigkeit": {"max_abs": 0.5, "einheit": "°C", "bezug": "einzelwert|mittelwert"},   # Voreinstellung einzelwert
+     "linearitaet": {"max_abs": 0.2, "einheit": "%FS"},
      "hysterese": {"max_abs": 0.2, "einheit": "%FS"}, "drift": {"max_abs": 0.1, "einheit": "°C/Jahr"},
      "wiederholbarkeit": {"max_abs": 0.05, "einheit": "°C"},         # Standardabweichung
      "definition_genauigkeit": "max. Betrag der Abweichung zur Referenz ueber den Messbereich",

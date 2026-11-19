@@ -122,6 +122,16 @@ def test_genauigkeit_schutzband():
     assert schlecht['status'] == 'verletzt', schlecht
 
 
+def test_genauigkeit_einzelwert_ist_voreinstellung():
+    """Streuung +-0,9 bei Mittel 0: als Einzelwert verletzt (Voreinstellung), nur mit bezug mittelwert bestanden."""
+    pk = [{'ref': x, 'ist': x + d} for x in (0, 50, 100) for d in (-0.9, 0.9, -0.9, 0.9)]
+    b = mk.bewerte_reihe(reihe('genauigkeit', pk), 'genauigkeit', MT)
+    assert b['status'] == 'verletzt' and abs(b['kennwert'] - 0.9) < 1e-9, b
+    mt = dict(MT, genauigkeit={'max_abs': 0.5, 'einheit': '°C', 'bezug': 'mittelwert'})
+    m = mk.bewerte_reihe(reihe('genauigkeit', pk), 'genauigkeit', mt)
+    assert m['kennwert'] < 1e-9 and m['status'] in ('bewiesen', 'vorbehalt'), m
+
+
 def test_zweipunktkalibrierung_beweist_keine_linearitaet():
     b = mk.bewerte_reihe(reihe('linearitaet', [{'ref': 0, 'ist': 0}, {'ref': 100, 'ist': 100}]), 'linearitaet', MT)
     assert b['status'] == 'unbewiesen' and b['grund'] == 'verfahren_unzureichend', b

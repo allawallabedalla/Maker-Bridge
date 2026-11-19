@@ -111,6 +111,7 @@ Darum gibt es zwei Ebenen:
 - **Datenstatus je Messreihe (Pflicht):** `rueckfuehrbar_gemessen` | `gemessen_nicht_rueckfuehrbar` | `demonstrationsdaten_nicht_rueckfuehrbar` | `simuliert`.
   - Nur `rueckfuehrbar_gemessen` kann beweisen. Dafür nötig: Sensor-ID, Seriennummer, Datum, Verfahren und an der Referenz Mittel, Seriennummer, Kalibrierschein, Rückführung, U, Gültigkeit. Fehlt etwas, gilt `nachweisdaten_unvollstaendig`.
   - Alle anderen Datenstatus werden ausgewertet und gezeigt (`auswertung_status`), bleiben aber `unbewiesen`.
+- **Bezug der Genauigkeit** (`messtechnik.genauigkeit.bezug`): `einzelwert` (Voreinstellung, jeder Messwert muss die Grenze einhalten) oder `mittelwert` (nur ausdrücklich, wenn das Gerät immer mittelt; dann Abweichung der Punktmittel, Streuung als s/√n in U_prüf).
 - **Prüfunsicherheit** U_prüf = 2·√(u_ref² + Σ `pruefunsicherheit` + (s/√n)²). Dazu gehören thermische Kopplung, Eintauchtiefe und Homogenität des Mediums.
 - **Protokoll** `pruef/messprotokoll.md`. Je Nachweis: gemessene Abweichung, zulässige Abweichung, U_prüf, Akzeptanzgrenze (Grenze − U_prüf), Entscheidungsregel, Fehlentscheidungsrisiko, Status, Gründe. Dazu je Messpunkt n, Mittelwert, s und Abweichung.
 - **Messtechnische Freigabe** (`v_matrix.messtechnische_freigabe`):
