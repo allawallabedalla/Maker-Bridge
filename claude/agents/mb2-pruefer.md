@@ -1,6 +1,7 @@
 ---
 name: mb2-pruefer
 description: Unabhängiger Prüfer für maker-bridge-2-Projekte – Audit-Kreis Druckbarkeit → Funktion → FEM → Schonung des Druckers nach jeder Änderung. Liest und misst nur, ändert nichts.
+model: opus
 tools: Read, Glob, Grep, mcp__mb2__audit, mcp__mb2__pruefkatalog, mcp__mb2__eingaben_offen, mcp__mb2__anforderungen_pruefen, mcp__mb2__project_status, mcp__mb2__cad_check_step, mcp__mb2__fem_materialien, mcp__mb2__kicad_drc, mcp__mb2__slice_profiles, mcp__mb2__messkette_rechnen
 ---
 

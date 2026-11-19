@@ -657,6 +657,26 @@ def test_e18_uebersprechen_hand():
     weit = [e for e in el.pruefe_e18(_takt_platine(0.6)) if e['id'] == 'E18' and '->' in e['hinweis']]
     assert not weit, weit
 
+def test_e14_hf_zuleitung_hand():
+    """RAK3172 RF-Pin -> 40 mm Bahn zur Antennenbuchse (868 MHz). 0,5 mm auf h 1,53 mm: Z0 nach Hammerstad weit ueber
+    50 Ohm, Laenge > lambda/20 -> warnung mit Breitenvorschlag. Mit der 50-Ohm-Breite und GND darunter -> ok."""
+    def platine(w):
+        teile = {'U1': ('RAK3172', 'x', {'LCSC': 'C19723908'}), 'AE1': ('ANT', 'RF_Antenna:x', {})}
+        netze = {'/ANT': [('U1', '10', 'RF', 'passive'), ('AE1', '1', 'A', 'passive')],
+                 'GND': [('U1', '1', 'GND', 'power_in')]}
+        bahnen = [{'art': 'bahn', 'a': [5, 10], 'b': [45, 10], 'w': w, 'lage': 'F.Cu', 'netz': '/ANT', 'l': 40.0}]
+        poly = {'aussen': [[0, 0], [50, 0], [50, 50], [0, 50]], 'loecher': []}
+        return _platine(teile, netze, bahnen=bahnen,
+                        zonen=[{'netz': 'GND', 'regel': False, 'lagen': ['B.Cu'], 'fp': None, 'flaechen': {'B.Cu': [poly]}}])
+    pl = platine(0.5)
+    h, er, _ = pl.h_ref['F.Cu']
+    z0, _ = el.microstrip_z0(0.5, h, 0.035, er)
+    e = eintrag(el.pruefe_e14(pl), 'E14', enthaelt='/ANT')
+    assert nahe(e['wert'], round(z0, 1), 1e-3) and abs(z0 - 50) > 5 and e['stufe'] == 'warnung', (e, z0)
+    assert '50 Ohm braeuchten' in e['hinweis'], e['hinweis']
+    w50 = el.microstrip_breite(50, h, 0.035, er)
+    assert eintrag(el.pruefe_e14(platine(w50)), 'E14', enthaelt='/ANT')['stufe'] == 'ok'
+
 
 if __name__ == '__main__':
     n = 0

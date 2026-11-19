@@ -702,9 +702,10 @@ def standard(pdir):
     L.append({'id': 'A-GERAET', 'ebene': 'system', 'herkunft': 'project_new: Idee in projekt.md',
               'text': 'Das Geraet erfuellt die Idee aus projekt.md im Einsatz (Abnahme am fertigen Geraet).',
               'nachweise': [{'art': 'abnahme', 'ref': 'AB-FUNKTION', 'stufe': 'abnahme'}]})
-    L.append({'id': 'A-MONTAGE', 'ebene': 'system', 'herkunft': 'mb2-Standard (Bodenklima: Klemmen gespiegelt)',
-              'text': 'Montage und Anschluss nach Anleitung sind eindeutig und geprueft (Pin 1/Farbe, nicht links/rechts).',
-              'nachweise': [{'art': 'abnahme', 'ref': 'AB-ANSCHLUSS', 'stufe': 'abnahme'}]})
+    if a('elektronik') or a('funk') or a('akku') or a('messung'):   # Adern/Stecker gibt es nur mit Elektronik (19.11.2026)
+        L.append({'id': 'A-MONTAGE', 'ebene': 'system', 'herkunft': 'mb2-Standard (Bodenklima: Klemmen gespiegelt)',
+                  'text': 'Montage und Anschluss nach Anleitung sind eindeutig und geprueft (Pin 1/Farbe, nicht links/rechts).',
+                  'nachweise': [{'art': 'abnahme', 'ref': 'AB-ANSCHLUSS', 'stufe': 'abnahme'}]})
     L.append({'id': 'S-DRUCK', 'ebene': 'subsystem', 'eltern': ['A-GERAET'], 'herkunft': 'abgeleitet aus A-GERAET',
               'text': 'Alle Teile sind druckbar (Wand, Spalt, Ueberhang) und gesliced ohne Profilprobleme.',
               'nachweise': [{'art': 'cad', 'ref': 'alle', 'stufe': 'komponente'},

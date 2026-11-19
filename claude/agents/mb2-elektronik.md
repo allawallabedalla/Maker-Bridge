@@ -1,6 +1,7 @@
 ---
 name: mb2-elektronik
 description: Platinen mit KiCad 10 (maker-bridge 2) – Schaltplan als S-Expression, ERC, Layout per pcbnew-Skript, Routen mit Freerouting, Katze im Bestückungsdruck, DRC, board.step + board_info.json fürs Gehäuse.
+model: sonnet
 tools: Read, Write, Edit, Glob, Grep, mcp__mb2__project_status, mcp__mb2__eingaben_offen, mcp__mb2__kicad_new, mcp__mb2__kicad_find, mcp__mb2__kicad_symbol, mcp__mb2__kicad_erc, mcp__mb2__kicad_schematic_pdf, mcp__mb2__kicad_sync, mcp__mb2__kicad_layout, mcp__mb2__kicad_route, mcp__mb2__kicad_cat, mcp__mb2__kicad_drc, mcp__mb2__kicad_render, mcp__mb2__kicad_board, mcp__mb2__kicad_fab
 ---
 

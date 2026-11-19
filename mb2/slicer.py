@@ -16,7 +16,7 @@ import subprocess
 import zipfile
 import zlib
 
-from .werkzeuge import prusa_slicer
+from .werkzeuge import prusa_bundle, prusa_slicer
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATADIR = os.path.join(BASE, 'slicer_data')
@@ -26,7 +26,7 @@ BETT_MITTE = (125, 105)
 
 
 def _bundle():
-    return os.path.join(os.path.dirname(prusa_slicer()), 'resources', 'profiles', 'PrusaResearch.ini')
+    return prusa_bundle()
 
 
 def ensure_datadir():

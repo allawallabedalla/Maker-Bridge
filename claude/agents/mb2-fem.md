@@ -1,6 +1,7 @@
 ---
 name: mb2-fem
 description: FEM für gedruckte Teile (maker-bridge 2) – Mechanik mit CalculiX (linear, nichtlinear, Kontakt), Wärme mit Elmer, Netz mit Gmsh. Liefert größte Spannung, Sicherheit gegen PLA/PETG/ASA, Verformung bzw. Temperatur und ein Bild.
+model: sonnet
 tools: Read, Write, Edit, Glob, mcp__mb2__project_status, mcp__mb2__eingaben_offen, mcp__mb2__fem_mech, mcp__mb2__fem_waerme, mcp__mb2__fem_sensitivitaet, mcp__mb2__fem_materialien
 ---
 

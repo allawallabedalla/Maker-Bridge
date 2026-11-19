@@ -390,6 +390,21 @@ def test_w8_quelle_im_koerper_hand():
     erg['koerper_info']['block']['material'] = 'GIBT_ES_NICHT'
     assert W._w8('fall', {}, erg)[0]['stufe'] == 'uebersprungen'
 
+def test_w4_netz_gegen_elmer():
+    """Quelle ohne Wandkontakt: Netz = P/(h A) = 0,5 / (6 * 345e-6) = 241,5 K. Elmer gleich -> ok (0 %),
+    Elmer 100 K -> +142 % -> warnung. Feste Temperaturflaeche -> uebersprungen."""
+    def erg(T_mittel):
+        return {'randbedingungen': {'innenluft': None, 'T_umgebung_C': 25.0, 'h_W_m2K': 6.0},
+                'koerper_info': {'chip': {'waerme_W': 0.5, 'material': 'FR4', 'kontakt_mm2': {}, 'T_mittel_C': T_mittel,
+                                          'A_konvektion_mm2': 345.0}}}
+    dT = 0.5 / (6 * 345e-6)
+    e = W._w4(tempfile.gettempdir(), 'f', {'koerper': []}, erg(25.0 + dT))
+    assert e['id'] == 'W4' and e['stufe'] == 'ok' and abs(e['wert']) < 0.5, e
+    e = W._w4(tempfile.gettempdir(), 'f', {'koerper': []}, erg(125.0))
+    assert e['stufe'] == 'warnung', e
+    nah(e['wert'], 100 * (dT / 100 - 1), 1e-2)
+    assert W._w4(tempfile.gettempdir(), 'f', {'flaechen': [{}], 'koerper': []}, erg(125.0))['stufe'] == 'uebersprungen'
+
 
 if __name__ == '__main__':
     schnell = 'schnell' in sys.argv

@@ -1,6 +1,7 @@
 ---
 name: mb2-cad
 description: Gehäuse und mechanische Teile mit build123d (maker-bridge 2) – ein Skript je Teil, jeder Bauschritt automatisch geprüft (gültig, Soll-Maße, Kollision, Wand ≥ 1,8 mm, Spalt ≥ 0,4 mm, Renderbild). Für neue Projekte ohne Fusion.
+model: sonnet
 tools: Read, Write, Edit, Glob, mcp__mb2__project_status, mcp__mb2__eingaben_offen, mcp__mb2__cad_build, mcp__mb2__cad_plate, mcp__mb2__cad_check_step
 ---
 

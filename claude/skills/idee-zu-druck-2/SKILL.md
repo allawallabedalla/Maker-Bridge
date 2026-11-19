@@ -159,6 +159,20 @@ verwechseln mit `freigabe` der V-Matrix). Nach Abnahme und Feldwerten läuft `mb
 gemeldet wird. Nach zwei gescheiterten Varianten mit gleichem Fehlerbild die Grundannahme prüfen, nicht Variante 3 bauen. <!-- R:S26 -->
 Teure Befehle (`cad_build`, `fem_*`) sind gecacht. Bei unveränderten Eingaben kommt `aus_cache: true` zurück. `neu=true` erzwingt eine neue Rechnung. <!-- R:S21 -->
 
+## 5a. Lauf mit Auftragskarten (Pflicht ab Entwurf, seit 19.11.2026, `mb2/karten.py`)
+Du bist Leit-Agent: du entscheidest, gibst Karten aus und urteilst. Fleißarbeit machst du nicht selbst.
+1. `lauf_start(projekt)`. Bei `ok: false` läuft schon ein Lauf: sofort enden, nichts schreiben. <!-- R:S27 -->
+2. Schleife: `karte_naechste` → Fachagent (Agent-Tool) mit `karte.text` als ganzem Auftrag und `model = karte.modell`
+   → `karte_ergebnis(projekt, notiz, tokens)`. Ob die Karte erledigt ist, entscheidet das audit, nicht der Agent. <!-- R:S28 -->
+3. Ein Fehlversuch geht automatisch eine Stufe höher (haiku → sonnet → opus), danach kommt „Grundannahme prüfen“ an
+   dich, dann der Nutzer. Nie dieselbe Karte zweimal auf derselben Stufe, keine eigene Variante 4. <!-- R:S29 -->
+4. Ende bei `stop`: `fertig`, `nutzer` (EINE Frage über `fragen` oder Abnahme am Gerät), `bremse` (max. Karten/Tokens
+   je Lauf). Immer `lauf_ende` aufrufen, auch bei Abbruch. <!-- R:S30 -->
+5. Übergabe an die nächste Iteration oder Sitzung nur über `pruef/stand.md` (höchstens 5 KB). Lange Arbeit: als
+   geplante Aufgabe neu starten; jede Runde beginnt mit `lauf_start` und liest nur den Stand. <!-- R:S31 -->
+Tokens je Karte meldest du mit, wenn das Agent-Ergebnis sie nennt; `lauf_ende` zeigt die Kosten je Agent und Stufe.
+Daraus folgt die Startstufe – nicht aus dem Gefühl.
+
 ## 6. Abschluss
 In `projekt.md` gehören: Entscheidungen, Prüfwerte (Wand, Spalt, Sicherheit, T_max), Druckzeit und Gramm, Pfade zur `.bgcode` und zum `.projekt.3mf`.
 Dazu die Reserven, die im Feld zählen: Linkbudget-Reserve (E16), Laufzeit gegen Ziel (E6), Abstand zu Tg mit Sonne (D1/W6),

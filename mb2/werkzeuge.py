@@ -95,11 +95,29 @@ def kicad_home():
 
 
 def prusa_slicer():
+    """Windows: prusa-slicer-console.exe unter Program Files. Linux/macOS: prusa-slicer im PATH (seit 19.11.2026)."""
     for root in (r'C:\Program Files\Prusa3D\PrusaSlicer', r'C:\Program Files\PrusaSlicer'):
         p = os.path.join(root, 'prusa-slicer-console.exe')
         if os.path.exists(p):
             return p
-    raise RuntimeError('PrusaSlicer nicht gefunden.')
+    for n in ('prusa-slicer', 'PrusaSlicer'):
+        p = shutil.which(n)
+        if p:
+            return p
+    raise RuntimeError('PrusaSlicer nicht gefunden (Windows: Installer von prusa3d.com; Linux: apt install prusa-slicer).')
+
+
+def prusa_bundle():
+    """PrusaResearch.ini des installierten Slicers (Windows: neben der exe; Linux: /usr/share/PrusaSlicer)."""
+    exe = prusa_slicer()
+    kand = [os.path.join(os.path.dirname(exe), 'resources', 'profiles', 'PrusaResearch.ini'),
+            os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(exe))), 'share', 'PrusaSlicer', 'profiles',
+                         'PrusaResearch.ini'),
+            '/usr/share/PrusaSlicer/profiles/PrusaResearch.ini', '/usr/share/prusa-slicer/profiles/PrusaResearch.ini']
+    for k in kand:
+        if os.path.exists(k):
+            return k
+    raise RuntimeError(f'PrusaResearch.ini nicht gefunden (gesucht: {kand})')
 
 
 def blender():

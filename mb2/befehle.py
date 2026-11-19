@@ -724,3 +724,45 @@ def tools_status():
     """Wo liegen ccx, Elmer, KiCad, PrusaSlicer, Java, Freerouting."""
     from . import werkzeuge
     return werkzeuge.status()
+
+
+# ---------------------------------------------------------------- Lauf mit Auftragskarten (Kriterium 6, 19.11.2026)
+
+@befehl('lauf')
+def lauf_start(projekt: str, max_karten: int = 20, max_tokens: int = 0):
+    """Lauf beginnen: Sperre pruef/lauf.json (ok=false -> ein anderer Lauf ist aktiv: sofort enden) und Bremse
+    (max_karten, optional max_tokens je Lauf). Danach in einer Schleife: karte_naechste -> Agent mit karte.text und
+    karte.modell starten -> karte_ergebnis. Ende bei stop (fertig | nutzer | bremse) mit lauf_ende."""
+    from . import karten
+    return karten.lauf_start(pdir(projekt), max_karten, max_tokens or None)
+
+
+@befehl('lauf')
+def karte_naechste(projekt: str):
+    """Die EINE naechste Auftragskarte aus dem audit (gecacht): Agent, Modellstufe, in sich vollstaendiger Text.
+    Hochstufen statt wiederholen: jeder Fehlversuch eine Stufe hoeher, danach Grundannahme (Leit-Agent), dann Nutzer.
+    stop = fertig | nutzer (EINE Frage / Abnahme am Geraet) | bremse | karte_offen."""
+    from . import karten
+    au = audit(projekt)
+    r = karten.naechste(pdir(projekt), au, projekt)
+    r['freigabe'] = au.get('freigabe')
+    return r
+
+
+@befehl('lauf')
+def karte_ergebnis(projekt: str, notiz: str = '', tokens: int = -1):
+    """Ausgegebene Karte abschliessen. Ob sie erledigt ist, entscheidet das audit (Mangel weg?), nicht der Agent.
+    tokens = Verbrauch des Agenten, falls der Host ihn meldet (-1 = unbekannt, zaehlt nie als 0)."""
+    from . import karten
+    au = audit(projekt)
+    return karten.ergebnis(pdir(projekt), au, notiz, tokens if tokens >= 0 else None)
+
+
+@befehl('lauf')
+def lauf_ende(projekt: str, grund: str = ''):
+    """Lauf beenden (immer, auch bei Abbruch): Sperre frei, pruef/stand.md schreiben. Die naechste Sitzung liest nur
+    pruef/stand.md (hoechstens 5 KB) - nie den alten Chatverlauf."""
+    from . import karten
+    r = karten.lauf_ende(pdir(projekt), grund)
+    r['kosten_je_agent'] = karten.kosten(pdir(projekt))
+    return r

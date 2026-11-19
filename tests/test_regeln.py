@@ -102,6 +102,11 @@ REGELN = {
     'S23': ['test_regeln.py::test_freigabestufen'],
     'S24': ['test_anforderungen.py::test_abnahme_eintragen_beweist'],
     'S25': ['test_feldfaelle.py::test_feldfaelle'],
+    'S27': ['test_karten.py::test_laufsperre_und_bremse'],
+    'S28': ['test_karten.py::test_abnahme_entscheidet_das_audit_nicht_der_agent', 'test_durchlauf.py::test_durchlauf_idee_bis_freigabe'],
+    'S29': ['test_karten.py::test_hochstufen_statt_wiederholen'],
+    'S30': ['test_karten.py::test_laufsperre_und_bremse', 'test_karten.py::test_vorrang_und_nutzer'],
+    'S31': ['test_karten.py::test_stand_kurz_und_vollstaendig'],
     'S26': (VERHALTEN, 'Grundannahme pruefen nach zwei gescheiterten Varianten - Urteil der KI'),
 }
 
