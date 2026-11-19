@@ -227,9 +227,9 @@ def test_d2_d3_d4_kriechen():
     # D4: 300 * 0,68394 = 205,18 N >= 200
     r = finde(erg, 'D4', 'teil')
     assert r['stufe'] == 'ok' and abs(r['wert'] - 205.2) < 0.1, r
-    # D2: 12/2000 = 0,006 -> nach Kriechen 0,006/0,68394 = 0,008773 > 0,8 % -> warnung
+    # D2: 12/1500 = 0,008 (PETG E 1500 seit 19.11.2026) -> nach Kriechen 0,008/0,68394 = 0,011697 > 1 % -> fehler
     r = finde(erg, 'D2', 'teil')
-    assert r['stufe'] == 'warnung' and abs(r['wert'] - 0.008773) < 1e-5, r
+    assert r['stufe'] == 'fehler' and abs(r['wert'] - 0.011697) < 1e-5, r
     soll['teil']['dauerlast']['durchbiegung_zul_mm'] = 0.25
     soll['teil']['schrauben'][0]['klemmkraft_min_N'] = 210
     erg = dauer.pruefe(projekt(soll))
@@ -259,7 +259,7 @@ def test_d6_d7():
     assert r['stufe'] == 'info' and r['wert'] > f0          # Tagesgang beschleunigt (1/a_T konvex)
     r7 = finde(erg, 'D7', 'teil')
     tp = dauer.effektive_zeit(500, 30, 10, 80, 100)
-    nah(r7['wert'], round(5 * dauer.sls_nachgiebigkeit(tp, 2000, 0.5, 1000), 5), 1e-3)
+    nah(r7['wert'], round(5 * dauer.sls_nachgiebigkeit(tp, 1500, 0.5, 1000), 5), 1e-3)   # PETG E 1500
 
 
 @synthetisch
@@ -278,9 +278,9 @@ def test_d8_d9_platine():
     # Loecher: Abstand sqrt(43^2 + 23^2) = 48,765; warm 55e-6*48,765*37 = 0,09924 <= Spiel 0,2
     r = finde(erg, 'D8', titel='Befestigungsloecher, warm')
     assert r['stufe'] == 'ok' and abs(r['wert'] - 0.0992) < 1e-4, r
-    # D9 voll: 2000 * 55e-6 * 37 = 4,07 MPa
+    # D9 voll: 1500 * 55e-6 * 37 = 3,0525 MPa (PETG E 1500 seit 19.11.2026)
     r = finde(erg, 'D9', 'schale')
-    assert r['stufe'] == 'ok' and abs(r['wert'] - 4.07) < 1e-6, r
+    assert r['stufe'] == 'ok' and abs(r['wert'] - 3.05) < 1e-6, r     # auf 0,01 MPa gerundet
     # ohne alpha: uebersprungen, kein Absturz
     soll['_projekt'].pop('kennwerte')
     assert finde(dauer.pruefe(projekt(soll, board=board)), 'D8')['stufe'] == 'uebersprungen'

@@ -130,7 +130,7 @@ def test_s1_fem_schwerkraft_s2_s3_s4():
     erg = {'koerper': ['arm'], 'lastfaelle': {
         'schwerkraft': {'kraft_N': [0, 0, 0], 'max_vonMises_MPa': 0.01, 'max_verschiebung_mm': 0.01},
         'last': {'kraft_N': [0, 0, -5.0], 'max_vonMises_MPa': 10.0, 'max_verschiebung_mm': 0.1, 'federrate_N_mm': 50.0}}}
-    # S3-Gegenprobe: L 20, b 5, t 2 -> 1013,6 Hz; S1-FEM 157,6 -> -84 % -> warnung
+    # S3-Gegenprobe: L 20, b 5, t 2 -> 877,8 Hz (PETG E 1500; vorher 1013,6 mit E 2000); S1-FEM 157,6 -> warnung
     so = {'_projekt': {'anregung_Hz': [20, 50], 'fallhoehe_m': 1.0, 'masse_g': 100},
           'arm': {'material': 'PETG', 'kragarm': [{'name': 'arm', 'L_mm': 20, 'b_mm': 5, 't_mm': 2}]}}
     d = _projekt(so, {'fall': (spec, erg)}, {'arm': (None, 1000.0)})
@@ -139,8 +139,8 @@ def test_s1_fem_schwerkraft_s2_s3_s4():
         s1 = [e for e in nach_id(r, 'S1', 'arm') if 'FEM' in e['titel']]
         assert len(s1) == 1 and nah(s1[0]['wert'], 157.6, 1e-3), s1
         s3 = nach_id(r, 'S3', 'arm')[0]
-        assert nah(s3['wert'], 1013.6, 2e-3) and s3['stufe'] == 'warnung', s3
-        # S2: f1 = min(157,6; 1013,6) = 157,6; f_max 50 -> 3,15 >= 3 -> ok
+        assert nah(s3['wert'], 877.8, 2e-3) and s3['stufe'] == 'warnung', s3   # 1013,6 * sqrt(1500/2000)
+        # S2: f1 = min(157,6; 877,8) = 157,6; f_max 50 -> 3,15 >= 3 -> ok
         s2 = nach_id(r, 'S2', 'arm')[0]
         assert s2['stufe'] == 'ok' and nah(s2['wert'], 3.15, 2e-3), s2
         # S4: m 0,1 kg, k 50, h 1000: mg 0,981, delta 0,01962; F = 0,981*(1+sqrt(1+101937)) = 0,981*320,28 = 314,2 N

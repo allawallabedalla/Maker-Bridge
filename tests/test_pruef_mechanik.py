@@ -280,11 +280,11 @@ def test_gesamt_synthetisch():
         assert st('M1', 'quer: Druckrichtung') == 'fehler'        # Hakenachse || Z
         # zu_kurz: eps = 1,5*2*1,2/25 = 0,144 > 0,02
         assert st('M1', 'zu_kurz: Dehnung') == 'fehler'
-        nah(finde(e, 'M2', 'Fuegekraft gut')['wert'], 6.04, rel=1e-2)
+        nah(finde(e, 'M2', 'Fuegekraft gut')['wert'], 4.53, rel=1e-2)   # proportional zu E: 6,04 * 1500/2000
         assert st('M2', 'Fuegekraft gut') == 'ok'
         assert st('M2', 'Fuegekraft zu_kurz') == 'fehler'        # Selbsthemmung
-        # M4: P_cr 24,8 N / 20 N = 1,24 < 3 -> warnung
-        assert st('M4', 'stift') == 'warnung'
+        # M4: P_cr 24,8 * 1500/2000 = 18,6 N < 20 N -> fehler (knickt; mit dem alten E 2000 war es nur warnung)
+        assert st('M4', 'stift') == 'fehler'
         # M5 von Hand: sigma_cr 76,9 / 10 = 7,7 >= 2 ok; automatisch: Rippe h/t 10 > 4,26 -> warnung
         assert st('M5', 'steg') == 'ok'
         assert st('M5', 'Rippen-Schlankheit') == 'warnung'
@@ -300,19 +300,20 @@ def test_gesamt_synthetisch():
         nah(kp['grenze'], round(druck / 2, 2), rel=1e-3)
         assert kp['stufe'] == ('ok' if 19.09 <= druck / 2 else 'warnung' if 19.09 <= druck else 'fehler'), kp
         assert st('M12', 'Klaffen') == 'ok'
-        # Restvorspannung: PETG ohne Kriechdaten -> 0,5 x 300 = 150 N; (1-C) P = 300 - 293,8 = 6,2 N
-        # -> F_klemm 143,8 N >= 100 -> ok, aber nur angenommen -> warnung
+        # Restvorspannung: PETG ohne Kriechdaten -> 0,5 x 300 = 150 N; (1-C) P = 4,7 N (PETG E 1500: Klemmteile
+        # weicher, C groesser; vorher 6,2 N mit E 2000) -> F_klemm 145,3 N >= 100 -> ok, aber nur angenommen -> warnung
         rv = finde(e, 'M12', 'Restvorspannung')
-        nah(rv['wert'], 143.8, rel=2e-3)
+        nah(rv['wert'], 145.3, rel=2e-3)
         assert rv['stufe'] == 'warnung' and rv['daten']['rest_faktor'] == 0.5, rv
         assert st('M12', 'Einschraubtiefe') == 'warnung'
-        # M13: Kraft aus M12 (393,8 N): tau = 393,8/(pi*4*5,7) = 5,50 MPa; Grenze schub_z oder 28/sqrt3 = 16,2
+        # M13: Kraft aus M12 (395,3 N; mit PETG E 1500 groesserer Lastanteil C, vorher 393,8 N):
+        # tau = 395,3/(pi*4*5,7) = 5,519 MPa; Grenze schub_z oder 28/sqrt3 = 16,2
         ins = finde(e, 'M13', 'Insert')
-        nah(ins['daten']['tau_MPa'], 5.498, rel=1e-3)
-        # Dauerlast A_K 1,7: S = 14 (schub_z PETG) / 1,7 / 5,498 = 1,498 -> zwischen 1 und 2 -> warnung
+        nah(ins['daten']['tau_MPa'], 5.519, rel=1e-3)
+        # Dauerlast A_K 1,7: S = 14 (schub_z PETG) / 1,7 / 5,519 = 1,498 -> zwischen 1 und 2 -> warnung
         tz = kennwerte.wert('PETG', 'schub_z_MPa') or 28 / math.sqrt(3)
-        nah(ins['wert'], round(tz / 1.7 / 5.498, 2), rel=5e-3)
-        assert ins['stufe'] == ('ok' if tz / 1.7 / 5.498 >= 2 else 'warnung' if tz / 1.7 / 5.498 >= 1 else 'fehler')
+        nah(ins['wert'], round(tz / 1.7 / 5.519, 2), rel=5e-3)
+        assert ins['stufe'] == ('ok' if tz / 1.7 / 5.519 >= 2 else 'warnung' if tz / 1.7 / 5.519 >= 1 else 'fehler')
         # M14: stehende Bohrung (z): sigma_theta 10,9 gegen 45 / A_K 1,7 (Uebermass dauernd) -> S 4,1/1,7 = 2,43 ok
         assert st('M14', 'Pressitz') == 'ok'
         nah(finde(e, 'M14', 'Pressitz')['wert'], round(finde(e, 'M14', 'Pressitz')['daten']['S_roh'] / 1.7, 2), 1e-2)
@@ -376,8 +377,8 @@ def test_realterme_m1_haeufig_kalt_aussen():
       y 0,80: eps = 1,5*1,6*0,8/144 = 0,013333 > 0,0084 -> fehler (vorher ok)
       y 0,48: eps = 0,008 zwischen 0,007 und 0,0084 -> warnung
     Spannung aussen, Farbe weiss: Sonne 0,25*1000/25 = 10 K -> T = 30 + 10 = 40 C, PETG Tg 78 - 40 = 38 K >= 30 -> A_T 1;
-      A_A 1,3; Fuegen = Kurzzeit -> f = 1,3: sigma = 2000*0,013333 = 26,67 MPa gegen 45/1,3/1,5 = 23,08 -> warnung
-      (<= 45/1,3 = 34,6)."""
+      A_A 1,3; Fuegen = Kurzzeit -> f = 1,3: sigma = 1500*0,013333 = 20,0 MPa gegen 45/1,3/1,5 = 23,08 -> ok
+      (PETG E 1500 seit 19.11.2026; vorher 2000 -> 26,67 MPa warnung)."""
     with tempfile.TemporaryDirectory() as tmp:
         s = {'L_mm': 12, 'b_mm': 6, 't_mm': 1.6, 'achse': 'x', 'eps_zul': 0.02, 'zyklen': 10}
         soll = {'_projekt': {'material': 'PETG', 'T_max_C': 30, 'T_min_C': 0, 'aussen': True, 'farbe': 'weiss'},
@@ -393,14 +394,14 @@ def test_realterme_m1_haeufig_kalt_aussen():
         sa = finde(e, 'M1', 'a: Spannung')
         nah(sa['daten']['abminderung'], 1.3, rel=1e-6)
         nah(sa['grenze'], round(45 / 1.3 / 1.5, 2), rel=1e-3)
-        assert sa['stufe'] == 'warnung', sa
+        assert sa['stufe'] == 'ok' and abs(sa['wert'] - 20.0) < 1e-6, sa
         # vorgespannt in Ruhelage -> Dauerlast A_K 1,7: f = 1,3*1,7 = 2,21, Grenze 45/2,21/1,5 = 13,57;
-        # 26,67 > 45/2,21 = 20,36 -> fehler
+        # 13,57 < 20,0 <= 45/2,21 = 20,36 -> warnung
         soll['teil']['schnapper'][0]['vorgespannt'] = True
         _projekt(tmp, soll)
         sa = finde(M.pruefe(tmp), 'M1', 'a: Spannung')
         nah(sa['grenze'], round(45 / 2.21 / 1.5, 2), rel=1e-3)
-        assert sa['stufe'] == 'fehler', sa
+        assert sa['stufe'] == 'warnung', sa
 
 
 def test_realterme_ohne_angaben_hoechstens_warnung():

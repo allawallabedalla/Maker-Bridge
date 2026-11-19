@@ -111,7 +111,7 @@ KENNWERTE = {
     },
     'PETG': {
         'eps_zul_xy': (0.020, '[gedruckt] Streckdehnung horizontal 5,1 % (PrusaPETG); 0,5 x waeren 2,55 %, auf '
-                              '2,0 % begrenzt, damit E x eps (material.py E 2000) unter sigma_xy 45 MPa bleibt'),
+                              '2,0 % begrenzt (mit E 1500 seit 19.11.2026: E x eps = 30 MPa < sigma_xy 45 MPa)'),
         'eps_zul_z': (0.012, '[gedruckt] 0,5 x Streckdehnung Z 2,5 % (PrusaPETG; PolyPETG Bruchdehnung Z 3,3 %)'),
         'eps_dauer': (0.005, _Q_EPS_DAUER),
         'alpha_1_K': (68e-6, '[voll] PETG 23-100 C ISO 11359-2 0,068 mm/(m K) (PETG-Datenblatt Oadby Plastics); '

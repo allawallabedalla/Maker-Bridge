@@ -7,7 +7,8 @@ MATERIAL = {
     'PLA':  {'E_MPa': 2300.0,  # Prusament PLA TDS 2,3 GPa gedruckt (vorher 3500 = Vollmaterial, nicht konservativ; 10.11.2026)
               'nu': 0.36, 'festigkeit_xy_MPa': 50.0, 'festigkeit_z_MPa': 30.0,
              'dichte_kg_m3': 1240.0, 'waermeleitung_W_mK': 0.13, 'glasuebergang_C': 57.0},
-    'PETG': {'E_MPa': 2000.0, 'nu': 0.38, 'festigkeit_xy_MPa': 45.0, 'festigkeit_z_MPa': 28.0,
+    'PETG': {'E_MPa': 1500.0, 'nu': 0.38,   # gedruckt, Prusament PETG TDS (kennwerte.py PrusaPETG), seit 19.11.2026
+             'festigkeit_xy_MPa': 45.0, 'festigkeit_z_MPa': 28.0,
              'dichte_kg_m3': 1270.0, 'waermeleitung_W_mK': 0.20, 'glasuebergang_C': 80.0},
     'ASA':  {'E_MPa': 2000.0, 'nu': 0.35, 'festigkeit_xy_MPa': 40.0, 'festigkeit_z_MPa': 25.0,
              'dichte_kg_m3': 1070.0, 'waermeleitung_W_mK': 0.17, 'glasuebergang_C': 100.0},
