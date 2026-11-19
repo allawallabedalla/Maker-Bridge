@@ -273,7 +273,8 @@ def pruefe(mk, herkunft_klasse):
     e = mk.get('einheit', '°C')
     out = []
     pflicht = [f for f in ('I_idac_A', 'R_ref_ohm', 'gain') if (mk.get('schaltung') or {}).get(f) is None]
-    if pflicht or not (mk.get('messbereich') or {}).get('max') is not None:
+    mb_ = mk.get('messbereich') or {}
+    if pflicht or mb_.get('min') is None or mb_.get('max') is None:   # beide Grenzen noetig, sonst nie rechnen
         g = f'messkette.schaltung {", ".join(pflicht) or ""} / messbereich fehlt'
         return [uebersprungen(i, n, g, Q) for i, n in (('MK1', 'Unsicherheitsbudget Messkette'),
                                                        ('MK2', 'Rauschbegrenzte Aufloesung'),
