@@ -57,6 +57,10 @@ Nachweis auf derselben Höhe des V. Anlass und Herleitung: `audits/KERNPROBLEM_2
 - Firmware-Konstanten mit Prüfwirkung (Sendeleistung, SF, Intervall, Abschaltspannung) stehen in
   `_projekt.firmware.konstanten`. FW1 vergleicht sie mit der Datei. <!-- R:V13 -->
 
+- **Erkennungsfunktionen** (Anforderung `erkennung`): jeder Fehler wird am Gerät gezielt herbeigeführt (Abnahme AB-FI-*), dazu ein Fehlalarm-Gegentest im Normalbetrieb (AB-FA-*). Ohne `herbeifuehren` oder `reaktion_s` ist es ein Matrix-Mangel. <!-- R:V38 -->
+- **Beobachtbarkeit** (X10): ein Fehler ist nur erkennbar, wenn das Gerät die Größen misst, die ihn vom Normalbetrieb unterscheiden (`braucht_eine_von` gegen `_projekt.messgroessen`). <!-- R:V39 -->
+- **Dichtheit** (Anforderung `dichtheit`): Druckabfallprüfung als Abnahme AB-DICHT-* mit messbarem Grenzwert. <!-- R:V40 -->
+
 ## Glaubwürdigkeit der Rechenmodelle (seit 17.11.2026, `mb2/glaubwuerdigkeit.py`)
 
 Begriffe und Quellenstand: **`VVUQ.md`**.
@@ -140,6 +144,7 @@ Darum gibt es zwei Ebenen:
   - Die Modellgleichung liefert numerische Sensitivitäten (`budget_aus_modell`).
   - Das erste Profil ist `rtd_ratiometrisch_3leiter`: IEC 60751, IDAC-Tausch, MK4-Bauteilgrenzen. Bauteilgrenzen sind Daten, keine eingebauten Datenblattwerte. <!-- R:V36 -->
   - Der Demonstrator dazu liegt unter `demonstratoren/MB2-TEMP-001/`.
+  - `modul_digital` (seit 19.11.2026): gekauftes Messmodul beliebiger Größe; Budget aus Datenblatt-Genauigkeit, Wiederholbarkeit/Mittelung, Auflösung, Temperaturgang und Zusatzbeiträgen (Einbau, Medium). <!-- R:V41 -->
 - **Kalibrierung** (`kalibrierung_auswerten`): Eine Reihe liefert die Korrektur. Sie darf nicht zugleich Nachweis sein (Grund `kalibrierdaten_als_nachweis`). Der Nachweis braucht eine unabhängige Reihe nach dem Laden der Korrektur. <!-- R:V34 -->
 - **Risiken** (`risiko` je Anforderung oder Liste `risiken` in `anforderungen.json`): bewusst eingegangen, z. B. Nutzerentscheidung gegen eine Empfehlung. Blockieren nichts, stehen aber in `v_matrix.risiken`, im audit (`v_matrix.risiken`) und im Messprotokoll. `messtechnik_freigeben` verlangt `risiken_akzeptiert=True` und speichert die akzeptierten Risiken in `freigabe.json`. <!-- R:V35 -->
 - Grenze: Der KI-Prüfer organisiert und rechnet den Nachweis. Beweiskraft hat nur die Messung mit rückführbarer Referenz. Eine kritische Freigabe macht ein Mensch.

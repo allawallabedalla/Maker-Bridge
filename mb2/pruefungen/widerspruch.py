@@ -19,6 +19,10 @@ Regeln (deterministisch, nur aus vorhandenen Daten; fehlt eine Angabe: 'ueberspr
   X8 Kalibrierung gegen Aufwand: Modus kalibriert, aber in kosten.json kein Arbeitsschritt mit "kalib" -> warnung.
   X9 Stueckzahl 1 gegen Seriengedanke: stueckzahl == 1 -> info "Nachweise gelten nur fuer dieses Geraet";
      verlangt eine Anforderung Reproduzierbarkeit/Exemplarstreuung -> fehler.
+  X10 Erkennung gegen Messgroessen (Beobachtbarkeit): jeder Fehler in "erkennung" einer Anforderung braucht
+     "braucht_eine_von" (Listen von Messgroessen, die ihn vom Normalbetrieb unterscheiden). Keine Liste ist in
+     _projekt.messgroessen vollstaendig vorhanden -> fehler (z. B. Leck HINTER dem einzigen Durchflusssensor ist
+     unsichtbar: braucht Durchfluss ein UND aus, oder Druck + Pumpenzustand). Ohne Begruendung -> warnung.
 Jede Meldung nennt: was nicht zusammenpasst, warum es zaehlt, wie man es aufloest.
 """
 import datetime
@@ -213,4 +217,29 @@ def pruefe(pdir, heute=None):
     else:
         out.append(ergebnis('X9', 'Stueckzahl gegen Seriennachweis', 'ok', quelle=Q,
                             hinweis=f'Stueckzahl {z["stueckzahl"]}'))
+    # X10 Beobachtbarkeit der Erkennungsfunktionen
+    erk = [(a['id'], f) for a in _json(pdir, 'anforderungen.json', {}).get('anforderungen', [])
+           for f in a.get('erkennung') or []]
+    mg = pj.get('messgroessen')
+    if not erk:
+        out.append(uebersprungen('X10', 'Erkennung gegen Messgroessen', 'keine Anforderung mit erkennung', Q))
+    elif not isinstance(mg, list):
+        out.append(uebersprungen('X10', 'Erkennung gegen Messgroessen',
+                                 '_projekt.messgroessen fehlt (Liste der Groessen, die das Geraet wirklich misst)', Q))
+    else:
+        for aid, f in erk:
+            alt = [set(x) for x in f.get('braucht_eine_von') or [] if isinstance(x, list) and x]
+            tit = f'Erkennung gegen Messgroessen: {f.get("fehler")} ({aid})'
+            if not alt:
+                out.append(ergebnis('X10', tit, 'warnung', quelle=Q,
+                                    hinweis='braucht_eine_von fehlt: Welche Messgroessen unterscheiden diesen Fehler vom '
+                                            'Normalbetrieb? Ohne Begruendung ist die Erkennung eine Behauptung.'))
+                continue
+            da = [sorted(x) for x in alt if x <= set(mg)]
+            fehlen = [sorted(x - set(mg)) for x in alt]
+            out.append(ergebnis('X10', tit, 'ok' if da else 'fehler', quelle=Q, daten={'vorhanden': mg, 'braucht': [sorted(x) for x in alt]},
+                                hinweis=(f'beobachtbar ueber {da[0]}' if da else
+                                         f'nicht beobachtbar: gemessen wird {mg}, es fehlt je Variante {fehlen} - '
+                                         'Messgroesse ergaenzen (zweiter Sensor, Druck, Pumpenzustand) oder die '
+                                         'Anforderung auf das Machbare einschraenken')))
     return out

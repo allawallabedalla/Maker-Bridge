@@ -471,6 +471,7 @@ def pruefen(pdir, katalog=None, extra=None):
                 maengel.append(f'Nachweis {n.get("art")} {n.get("ref")}: stufe {n.get("stufe")!r} ungueltig '
                                f'(komponente/integration/abnahme/feld)')
         maengel += _messtechnik_maengel(a)
+        maengel += _erkennung_maengel(a)
         herk, htexte = schwaechste_herkunft(soll, a.get('eingaben'))
         ergebnisse, st_gesamt = [], 'bewiesen' if nws else 'unbewiesen'
         for nw in nws:
@@ -777,12 +778,66 @@ def standard(pdir):
     return L
 
 
+def pruefschritte_erkennung(a):
+    """Abnahmeschritte fuer Erkennungs- und Dichtheitsfunktionen einer Anforderung (seit 19.11.2026, allgemein fuer
+    jede Diagnose: Verstopfung, Leck, Sensorbruch, Ueberlast, Kabelbruch ...).
+
+    Anforderung:
+      "erkennung": [{"fehler": "Verstopfung", "herbeifuehren": "Schlauch hinter dem Sensor abklemmen",
+                     "reaktion_s": 10, "braucht_eine_von": [["durchfluss", "druck"]]}],
+      "fehlalarm_max": 0, "normalbetrieb_h": 24          # Fehlalarme im Normalbetrieb (zweite Haelfte des Nachweises)
+      "dichtheit": {"pruefdruck_bar": 0.5, "dauer_min": 10, "abfall_max_mbar": 5, "medium": "Luft"}
+    Jeder Fehler wird am Geraet GEZIELT herbeigefuehrt (Fehlerinjektion) - eine Erkennung, die nie ausgeloest wurde,
+    ist nicht bewiesen. Dazu der Gegentest: kein Alarm im Normalbetrieb."""
+    out = []
+    for i, f in enumerate(a.get('erkennung') or [], 1):
+        wie = f.get('herbeifuehren') or '<WIE HERBEIFUEHREN? fehlt>'
+        out.append({'art': 'abnahme', 'ref': f'AB-FI-{a["id"]}-{i}', 'stufe': 'abnahme',
+                    'anweisung': f'Fehlerinjektion "{f.get("fehler")}": {wie}. Geraet muss innerhalb '
+                                 f'{f.get("reaktion_s", "?")} s melden. Danach Normalzustand herstellen.',
+                    'kriterium': {'groesse': 'erkannt', 'op': '==', 'wert': 1, 'einheit': 'ja=1'}})
+    if a.get('erkennung'):
+        out.append({'art': 'abnahme', 'ref': f'AB-FA-{a["id"]}', 'stufe': 'abnahme',
+                    'anweisung': f'Normalbetrieb {a.get("normalbetrieb_h", "?")} h ohne herbeigefuehrten Fehler: '
+                                 'Zahl der Fehlalarme zaehlen.',
+                    'kriterium': {'groesse': 'fehlalarme', 'op': '<=', 'wert': a.get('fehlalarm_max', 0), 'einheit': 'Stueck'}})
+    d = a.get('dichtheit')
+    if d:
+        out.append({'art': 'abnahme', 'ref': f'AB-DICHT-{a["id"]}', 'stufe': 'abnahme',
+                    'anweisung': f'Druckabfallpruefung: mit {d.get("medium", "Luft")} auf {d.get("pruefdruck_bar", "?")} bar '
+                                 f'beaufschlagen, absperren, {d.get("dauer_min", "?")} min warten, Druckabfall ablesen.',
+                    'kriterium': {'groesse': 'druckabfall_mbar', 'op': '<=', 'wert': d.get('abfall_max_mbar'),
+                                  'einheit': 'mbar'}})
+    return out
+
+
+def _erkennung_maengel(a):
+    m = []
+    for f in a.get('erkennung') or []:
+        if not f.get('herbeifuehren'):
+            m.append(f'Erkennung "{f.get("fehler")}": herbeifuehren fehlt - ohne gezielte Fehlerinjektion nicht nachweisbar')
+        if not f.get('reaktion_s'):
+            m.append(f'Erkennung "{f.get("fehler")}": reaktion_s fehlt (wie schnell muss gemeldet werden?)')
+    if a.get('erkennung') and a.get('normalbetrieb_h') is None:
+        m.append('Erkennung ohne normalbetrieb_h: Fehlalarm-Gegentest nicht festgelegt')
+    if a.get('dichtheit') and a['dichtheit'].get('abfall_max_mbar') is None:
+        m.append('Dichtheit ohne abfall_max_mbar: kein messbares Kriterium')
+    da = {n.get('ref') for n in a.get('nachweise', [])}
+    for n in pruefschritte_erkennung(a):
+        if n['ref'] not in da:
+            m.append(f'Nachweis {n["ref"]} fehlt (anforderungen_erzeugen legt ihn an)')
+    return m
+
+
 def erzeugen(pdir):
     """anforderungen.json anlegen/ergaenzen: Standard-Anforderungen hinzufuegen, vorhandene (auch geaenderte) behalten."""
     alt = lade(pdir, 'anforderungen.json', {'anforderungen': []})
     vorhanden = {a['id'] for a in alt['anforderungen']}
     neu = [a for a in standard(pdir) if a['id'] not in vorhanden]
     alt['anforderungen'] += neu
+    for a in alt['anforderungen']:            # Fehlerinjektion/Dichtheit als Abnahme-Nachweise ergaenzen
+        da = {n.get('ref') for n in a.get('nachweise', [])}
+        a.setdefault('nachweise', []).extend(n for n in pruefschritte_erkennung(a) if n['ref'] not in da)
     alt.setdefault('hinweis', 'V-Modell (mb2/anforderungen.py): system <-> abnahme/feld, subsystem <-> integration, '
                               'komponente <-> komponente. Eigene Anforderungen des Nutzers als system-Ebene mit herkunft '
                               'ergaenzen; Standard-Eintraege anpassen statt loeschen.')

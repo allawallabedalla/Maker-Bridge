@@ -257,6 +257,12 @@ Wärmeglied α·L·ΔT (sonst ±20 K angenommen).
 | X7 | Bus gegen Leitungslänge | SPI ≤ 0,3 m, I²C ≤ 1 m (Faustregel) | Faustregel | `schnittstelle` | – | mittel | ✅ umgesetzt |
 | X8 | Kalibrierung im Aufwand | Kalibrierschritt in `kosten.json` | eigen | `messkette`, `kosten.json` | – | niedrig | ✅ umgesetzt |
 | X9 | Stückzahl gegen Seriennachweis | Stückzahl 1 → kein Seriennachweis | eigen | `ziele`, Anforderungen | – | mittel | ✅ umgesetzt |
+| X10 | Erkennung gegen Messgrößen (Beobachtbarkeit) | eine Variante aus `braucht_eine_von` ⊆ `_projekt.messgroessen` | eigen | Anforderung `erkennung`, `messgroessen` | sonst fehler (Fehler unsichtbar) | hoch | ✅ umgesetzt – `widerspruch.py` |
+| FL1 | Strömungsform | Re = ρ v d_h / μ; < 2000 laminar | Lehrbuch Rohrströmung | `stroemung` (Medium mit Herkunft, Kanäle) | turbulent → FL2 gilt nicht | hoch | ✅ umgesetzt – `stroemung.py` |
+| FL2 | Druckverlust laminar | rund 128 μ L Q/(π d⁴); Rechteck 12 μ L Q/(w h³(1−0,63 h/w)) | Hagen-Poiseuille | `stroemung` | ≤ `dp_max_Pa` | hoch | ✅ umgesetzt |
+| FL3 | Einlauflänge vor dem Sensor | L_e ≈ 0,06 Re d_h | Lehrbuch (White) | `einlauf_vor_sensor_mm` | gerade Strecke ≥ L_e | mittel | ✅ umgesetzt |
+| FL4 | Messbarkeit Differenzdruck | Δp(Q_min) ≥ 10 × Sensorauflösung | eigen | `dp_sensor_aufloesung_Pa` | sonst warnung (Prinzip ungeeignet) | mittel | ✅ umgesetzt |
+
 
 ## 4 Was mb2 dafür neu braucht
 

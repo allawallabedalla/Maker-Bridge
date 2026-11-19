@@ -54,6 +54,13 @@ Die Werkzeuge liefert der MCP-Server **mb2**. Jeder Schritt läuft über einen e
   nicht übernehmen. (Lehre MB2-TEMP-001: 100 °C für Außenluft, 5 Werte/s ohne Grund.)
 - **Einbau beeinflusst die Messung:** Bei Sensoren den Einbau als Teil der Messkette behandeln (Strahlungsschutz, <!-- R:S10 -->
   Wärmeleitung über Halter, Luftaustausch, mechanische Verspannung) – oft größer als jeder Elektronikfehler.
+- **Erkennen heißt beobachten:** Soll das Gerät Fehler erkennen (Leck, Verstopfung, Bruch …), je Fehler eintragen, welche
+  Messgrößen ihn vom Normalbetrieb unterscheiden (`braucht_eine_von`), und `_projekt.messgroessen` pflegen. X10 meldet,
+  was mit den vorhandenen Sensoren unsichtbar bleibt – dann Sensor ergänzen oder Anforderung einschränken. <!-- R:S32 -->
+- **Fertigungsverfahren prüfen:** Dichte Kanäle, Bohrungen um 1 mm und enge Toleranzen schafft FDM nicht zuverlässig.
+  Funktionsmaße als `toleranzen` eintragen: T1 prüft mit C_pk, ob der Drucker sie hält. Hält er sie nicht, das Teil
+  als Kaufteil (z. B. Sensormodul mit eigenem Kanal) oder in anderem Verfahren vorsehen; das Druckteil hält und
+  schützt nur. <!-- R:S33 -->
 - **Aufwand × Stückzahl:** Kalibrierung, Prüfung und Montage je Gerät mit der Stückzahl multiplizieren, bevor ein <!-- R:S11 -->
   Verfahren gewählt wird.
 - **Widersprüche (X1–X9, `mb2/pruefungen/widerspruch.py`):** nach `project_new` und nach jeder Änderung an Zielen, <!-- R:S12 -->

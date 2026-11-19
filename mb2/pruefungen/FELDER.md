@@ -193,3 +193,13 @@ Pflichtzone je Funkmodul aus dem Datenblatt, in `bauteile.json → antenne.keepo
 - Das Kontrollpad prüft die Umrechnung am echten Board (Abweichung über 0,2 mm ergibt `fehler`).
 - E15 verlangt, dass die Zone auf **allen** Kupferlagen von Sperrflächen abgedeckt ist. Teile außerhalb der Platine zählen nur mit `ueber_kante_erlaubt`.
 - Fehlt die Pflichtzone, gibt es höchstens `warnung`.
+
+## Seit 19.11.2026: Messmodul, Strömung, Erkennung
+
+| Feld | Inhalt | Prüfung |
+|---|---|---|
+| `messkette.profil: "modul_digital"` + `messkette.modul {bereich_min, bereich_max, genauigkeit {abs, rel_messwert, rel_endwert, kombination}, wiederholbarkeit, rauschen, aufloesung, tk_rel_je_K, messzeit_s}`, `dT_K`, `mittelung`, `messrate_Hz`, `zusatz` | gekauftes Messmodul beliebiger Messgröße, Werte aus dem Datenblatt mit `_herkunft` | MK1, MK2, MK3, MK5 (`mb2/sensorprofile/modul.py`) |
+| `stroemung {medium {viskositaet_Pa_s, dichte_kg_m3}, kanaele [{name, d_mm \| b_mm+h_mm, L_mm, Q_min_ml_min, Q_max_ml_min, dp_max_Pa, einlauf_vor_sensor_mm, dp_sensor_aufloesung_Pa}]}` | Kanäle/Leitungen, Stoffwerte nie aus dem Code | FL1–FL4 |
+| `_projekt.messgroessen` | Liste der Größen, die das Gerät wirklich misst | X10 |
+| Anforderung `erkennung [{fehler, herbeifuehren, reaktion_s, braucht_eine_von}]`, `fehlalarm_max`, `normalbetrieb_h` | Diagnosefunktion | X10, Abnahme AB-FI-*/AB-FA-* |
+| Anforderung `dichtheit {pruefdruck_bar, dauer_min, abfall_max_mbar, medium}` | Dichtheit (Fluid, Gehäuse IP) | Abnahme AB-DICHT-* |

@@ -20,7 +20,7 @@ import json
 import os
 
 MODULE = ('fem_plausi', 'waerme', 'mechanik', 'dauer', 'toleranz', 'schwingung', 'elektronik', 'druck', 'firmware',
-          'messkette', 'kpi', 'widerspruch')
+          'messkette', 'kpi', 'widerspruch', 'stroemung')
 STUFEN = ('ok', 'info', 'warnung', 'fehler', 'uebersprungen')
 
 
@@ -70,6 +70,8 @@ AUSLOESER = {
     'firmware': (('FW1',), '_projekt.firmware {pfad, konstanten: {NAME: {datei, soll|soll_aus}}}'),
     'ziele': (('K1', 'K2'), '_projekt.ziele {zielkosten_eur_stueck, aufwand_h_stueck} und kosten.json {posten, '
                             'arbeitsschritte} (Ziel "unbekannt" ist erlaubt und wird als Risiko gemeldet)'),
+    'fluid': (('FL1', 'FL2'), '_projekt.stroemung {medium: {viskositaet_Pa_s, dichte_kg_m3}, kanaele: [{d_mm|b_mm+h_mm, '
+                              'L_mm, Q_max_ml_min, dp_max_Pa, einlauf_vor_sensor_mm}]} mit _herkunft der Stoffwerte'),
     'messung': (('MK1', 'MK2'), '_projekt.messkette {adc_bits, v_ref_V, adc_rauschen_V, u_ref_V, '
                                 'empfindlichkeit_V_je_einheit, ziel_U, ziel_aufloesung, ...}'),
 }
