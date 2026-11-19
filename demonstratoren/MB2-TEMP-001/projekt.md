@@ -29,6 +29,12 @@ Kritik am bisherigen Lastenheft (vom Nutzer am 19.11.2026 angenommen, umgesetzt)
 - Elektronik steht draußen: Temperaturbereich der Elektronik −30 … +50 °C statt 10 … 40 °C, dadurch größere
   Driftbeiträge; Gehäuse UV-fest (ASA), Feuchte und Betauung beachten.
 
+## Systemgrenze (Nutzer 19.11.2026, Entscheidung offen)
+Gebaut wird ein **Sensormodul**, kein Gesamtgerät: Es wird über einen Bus an einen vorhandenen Rechner (ESP32,
+Raspberry Pi o. ä.) angeschlossen. Zeitstempel, Speicherung und Übertragung sind Aufgabe dieses Rechners.
+Offen: wo die Elektronik sitzt und welcher Bus. Der ADS1220 spricht SPI – SPI ist nur für kurze Leitungen
+(Platinen, wenige Dezimeter) gedacht, nicht für ein Kabel nach draußen.
+
 ## Einsatzbedingungen
 - Laborbetrieb 10 … 40 °C (angenommen)
 - Datenübertragung: USB-Seriell angenommen, Funk des ESP32 aus (vom Nutzer bestätigen, sonst E15/E16 rechnen)
