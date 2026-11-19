@@ -167,7 +167,11 @@
    "messkette.bauteile.adc.aussteuerung_reserve": "angenommen: 5 % Reserve gegen Vollausschlag (Toleranz R_ref, Verstaerkung)",
    "messkette.schaltung.messrate_Hz": "berechnet: Lastenheft A-MESSRATE 5 Hz",
    "messkette.schaltung.einschwing_s": "angenommen: Eingangsfilter noch nicht ausgelegt - nach Filterauslegung berechnen",
-   "messkette.kalibrierung": "offen: Kalibrierung noch nicht durchgefuehrt (Temperaturbad, Referenzthermometer)"
+   "messkette.kalibrierung": "offen: Kalibrierung noch nicht durchgefuehrt (Temperaturbad, Referenzthermometer)",
+   "ziele.stueckzahl": "Nutzer 19.11.2026"
+  },
+  "ziele": {
+   "stueckzahl": 1
   }
  }
 }
