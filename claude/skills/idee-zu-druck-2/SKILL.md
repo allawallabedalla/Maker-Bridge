@@ -59,8 +59,15 @@ Die Werkzeuge liefert der MCP-Server **mb2**. Jeder Schritt läuft über einen e
   was mit den vorhandenen Sensoren unsichtbar bleibt – dann Sensor ergänzen oder Anforderung einschränken. <!-- R:S32 -->
 - **Fertigungsverfahren prüfen:** Dichte Kanäle, Bohrungen um 1 mm und enge Toleranzen schafft FDM nicht zuverlässig.
   Funktionsmaße als `toleranzen` eintragen: T1 prüft mit C_pk, ob der Drucker sie hält. Hält er sie nicht, das Teil
-  als Kaufteil (z. B. Sensormodul mit eigenem Kanal) oder in anderem Verfahren vorsehen; das Druckteil hält und
-  schützt nur. <!-- R:S33 -->
+  als Kaufteil (z. B. Sensormodul mit eigenem Kanal) oder extern gefertigt vorsehen (`verfahren`, `fertigung` mit
+  Prozessstreuung des Anbieters) – dann rechnet T1 mit diesem Verfahren und die Abnahme bekommt eine
+  Wareneingangsprüfung. Das Druckteil hält und schützt nur. <!-- R:S33 -->
+- **Rechenlogik vor dem Bau prüfen:** Firmware-Rechnung (Messwert, Volumen, Diagnose) ohne Hardwarezugriff in eigene
+  Dateien, dazu ein Hosttest (`firmware.hosttest`, Befehl `firmware_test`). Jeder zu erkennende Fehler wird dort auch
+  in Software eingespielt. <!-- R:S34 -->
+- **Daten zählen:** Speichert oder sendet das Gerät Daten, `_projekt.daten` füllen (Satzgröße, Intervall, Speicher,
+  Kanal, Flash-Zyklen aus dem Datenblatt). DS1–DS3 zeigen, wann der Speicher voll, der Kanal überlastet oder der Flash
+  verschlissen ist. <!-- R:S35 -->
 - **Aufwand × Stückzahl:** Kalibrierung, Prüfung und Montage je Gerät mit der Stückzahl multiplizieren, bevor ein <!-- R:S11 -->
   Verfahren gewählt wird.
 - **Widersprüche (X1–X9, `mb2/pruefungen/widerspruch.py`):** nach `project_new` und nach jeder Änderung an Zielen, <!-- R:S12 -->

@@ -12,11 +12,17 @@ soll.json ``_projekt.stroemung`` (oder je Teil):
                   "dp_max_Pa": 5000,                                               # zulaessiger Druckverlust
                   "einlauf_vor_sensor_mm": 15,                                    # gerade Strecke vor dem Sensor
                   "dp_sensor_aufloesung_Pa": 2}]}                                  # nur bei Differenzdruck-Messung
-FL1 Stroemungsform: Re = rho v d_h / mu. Re < 2000 laminar (ok), 2000-4000 Uebergang (warnung), > 4000 turbulent
-    (warnung: FL2-Formel gilt nicht). Grenzen: uebliche Lehrbuchwerte fuer Rohrstroemung (Re_krit ~ 2300).
-FL2 Druckverlust laminar: rund dp = 128 mu L Q / (pi d^4); rechteckig dp = 12 mu L Q / (w h^3 (1 - 0,63 h/w)), h <= w
-    (Naeherung fuer flache Kanaele, Fehler wenige %). Gegen dp_max_Pa.
-FL3 Einlauflaenge laminar: L_e ~ 0,06 Re d_h (Lehrbuch-Naeherung, z. B. White, Fluid Mechanics). Gerade Strecke vor dem
+FL1 Stroemungsform: Re = rho v d_h / mu. Re < 2000 laminar (ok), 2000-4000 Uebergang (warnung: weder laminar noch
+    turbulent berechenbar, Auslegung dort meiden), > 4000 turbulent (info, FL2 rechnet turbulent). Grenzen: uebliche
+    Lehrbuchwerte fuer Rohrstroemung (Re_krit ~ 2300).
+FL2 Druckverlust (seit 19.11.2026 auch turbulent, ohne CFD):
+    laminar rund dp = 128 mu L Q / (pi d^4); rechteckig dp = 12 mu L Q / (w h^3 (1 - 0,63 h/w)), h <= w.
+    turbulent dp = lambda L/d_h rho v^2/2 (Darcy-Weisbach): glatt (ohne rauigkeit_mm) Blasius lambda = 0,3164 Re^-0,25
+    nur 4000 < Re < 1e5; mit rauigkeit_mm Colebrook-White 1/sqrt(lambda) = -2 lg(k/(3,7 d_h) + 2,51/(Re sqrt(lambda))).
+    Einzelverluste (Kruemmer, Verschraubung, Ventil): "einzelverluste": [{"name", "zeta"}] -> sum zeta rho v^2/2, zeta
+    mit Quelle (Hersteller/Tabelle). Uebergangsbereich und Re > 1e5 ohne Rauigkeit -> uebersprungen (keine Formel).
+    Gegen dp_max_Pa.
+FL3 Einlauflaenge: laminar L_e ~ 0,06 Re d_h, turbulent ~ 4,4 Re^(1/6) d_h (Lehrbuch-Naeherung, z. B. White, Fluid Mechanics). Gerade Strecke vor dem
     Sensor kuerzer -> warnung (Profil noch nicht ausgebildet, Kalibrierung gilt nur fuer genau diesen Einbau).
 FL4 Messbarkeit Differenzdruck: dp bei Q_min >= 10 x Aufloesung des Drucksensors, sonst warnung (kleinster Durchfluss
     geht im Rauschen unter -> anderes Messprinzip, z. B. thermisch, oder laengere Messstrecke).
@@ -27,7 +33,7 @@ import math
 from . import ergebnis, projekt_soll, soll as lade_soll, uebersprungen
 
 Q = 'mb2/pruefungen/stroemung.py (Hagen-Poiseuille, laminare Rohrstroemung, Lehrbuch)'
-T = {'FL1': 'Stroemungsform (Reynolds)', 'FL2': 'Druckverlust laminar', 'FL3': 'Einlauflaenge vor dem Sensor',
+T = {'FL1': 'Stroemungsform (Reynolds)', 'FL2': 'Druckverlust', 'FL3': 'Einlauflaenge vor dem Sensor',
      'FL4': 'Messbarkeit Differenzdruck'}
 RE_LAMINAR, RE_TURBULENT = 2000.0, 4000.0
 SCHWACH = ('geschaetzt', 'angenommen', None)
@@ -55,6 +61,45 @@ def druckverlust(k, mu, Q_m3_s):
         return 128 * mu * L * Q_m3_s / (math.pi * d ** 4)
     w, h = max(k['b_mm'], k['h_mm']) * 1e-3, min(k['b_mm'], k['h_mm']) * 1e-3
     return 12 * mu * L * Q_m3_s / (w * h ** 3 * (1 - 0.63 * h / w))
+
+
+def lambda_turbulent(Re, d_h_m, rauigkeit_mm=None):
+    """Rohrreibungszahl turbulent: Colebrook-White mit Rauigkeit, sonst Blasius (glatt, 4000 < Re < 1e5). None = keine Formel."""
+    if rauigkeit_mm is not None:
+        r = float(rauigkeit_mm) * 1e-3 / d_h_m
+        lam = 0.02
+        for _ in range(50):
+            neu = (-2 * math.log10(r / 3.7 + 2.51 / (Re * math.sqrt(lam)))) ** -2
+            if abs(neu - lam) < 1e-12:
+                break
+            lam = neu
+        return lam
+    if 4000 < Re < 1e5:
+        return 0.3164 * Re ** -0.25
+    return None
+
+
+def druckverlust_stroemung(k, rho, mu, Q_m3_s):
+    """(dp_Pa, Text) fuer jede Stroemungsform, oder (None, Grund). Einzelverluste kommen dazu."""
+    A, dh, _ = geometrie(k)
+    v = Q_m3_s / A
+    Re = rho * v * dh / mu
+    zeta = sum(float(z.get('zeta', 0)) for z in k.get('einzelverluste') or [])
+    dyn = rho * v * v / 2
+    if Re < RE_LAMINAR:
+        dp, txt = druckverlust(k, mu, Q_m3_s), 'laminar (Hagen-Poiseuille)'
+    elif Re < RE_TURBULENT:
+        return None, f'Re {Re:.0f} im Uebergangsbereich - keine verlaessliche Formel, Auslegung dort meiden'
+    else:
+        lam = lambda_turbulent(Re, dh, k.get('rauigkeit_mm'))
+        if lam is None:
+            return None, f'Re {Re:.0f} > 1e5 ohne rauigkeit_mm - Colebrook braucht die Rauigkeit (Datenblatt Rohr)'
+        dp = lam * (k['L_mm'] * 1e-3) / dh * dyn
+        txt = f'turbulent, lambda {lam:.4f} ({"Colebrook" if k.get("rauigkeit_mm") is not None else "Blasius, glatt"})'
+    if zeta:
+        dp += zeta * dyn
+        txt += f' + Einzelverluste sum zeta {zeta:g} x rho v^2/2 = {zeta * dyn:.4g} Pa'
+    return dp, txt
 
 
 def reynolds(k, rho, mu, Q_m3_s):
@@ -102,22 +147,21 @@ def pruefe(pdir):
             Re = reynolds(k, rho, mu, Qmax)
             v = Qmax / A
             ann = f'; Stoffwerte {herk or "ohne Herkunft"} (angenommen)' if schwach else ''
-            st1 = 'ok' if Re < RE_LAMINAR else 'warnung'
+            st1 = 'ok' if Re < RE_LAMINAR else 'warnung' if Re < RE_TURBULENT else 'info'
             if st1 == 'ok' and schwach:
                 st1 = 'warnung'
             out.append(ergebnis('FL1', f'{T["FL1"]} {n}', st1, wert=round(Re, 1), grenze=RE_LAMINAR, quelle=Q, teil=teil,
                                 daten={'v_m_s': v, 'd_h_mm': dh * 1e3, 'art': art},
                                 hinweis=f'Re = rho v d_h / mu = {rho:g}*{v:.4g}*{dh * 1e3:g}e-3/{mu:g} = {Re:.0f} bei '
                                         f'Q_max {k["Q_max_ml_min"]:g} ml/min' +
-                                        (' - laminar' if Re < RE_LAMINAR else ' - Uebergang' if Re < RE_TURBULENT
-                                         else ' - turbulent: Hagen-Poiseuille gilt nicht') + ann))
-            if Re >= RE_LAMINAR:
-                out.append(uebersprungen('FL2', f'{T["FL2"]} {n}', f'Re {Re:.0f} nicht laminar - Formel gilt nicht '
-                                         '(Rohrreibungszahl/Moody-Diagramm oder CFD)', Q, teil))
+                                        (' - laminar' if Re < RE_LAMINAR else ' - Uebergang: nicht berechenbar, meiden'
+                                         if Re < RE_TURBULENT else ' - turbulent (FL2 nach Darcy-Weisbach)') + ann))
+            dp, dtxt = druckverlust_stroemung(k, rho, mu, Qmax)
+            if dp is None:
+                out.append(uebersprungen('FL2', f'{T["FL2"]} {n}', dtxt, Q, teil))
             else:
-                dp = druckverlust(k, mu, Qmax)
                 g = k.get('dp_max_Pa')
-                txt = (f'dp = {dp:.4g} Pa bei Q_max ({art}, L {k["L_mm"]:g} mm){ann}')
+                txt = f'dp = {dp:.4g} Pa bei Q_max ({art}, L {k["L_mm"]:g} mm, {dtxt}){ann}'
                 if not _num(g):
                     out.append(uebersprungen('FL2', f'{T["FL2"]} {n}', f'dp_max_Pa fehlt ({txt})', Q, teil))
                 else:
@@ -126,7 +170,8 @@ def pruefe(pdir):
                                         quelle=Q, teil=teil, hinweis=txt, daten={'dp_Pa': dp}))
             # FL3
             ein = k.get('einlauf_vor_sensor_mm')
-            Le = 0.06 * Re * dh * 1e3
+            # laminar 0,06 Re d_h; turbulent ~4,4 Re^(1/6) d_h (Lehrbuch-Naeherungen, White)
+            Le = (0.06 * min(Re, RE_TURBULENT) if Re < RE_TURBULENT else 4.4 * Re ** (1 / 6)) * dh * 1e3
             if ein is None:
                 out.append(uebersprungen('FL3', f'{T["FL3"]} {n}', f'einlauf_vor_sensor_mm fehlt (noetig ~{Le:.1f} mm)', Q, teil))
             else:

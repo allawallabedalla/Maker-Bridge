@@ -32,3 +32,10 @@ Gefunden mit der FEM-Weglass-Probe:
 Randwert-Probe (`test_randwerte_kein_absturz`, `test_randwerte_fem_kein_absturz`): jede Zahl in den Test-Projekten
 einzeln auf 0 und −1 – kein Modul darf abstürzen. Gefunden: Kriech-Zeitkonstante 0/−1 brachte `dauer` zum Absturz.
 Jetzt gelten unmögliche Kriechkennwerte als fehlend (Prüfung übersprungen, Hinweis „ungültig verworfen“).
+
+Lücken aus dem Machbarkeits-Challenge (Durchflusssensor als Prüffall, 19.11.2026), allgemein geschlossen:
+1. Firmware-Rechenlogik ungeprüft bis zur Abnahme → Hosttest FW2/FW3 (`firmware_test`, Fehlerinjektion in Software).
+2. Kein Datenbudget → DS1–DS3 (Speicher, Übertragung/Duty-Cycle, Flash-Verschleiß).
+3. Nur FDM → `verfahren: extern|kaufteil` mit Prozessstreuung in T1, Verfahrensgrenzen in cad_build, Wareneingang AB-WE-*.
+4. Strömung nur laminar → FL2 turbulent (Blasius/Colebrook) und Einzelverluste; Übergangsbereich ehrlich ohne Formel.
+5. Handarbeit am Gerät bleibt (Bauen, Kalibrieren, Fehler auslösen) – die Bridge plant und belegt sie (Abnahme), führt sie nicht aus.

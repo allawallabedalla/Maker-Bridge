@@ -754,6 +754,19 @@ def standard(pdir):
                   'nachweise': ([{'art': 'katalog', 'ref': 'M12', 'stufe': 'komponente'},
                                  {'art': 'katalog', 'ref': 'D4', 'stufe': 'integration'}] if a('schrauben') else []) +
                                ([{'art': 'katalog', 'ref': 'M1', 'stufe': 'komponente'}] if a('schnapper') else [])})
+    # Nicht gedruckte Teile (CNC, Harz, Kaufteil): Wareneingangspruefung der Funktionsmasse (seit 19.11.2026)
+    for tn, ts in _soll(pdir).items():
+        if tn == '_projekt' or not isinstance(ts, dict) or ts.get('verfahren', 'fdm') == 'fdm':
+            continue
+        masse = ', '.join(f'{t.get("name")} {t.get("nenn_mm")} +/- {t.get("tol_mm")}' for t in ts.get('toleranzen') or [])
+        L.append({'id': f'S-FERTIGUNG-{tn}', 'ebene': 'subsystem', 'eltern': ['A-GERAET'],
+                  'herkunft': f'abgeleitet: {tn} wird nicht gedruckt ({ts.get("verfahren")})',
+                  'text': f'{tn} haelt seine Funktionsmasse ({masse or "toleranzen fehlen"}).',
+                  'nachweise': [{'art': 'katalog', 'ref': 'T1', 'teil': tn, 'stufe': 'komponente'},
+                                {'art': 'abnahme', 'ref': f'AB-WE-{tn}', 'stufe': 'abnahme',
+                                 'anweisung': f'Wareneingang {tn}: jedes Funktionsmass messen ({masse or "Liste fehlt"}) '
+                                              'und die Zahl der Masse ausserhalb der Toleranz eintragen.',
+                                 'kriterium': {'groesse': 'ausser_toleranz', 'op': '==', 'wert': 0, 'einheit': 'Masse'}}]})
     zl = pj.get('ziele') or {}
     if isinstance(zl.get('zielkosten_eur_stueck'), (int, float)):
         L.append({'id': 'S-KOSTEN', 'ebene': 'subsystem', 'eltern': ['A-GERAET'], 'herkunft': 'Projektziel (ziele)',

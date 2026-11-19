@@ -30,6 +30,7 @@ STICHWORTE = {
     'lautsprecher': r'lautsprecher|speaker|buzzer|\bsummer\b|piezo',
     'dauerlast': r'vorspann|presssitz|pressitz|dauerlast|dauerhaft belastet|traegt dauerhaft',
     'fluid': r'durchfluss|volumenstrom|\bschlauch|mikrofluid|\bkanal\b.*\b(wasser|fluessig|gas)|leckage|\bpumpe|ventil\b',
+    'daten': r'datenlogger|\blogger\b|aufzeichn|sd-?karte|speichert die (mess)?daten|messdaten speichern|\bflash-?speicher',
     'firmware': r'firmware|\.ino|arduino|platformio|esp-idf|micropython',
 }
 
@@ -147,6 +148,8 @@ def merkmale(pdir):
     setze('ziele', bool(pj.get('ziele')), 'soll.json _projekt.ziele')
     setze('fluid', bool(pj.get('stroemung')) or any(t.get('stroemung') for t in teile.values()), 'soll.json stroemung')
     setze('fluid', bool(wort('fluid')), wort('fluid') or '')
+    setze('daten', bool(pj.get('daten')), 'soll.json _projekt.daten')
+    setze('daten', bool(wort('daten')), wort('daten') or '')
     # Messfunktion: Messkette im soll oder messtechnische Anforderung im Lastenheft
     setze('messung', bool(pj.get('messkette')), 'soll.json _projekt.messkette')
     setze('messung', _messtechnik(pdir), 'anforderungen.json messtechnik')

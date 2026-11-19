@@ -162,8 +162,10 @@ def pruefen(teil, platzhalter=None, soll=None):
 
     # Wandstaerke + Spalte
     ausn = soll.get('ausnahmen', {})
-    wand_min = ausn.get('wand_min', WAND_MIN)
-    spalt_min = ausn.get('spalt_min', SPALT_MIN)
+    # nicht gedruckte Teile (verfahren extern/kaufteil): Grenzen des Verfahrens statt der FDM-Regeln (19.11.2026)
+    fert = (soll.get('fertigung') or {}) if soll.get('verfahren', 'fdm') != 'fdm' else {}
+    wand_min = ausn.get('wand_min', fert.get('wand_min_mm', WAND_MIN))
+    spalt_min = ausn.get('spalt_min', fert.get('spalt_min_mm', SPALT_MIN))
     dicke = wand_und_spalt(teil)
     r['wand_min_mm'] = dicke['wand_min']
     r['spalt_min_mm'] = dicke['spalt_min']

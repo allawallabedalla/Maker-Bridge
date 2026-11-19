@@ -259,9 +259,14 @@ Wärmeglied α·L·ΔT (sonst ±20 K angenommen).
 | X9 | Stückzahl gegen Seriennachweis | Stückzahl 1 → kein Seriennachweis | eigen | `ziele`, Anforderungen | – | mittel | ✅ umgesetzt |
 | X10 | Erkennung gegen Messgrößen (Beobachtbarkeit) | eine Variante aus `braucht_eine_von` ⊆ `_projekt.messgroessen` | eigen | Anforderung `erkennung`, `messgroessen` | sonst fehler (Fehler unsichtbar) | hoch | ✅ umgesetzt – `widerspruch.py` |
 | FL1 | Strömungsform | Re = ρ v d_h / μ; < 2000 laminar | Lehrbuch Rohrströmung | `stroemung` (Medium mit Herkunft, Kanäle) | turbulent → FL2 gilt nicht | hoch | ✅ umgesetzt – `stroemung.py` |
-| FL2 | Druckverlust laminar | rund 128 μ L Q/(π d⁴); Rechteck 12 μ L Q/(w h³(1−0,63 h/w)) | Hagen-Poiseuille | `stroemung` | ≤ `dp_max_Pa` | hoch | ✅ umgesetzt |
+| FL2 | Druckverlust | laminar Hagen-Poiseuille (rund/Rechteck); turbulent Darcy-Weisbach mit Blasius (glatt) bzw. Colebrook (Rauigkeit); + Σζ ρv²/2 | Lehrbuch | `stroemung` | ≤ `dp_max_Pa`; Übergang 2000–4000 ohne Formel | hoch | ✅ umgesetzt |
 | FL3 | Einlauflänge vor dem Sensor | L_e ≈ 0,06 Re d_h | Lehrbuch (White) | `einlauf_vor_sensor_mm` | gerade Strecke ≥ L_e | mittel | ✅ umgesetzt |
 | FL4 | Messbarkeit Differenzdruck | Δp(Q_min) ≥ 10 × Sensorauflösung | eigen | `dp_sensor_aufloesung_Pa` | sonst warnung (Prinzip ungeeignet) | mittel | ✅ umgesetzt |
+| FW2 | Hosttest der Firmware-Rechenlogik | Testprogramm am PC, je Fall `MB2 {json}`; Ergebnis an den Quell-Hash gebunden | eigen | `firmware.hosttest`, Befehl `firmware_test` | alle Fälle bestanden, nicht veraltet | hoch | ✅ umgesetzt – `firmware.py`, `firmware_test.py` |
+| FW3 | Fehlerinjektion in Software | je Fehler aus `erkennung` ein bestandener Fall `fehlerinjektion` + ein Fehlalarm-Fall | eigen | Hosttest, Anforderungen | vollständig | hoch | ✅ umgesetzt |
+| DS1 | Datenspeicher | Satz × 3600/Intervall × Aufbewahrung ≤ Speicher × (1 − Reserve) | eigen | `_projekt.daten` | – | mittel | ✅ umgesetzt – `daten.py` |
+| DS2 | Datenübertragung | Nutzdaten/h ≤ Pakete × Nutzlast; Luftzeit ≤ Duty-Cycle bzw. Bits/Rate ≤ Nutzanteil | eigen | `daten.uebertragung` | – | mittel | ✅ umgesetzt |
+| DS3 | Flash-Verschleiß | Schreibvorgänge × max(Block, Puffer) × Lebensdauer / Speicher ≤ 0,5 × Zyklen | eigen | `daten`, `lebensdauer_h` | – | mittel | ✅ umgesetzt |
 
 
 ## 4 Was mb2 dafür neu braucht

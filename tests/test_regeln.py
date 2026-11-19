@@ -75,6 +75,8 @@ REGELN = {
     'V39': ['test_erweiterungen.py::test_x10_beobachtbarkeit'],
     'V40': ['test_erweiterungen.py::test_fehlerinjektion_und_dichtheit_als_abnahme'],
     'V41': ['test_erweiterungen.py::test_modulprofil_budget_hand', 'test_erweiterungen.py::test_modulprofil_ohne_angaben_kein_ok'],
+    'V42': ['test_firmware_host.py::test_hosttest_bestanden_veraltet_und_fehlerhaft', 'test_firmware_host.py::test_ohne_hosttest_ausloeser'],
+    'V43': ['test_erweiterungen.py::test_nicht_gedruckte_teile'],
     # ---------------------------------------------------------------- Skill idee-zu-druck-2
     'S01': ['test_regeln.py::test_kein_druck_und_keine_freigabe_ueber_mcp'],
     'S02': (VERHALTEN, 'Ton und Form der Antworten - Pruefung durch den Nutzer'),
@@ -112,7 +114,9 @@ REGELN = {
     'S30': ['test_karten.py::test_laufsperre_und_bremse', 'test_karten.py::test_vorrang_und_nutzer'],
     'S31': ['test_karten.py::test_stand_kurz_und_vollstaendig'],
     'S32': ['test_erweiterungen.py::test_x10_beobachtbarkeit'],
-    'S33': ['test_pruef_dauer_toleranz.py::test_t1_t4_messung'],
+    'S33': ['test_pruef_dauer_toleranz.py::test_t1_t4_messung', 'test_erweiterungen.py::test_nicht_gedruckte_teile'],
+    'S34': ['test_firmware_host.py::test_hosttest_bestanden_veraltet_und_fehlerhaft'],
+    'S35': ['test_erweiterungen.py::test_datenbudget_hand'],
     'S26': (VERHALTEN, 'Grundannahme pruefen nach zwei gescheiterten Varianten - Urteil der KI'),
 }
 

@@ -203,3 +203,7 @@ Pflichtzone je Funkmodul aus dem Datenblatt, in `bauteile.json → antenne.keepo
 | `_projekt.messgroessen` | Liste der Größen, die das Gerät wirklich misst | X10 |
 | Anforderung `erkennung [{fehler, herbeifuehren, reaktion_s, braucht_eine_von}]`, `fehlalarm_max`, `normalbetrieb_h` | Diagnosefunktion | X10, Abnahme AB-FI-*/AB-FA-* |
 | Anforderung `dichtheit {pruefdruck_bar, dauer_min, abfall_max_mbar, medium}` | Dichtheit (Fluid, Gehäuse IP) | Abnahme AB-DICHT-* |
+| `_projekt.firmware.hosttest {quellen, test, sprache, flags}` | Rechenlogik am PC, Befehl `firmware_test` | FW2, FW3 |
+| `_projekt.daten {datensatz_bytes, intervall_s, speicher_bytes, reserve_anteil, aufbewahrung_h, uebertragung {pakete_je_h, nutzdaten_bytes_je_paket, luftzeit_s_je_paket, duty_max \| rate_bit_s, ueberhang_bytes_je_paket, nutzanteil}, schreibzyklen_max, schreibblock_bytes, puffer_datensaetze}` | Datenbudget | DS1–DS3 |
+| Teil `verfahren: "extern" \| "kaufteil"` + `fertigung {name, sigma_mm, wand_min_mm, spalt_min_mm}`, `_herkunft.fertigung` | nicht gedruckte Teile: Prozessgrenzen des Verfahrens, Wareneingang AB-WE-* | T1, cad_build, S-FERTIGUNG-* |
+| Kanal `rauigkeit_mm`, `einzelverluste [{name, zeta}]` | turbulente Strömung, Einzelverluste | FL2 |

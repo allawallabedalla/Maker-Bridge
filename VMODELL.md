@@ -61,6 +61,9 @@ Nachweis auf derselben Höhe des V. Anlass und Herleitung: `audits/KERNPROBLEM_2
 - **Beobachtbarkeit** (X10): ein Fehler ist nur erkennbar, wenn das Gerät die Größen misst, die ihn vom Normalbetrieb unterscheiden (`braucht_eine_von` gegen `_projekt.messgroessen`). <!-- R:V39 -->
 - **Dichtheit** (Anforderung `dichtheit`): Druckabfallprüfung als Abnahme AB-DICHT-* mit messbarem Grenzwert. <!-- R:V40 -->
 
+- **Firmware-Rechenlogik** (FW2/FW3): Hosttest am PC, gebunden an den Quellstand; jeder zu erkennende Fehler auch in Software eingespielt. Firmware ohne Hosttest ist ein Auslöser-Fehler (oder `nicht_relevant` mit Grund). <!-- R:V42 -->
+- **Nicht gedruckte Teile** (`verfahren: extern|kaufteil`): T1 rechnet mit der Prozessstreuung des Verfahrens, cad_build mit dessen Wand-/Spaltgrenzen, und es entsteht eine Wareneingangsprüfung (AB-WE-*). <!-- R:V43 -->
+
 ## Glaubwürdigkeit der Rechenmodelle (seit 17.11.2026, `mb2/glaubwuerdigkeit.py`)
 
 Begriffe und Quellenstand: **`VVUQ.md`**.

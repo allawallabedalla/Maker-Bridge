@@ -162,11 +162,30 @@ def _grenzen(t):
     return None
 
 
-def _t1_t4(teil, material, t):
+def verfahren_modell(ts):
+    """Prozessmodell fuer Teile, die NICHT auf dem MK4 gedruckt werden (seit 19.11.2026): soll ``verfahren``
+    ('extern' = CNC/Harz/Laser/Spritzguss beim Anbieter, 'kaufteil') + ``fertigung {name, sigma_mm, wand_min_mm,
+    spalt_min_mm}``. sigma_mm = Prozessstreuung (1 sigma) laut Anbieter/Datenblatt mit ``_herkunft.fertigung``;
+    ohne Herkunft vorlaeufig (hoechstens warnung). None = FDM (MK4-Modell)."""
+    if (ts or {}).get('verfahren', 'fdm') == 'fdm':
+        return None
+    f = ts.get('fertigung') or {}
+    sig = f.get('sigma_mm')
+    if not isinstance(sig, (int, float)) or sig <= 0:
+        return {'fehlt': f'fertigung.sigma_mm fehlt (Prozessstreuung von {f.get("name") or ts["verfahren"]}, Anbieter)'}
+    herk = str((ts.get('_herkunft') or {}).get('fertigung', '')).split(':')[0].strip().lower()
+    return {'k': 1.0, 'b': 0.0, 'sigma': float(sig), 'vorlaeufig': herk not in ('gemessen', 'datenblatt', 'norm'),
+            'quelle': f'Verfahren {f.get("name") or ts["verfahren"]}, sigma {sig} mm ({herk or "Herkunft offen"})'}
+
+
+def _t1_t4(teil, material, t, ts=None):
     """Prozessfaehigkeit (T1) und Schwindungsvorhalt (T4) eines Toleranzmasses."""
     name = t.get('name', '?')
     art = t.get('art')
-    md = modell(material, art)
+    vm = verfahren_modell(ts)
+    if vm and vm.get('fehlt'):
+        return [uebersprungen('T1', f'Prozessfaehigkeit {name}', vm['fehlt'], Q_CPK, teil)]
+    md = vm or modell(material, art)
     if md is None:
         return [uebersprungen('T1', f'Prozessfaehigkeit {name}', f'art {art!r} unbekannt ({", ".join(ARTEN)})', Q_CPK, teil)]
     gr = _grenzen(t)
@@ -194,6 +213,8 @@ def _t1_t4(teil, material, t):
                     hinweis=f'{art}: CAD {cad} -> erwartet {mu:.3f} +/- {md["sigma"]:.3f} (1 sigma), Grenzen '
                             f'{lsl:.3f}..{usl:.3f}; C_p {cp:.2f}. Modell aus {md["quelle"]}{vorl}. '
                             f'Unter 1,33 Toleranz aufweiten oder Vorhalt (T4)')]
+    if vm:                        # nicht gedruckt: kein Schwindungsvorhalt des MK4
+        return out
     # T4: Vorhalt, damit der Mittelwert auf dem Nennmass liegt
     soll_cad = (nenn - md['b']) / md['k']
     abw = mu - nenn
@@ -450,7 +471,7 @@ def pruefe(pdir):
         tn = None if teil == '_projekt' else teil
         for t in ts.get('toleranzen') or []:
             gefunden = True
-            erg += _t1_t4(tn, material, t)
+            erg += _t1_t4(tn, material, t, ts)
         for k in ts.get('toleranzketten') or []:
             gefunden = True
             erg.append(_t2(tn, material, k, pdir, s))

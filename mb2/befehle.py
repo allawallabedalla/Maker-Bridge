@@ -122,6 +122,20 @@ def eingaben_offen(projekt: str):
 
 # ---------------------------------------------------------------- V-Modell (Anforderungen, Abnahme, Feld)
 
+@befehl('projekt')
+def firmware_test(projekt: str):
+    """Firmware-Rechenlogik auf dem PC uebersetzen und pruefen (_projekt.firmware.hosttest {quellen, test}).
+    Das Testprogramm gibt je Fall 'MB2 {json}' aus: art wert | fehlerinjektion | fehlalarm. Ergebnis
+    pruef/firmware_test.json (Katalog FW2/FW3). Format: mb2/firmware_test.py."""
+    from . import firmware_test as ft
+    from .pruefungen import projekt_soll
+    d = pdir(projekt)
+    ht = (projekt_soll(d).get('firmware') or {}).get('hosttest')
+    if not ht:
+        return {'ok': False, 'fehler': '_projekt.firmware.hosttest fehlt'}
+    return ft.laufen(d, ht)
+
+
 @befehl('anforderungen')
 def anforderungen_erzeugen(projekt: str):
     """anforderungen.json (V-Modell) anlegen/ergaenzen: Standard-Anforderungen aus Einsatz und Merkmalen (Druck,
@@ -674,11 +688,14 @@ def audit(projekt: str):
             maengel.append('Keine Katze im Bestueckungsdruck gefunden (kicad_cat)')
 
     platte = os.path.join(d, 'print', 'platte.3mf')
-    steps = [mt(os.path.join(d, 'out', t + '.step')) for t in teile]
+    sj = os.path.join(d, 'cad', 'soll.json')
+    soll_alle = json.load(open(sj, encoding='utf-8')) if os.path.exists(sj) else {}
+    druckteile = [t for t in teile if (soll_alle.get(t) or {}).get('verfahren', 'fdm') == 'fdm']   # extern/kaufteil nicht
+    steps = [mt(os.path.join(d, 'out', t + '.step')) for t in druckteile]
     steps = [x for x in steps if x]
     if mt(platte) is None:
         maengel.append('Keine Druckplatte (cad_plate)')
-    elif steps and mt(platte) < max(steps) and not _platte_aktuell(d, teile):
+    elif steps and mt(platte) < max(steps) and not _platte_aktuell(d, druckteile):
         maengel.append('Druckplatte aelter als ein Teil - cad_plate neu')
     if os.path.exists(platte):
         bilder.append(os.path.join(d, 'print', 'platte.png'))

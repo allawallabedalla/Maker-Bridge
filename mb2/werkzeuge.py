@@ -51,6 +51,20 @@ def physische_kerne():
         return max(1, (os.cpu_count() or 2) // 2)
 
 
+def c_compiler(cpp=False):
+    """C/C++-Compiler fuer Firmware-Hosttests (seit 19.11.2026): MSYS2 (Windows) oder PATH. None, wenn keiner da ist."""
+    namen = ('g++', 'clang++', 'c++') if cpp else ('gcc', 'clang', 'cc')
+    for n in namen:
+        p = os.path.join(MSYS2_BIN, n + '.exe')
+        if os.path.exists(p):
+            return p
+    for n in namen:
+        p = shutil.which(n)
+        if p:
+            return p
+    return None
+
+
 def ccx_env():
     n = str(physische_kerne())
     return dict(os.environ, OMP_NUM_THREADS=n, PASTIX_NUM_THREADS=n, STARPU_NCPU=n)

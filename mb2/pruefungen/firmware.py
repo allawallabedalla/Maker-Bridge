@@ -12,6 +12,11 @@ soll.json ``_projekt.firmware``:
 FW1 liest ``#define NAME wert`` (bzw. ``const ... NAME = wert;``) und vergleicht mit dem soll-Wert (direkt ``soll``
 oder aus einem anderen soll-Feld ``soll_aus``). Abweichung = fehler (die Pruefungen rechnen mit etwas anderem, als
 das Geraet tut). Datei fehlt = uebersprungen (Ausloeser 'firmware' macht daraus einen fehler).
+
+FW2 Hosttest der Rechenlogik (seit 19.11.2026, ``mb2/firmware_test.py``, Befehl ``firmware_test``): Ergebnis vorhanden,
+zum aktuellen Quellstand (Hash) und alle Faelle bestanden. Veraltet oder nie gelaufen -> uebersprungen.
+FW3 Fehlerinjektion in Software: jeder Fehler aus ``erkennung`` der Anforderungen hat einen bestandenen Fall
+art=fehlerinjektion; gibt es Erkennungen, braucht es ausserdem einen Fehlalarm-Fall.
 """
 import os
 import re
@@ -45,6 +50,49 @@ def _feld(d, pfad):
     return d
 
 
+def _hosttest(pdir, pj):
+    import json as _j
+    from ..firmware_test import quellen_hash
+    out = []
+    ht = (pj.get('firmware') or {}).get('hosttest')
+    if not ht:
+        return [uebersprungen('FW2', 'Hosttest Rechenlogik', 'firmware.hosttest {quellen, test} fehlt - Rechenlogik '
+                              'ungeprueft bis zur Abnahme am Geraet', Q),
+                uebersprungen('FW3', 'Fehlerinjektion in Software', 'kein Hosttest', Q)]
+    p = os.path.join(pdir, 'pruef', 'firmware_test.json')
+    erg = _j.load(open(p, encoding='utf-8')) if os.path.exists(p) else None
+    if erg is None:
+        return [uebersprungen('FW2', 'Hosttest Rechenlogik', 'nie gelaufen (Befehl firmware_test)', Q),
+                uebersprungen('FW3', 'Fehlerinjektion in Software', 'Hosttest nie gelaufen', Q)]
+    if erg.get('quellen_hash') != quellen_hash(pdir, ht):
+        return [uebersprungen('FW2', 'Hosttest Rechenlogik', 'veraltet: Quellen seit dem letzten Lauf geaendert '
+                              '(firmware_test neu)', Q),
+                uebersprungen('FW3', 'Fehlerinjektion in Software', 'Hosttest veraltet', Q)]
+    fs = erg.get('faelle') or []
+    schlecht = [f.get('fall') for f in fs if not f.get('bestanden')]
+    if erg.get('fehler') and 'Compiler' in erg['fehler']:
+        out.append(uebersprungen('FW2', 'Hosttest Rechenlogik', erg['fehler'], Q))
+    else:
+        st = 'ok' if erg.get('ok') else 'fehler'
+        out.append(ergebnis('FW2', 'Hosttest Rechenlogik', st, wert=len(fs) - len(schlecht), grenze=len(fs), quelle=Q,
+                            hinweis=(f'{len(fs)} Faelle bestanden' if st == 'ok' else
+                                     f'{erg.get("fehler") or ""} nicht bestanden: {schlecht[:5]}').strip()))
+    erk = [f.get('fehler') for a in _j.load(open(os.path.join(pdir, 'anforderungen.json'), encoding='utf-8')).get(
+        'anforderungen', []) for f in a.get('erkennung') or []] if os.path.exists(os.path.join(pdir, 'anforderungen.json')) else []
+    if not erk:
+        out.append(uebersprungen('FW3', 'Fehlerinjektion in Software', 'keine Anforderung mit erkennung', Q))
+    else:
+        gedeckt = {f.get('fehler') for f in fs if f.get('art') == 'fehlerinjektion' and f.get('bestanden')}
+        fehlt = [e for e in erk if e not in gedeckt]
+        fa = any(f.get('art') == 'fehlalarm' and f.get('bestanden') for f in fs)
+        st = 'ok' if not fehlt and fa else 'fehler'
+        out.append(ergebnis('FW3', 'Fehlerinjektion in Software', st, wert=len(erk) - len(fehlt), grenze=len(erk),
+                            quelle=Q, hinweis=('jeder Fehler in Software eingespielt und erkannt, Fehlalarm-Fall bestanden'
+                                               if st == 'ok' else f'ohne bestandenen Fall: {fehlt}' +
+                                               ('' if fa else '; kein bestandener Fehlalarm-Fall'))))
+    return out
+
+
 def pruefe(pdir):
     pj = projekt_soll(pdir)
     fw = pj.get('firmware')
@@ -75,4 +123,4 @@ def pruefe(pdir):
         else:
             out.append(ergebnis('FW1', f'{T} {name}', 'ok', wert=ist, grenze=soll, quelle=Q,
                                 hinweis=f'{name} = {ist} wie {k.get("soll_aus") or "soll"}'))
-    return out or [uebersprungen('FW1', T, 'firmware.konstanten leer', Q)]
+    return (out or [uebersprungen('FW1', T, 'firmware.konstanten leer', Q)]) + _hosttest(pdir, pj)
