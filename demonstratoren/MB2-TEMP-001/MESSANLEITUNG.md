@@ -1,6 +1,6 @@
 # Messanleitung MB2-TEMP-001: Sensor abgleichen und Genauigkeit nachweisen
 
-**Ziel:** Der Temperatursensor soll von −20 bis +100 °C auf ±0,5 °C genau messen.
+**Ziel:** Der Temperatursensor soll von −30 bis +50 °C (Außenluft) auf ±0,5 °C genau messen.
 Dafür vergleichst du ihn im Temperaturbad mit einem geprüften Referenzthermometer, an **zwei verschiedenen Tagen**:
 
 | Termin | Wozu | Dauer (geschätzt) |
@@ -10,13 +10,13 @@ Dafür vergleichst du ihn im Temperaturbad mit einem geprüften Referenzthermome
 
 Warum zwei Termine? Würde man mit denselben Messwerten abgleichen und prüfen, bestätigt sich der Sensor nur selbst.
 
-Die meiste Zeit wartest du, bis das Bad die Temperatur hält. Gemessen wird je Temperatur nur etwa 1 Minute.
+Die meiste Zeit wartest du, bis das Bad die Temperatur hält. Gemessen wird je Temperatur nur etwa 2 Minuten.
 
 ---
 
 ## 1 Was du brauchst
 
-- ☐ **Temperaturbad oder Blockkalibrator, der −20 bis +100 °C schafft.** Reines Wasser reicht nicht: Es friert unter 0 °C und kocht bei 100 °C. Geeignet sind ein Kältebad mit passender Badflüssigkeit oder ein Trockenblock-Kalibrator. Was das Gerät verträgt, steht in seiner Anleitung.
+- ☐ **Temperaturbad oder Blockkalibrator, der −30 bis +50 °C schafft.** Reines Wasser reicht nur von etwa 1 bis 50 °C. Für −30 bis 0 °C brauchst du ein Kältebad mit Badflüssigkeit, die nicht gefriert, oder einen Trockenblock-Kalibrator. Was das Gerät verträgt, steht in seiner Anleitung.
 - ☐ **Referenzthermometer** mit **Kalibrierschein** (siehe Abschnitt 2)
 - ☐ Sensor MB2-TEMP-001 mit aufgespielter Firmware, PT100-Fühler angeschlossen
 - ☐ Laptop, USB-Kabel, Terminalprogramm, das mitschreiben kann (zum Beispiel Arduino IDE „Serieller Monitor“ oder PuTTY mit Log-Datei)
@@ -31,7 +31,7 @@ Diese Punkte musst du mit Ja beantworten können. Sonst zählt die Messung nicht
 
 - ☐ Die Seriennummer auf dem Schein ist die deines Referenzthermometers.
 - ☐ Der Schein ist am Messtag noch gültig („gültig bis“ bzw. Rekalibrierdatum).
-- ☐ Der kalibrierte Bereich deckt −20 bis +100 °C ab.
+- ☐ Der kalibrierte Bereich deckt −30 bis +50 °C ab.
 - ☐ Die Messunsicherheit U ist ≤ 0,1 °C (meist mit „k = 2“ angegeben).
 - ☐ Der Schein stammt von einem akkreditierten Kalibrierlabor (in Deutschland mit DAkkS-Zeichen).
 
@@ -54,30 +54,30 @@ Notiere auf dem Protokollblatt: Gerät, Seriennummer, Schein-Nummer, Labor, U, k
    - **Termin 1** liest die Spalte **`t_roh_c`** ab (ohne Korrektur).
    - **Termin 2** liest die Spalte **`t_c`** ab (mit Korrektur).
    - Steht bei `fehlerbits` etwas anderes als `0`: anhalten und Fühler und Kabel prüfen.
-4. **30 Minuten warmlaufen** lassen.
+4. **30 Minuten warmlaufen** lassen. Das Gerät schreibt alle 10 Sekunden eine Zeile.
 
 ## 5 Kopplungstest (einmal, an Termin 1, etwa 30 min)
 
 So prüfst du, ob die Fühler tief genug stecken und die Wärme nicht über Schaft und Kabel abfließt.
 
-1. Bad auf **100 °C** stellen und warten, bis es stabil ist (siehe Abschnitt 6, Schritt 2).
+1. Bad auf **50 °C** stellen und warten, bis es stabil ist (siehe Abschnitt 6, Schritt 2).
 2. 10 Wertepaare aufschreiben (Referenz, Sensor), wie in Abschnitt 6.
 3. Beide Fühler **20 mm herausziehen**, 5 Minuten warten, wieder 10 Wertepaare aufschreiben.
 4. Auf dem Protokollblatt rechnen: Abweichung = Mittel(Sensor − Referenz). **Kopplung = halbe Differenz** der Abweichung zwischen „tief“ und „20 mm höher“.
-5. Bei **−20 °C** wiederholen. Den **größeren** der beiden Werte notieren.
+5. Bei **−30 °C** wiederholen. Den **größeren** der beiden Werte notieren.
 6. Ist die Kopplung über 0,05 °C: tiefer eintauchen und wiederholen.
 
 ## 6 Messen an einer Temperatur (immer gleich)
 
 1. Bad auf den Sollpunkt stellen.
 2. **Warten, bis es stabil ist:** mindestens **10 Minuten**, und die Referenz ändert sich über 1 Minute um weniger als 0,01 °C. Die Wartezeit aufschreiben.
-3. **10 Wertepaare** aufschreiben, **etwa alle 6 Sekunden** eines. Referenz und Sensor jeweils möglichst gleichzeitig ablesen, Uhrzeit dazu.
+3. **10 Wertepaare** aufschreiben, **bei jeder neuen Zeile im Terminal** eines (alle 10 Sekunden). Referenz und Sensor jeweils möglichst gleichzeitig ablesen, Uhrzeit dazu.
 4. Weiter zum nächsten Punkt.
 
 ## 7 Termin 1: Abgleich
 
 1. Abschnitte 2 bis 5 erledigen.
-2. Abschnitt 6 für diese Punkte, **aufsteigend**: **−20, 0, 10, 20, 30, 40, 50, 70, 100 °C**.
+2. Abschnitt 6 für diese Punkte, **aufsteigend**: **−30, −20, −10, 0, 10, 20, 30, 40, 50 °C**.
 3. Werte in `vorlage_messwerte.csv` eintragen: nur die Zeilen mit `richtung = auf`, Spalte `sensor_C` = abgelesenes `t_roh_c`. Die „ab“-Zeilen bleiben leer.
 4. Schick mir: die CSV-Datei, die Terminal-Log-Datei, die Angaben vom Kalibrierschein, Kopplung und Raumtemperatur.
 5. Ich lese alles ein, berechne die Korrekturformel und trage sie in die Firmware ein. Dann spielst du die Firmware neu auf.
@@ -85,8 +85,8 @@ So prüfst du, ob die Fühler tief genug stecken und die Wärme nicht über Scha
 ## 8 Termin 2: Nachweis (anderer Tag)
 
 1. Abschnitte 2 bis 4 wiederholen. Die erste Zeile muss jetzt die neuen `kal=`-Zahlen zeigen.
-2. Abschnitt 6 **aufsteigend**: −20, 0, 10, 20, 30, 40, 50, 70, 100 °C.
-3. Danach **absteigend**: 70, 50, 40, 30, 20, 10, 0, −20 °C. Daraus ergibt sich die Hysterese, also wie stark der Sensor beim Abkühlen anders anzeigt als beim Aufheizen.
+2. Abschnitt 6 **aufsteigend**: −30, −20, −10, 0, 10, 20, 30, 40, 50 °C.
+3. Danach **absteigend**: 40, 30, 20, 10, 0, −10, −20, −30 °C. Daraus ergibt sich die Hysterese, also wie stark der Sensor beim Abkühlen anders anzeigt als beim Aufheizen.
 4. Neue, leere `vorlage_messwerte.csv`: alle Zeilen füllen, Spalte `sensor_C` = abgelesenes **`t_c`**.
 5. Schick mir CSV, Log-Datei und Raumtemperatur. Die Maker-Bridge prüft daraus Genauigkeit, Linearität, Wiederholbarkeit, Messbereich und Hysterese und erstellt das Messprotokoll.
 
@@ -103,7 +103,7 @@ So prüfst du, ob die Fühler tief genug stecken und die Wärme nicht über Scha
 **Referenzthermometer:** Gerät ____________ SN ________ Schein-Nr. ____________ Labor ____________
 U = ______ °C, k = ___, gültig bis ________
 
-**Kopplungstest (nur Termin 1):** bei 100 °C: ____ °C  bei −20 °C: ____ °C  → Kopplung (größerer Wert): ____ °C
+**Kopplungstest (nur Termin 1):** bei 50 °C: ____ °C  bei −30 °C: ____ °C  → Kopplung (größerer Wert): ____ °C
 
 | Soll °C | Richtung | Wartezeit min | Nr. | Uhrzeit | Referenz °C | Sensor °C |
 |---|---|---|---|---|---|---|

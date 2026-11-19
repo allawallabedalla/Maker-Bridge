@@ -5,7 +5,7 @@
    "id": "R-BER-1",
    "eigenschaft": "messbereich",
    "datenstatus": "demonstrationsdaten_nicht_rueckfuehrbar",
-   "herkunft_daten": "synthetisch: ist = t + 0,08 + 0,0006 (t - 40) + 0,00002 (t - 40)^2 + (i mod 5 - 2) * 0,005 (+0,03 abwaerts); demonstriert nur die Auswertung, KEINE Messung",
+   "herkunft_daten": "synthetisch: ist = t + 0,08 + 0,0006 (t - 10) + 0,00002 (t - 10)^2 + (i mod 5 - 2) * 0,005 (+0,03 abwaerts); demonstriert nur die Auswertung, KEINE Messung",
    "sensor_id": "DEMO",
    "seriennummer": null,
    "datum": "2026-11-19",
@@ -28,141 +28,281 @@
    },
    "punkte": [
     {
-     "ref": -20,
-     "ist": -19.894,
+     "ref": -30,
+     "ist": -29.922,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.917,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.912,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.907,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.902,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.922,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.917,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.912,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.907,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.902,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.889,
+     "ist": -19.93,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.884,
+     "ist": -19.925,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.879,
+     "ist": -19.92,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.874,
+     "ist": -19.915,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.894,
+     "ist": -19.91,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.889,
+     "ist": -19.93,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.884,
+     "ist": -19.925,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.879,
+     "ist": -19.92,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.874,
+     "ist": -19.915,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.91,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.934,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.929,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.924,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.919,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.914,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.934,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.929,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.924,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.919,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.914,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.078,
+     "ist": 0.066,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.083,
+     "ist": 0.071,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.088,
+     "ist": 0.076,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.093,
+     "ist": 0.081,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.098,
+     "ist": 0.086,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.078,
+     "ist": 0.066,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.083,
+     "ist": 0.071,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.088,
+     "ist": 0.076,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.093,
+     "ist": 0.081,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.098,
+     "ist": 0.086,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
@@ -239,420 +379,280 @@
     },
     {
      "ref": 20,
-     "ist": 20.066,
+     "ist": 20.078,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.071,
+     "ist": 20.083,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.076,
+     "ist": 20.088,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.081,
+     "ist": 20.093,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.086,
+     "ist": 20.098,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.066,
+     "ist": 20.078,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.071,
+     "ist": 20.083,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.076,
+     "ist": 20.088,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.081,
+     "ist": 20.093,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.086,
+     "ist": 20.098,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.066,
+     "ist": 30.09,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.071,
+     "ist": 30.095,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.076,
+     "ist": 30.1,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.081,
+     "ist": 30.105,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.086,
+     "ist": 30.11,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.066,
+     "ist": 30.09,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.071,
+     "ist": 30.095,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.076,
+     "ist": 30.1,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.081,
+     "ist": 30.105,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.086,
+     "ist": 30.11,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.07,
+     "ist": 40.106,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.075,
+     "ist": 40.111,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.08,
+     "ist": 40.116,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.085,
+     "ist": 40.121,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.09,
+     "ist": 40.126,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.07,
+     "ist": 40.106,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.075,
+     "ist": 40.111,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.08,
+     "ist": 40.116,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.085,
+     "ist": 40.121,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.09,
+     "ist": 40.126,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.078,
+     "ist": 50.126,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.083,
+     "ist": 50.131,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.088,
+     "ist": 50.136,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.093,
+     "ist": 50.141,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.098,
+     "ist": 50.146,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.078,
+     "ist": 50.126,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.083,
+     "ist": 50.131,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.088,
+     "ist": 50.136,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.093,
+     "ist": 50.141,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.098,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.106,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.111,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.116,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.121,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.126,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.106,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.111,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.116,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.121,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.126,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.178,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.183,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.188,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.193,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.198,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.178,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.183,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.188,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.193,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.198,
+     "ist": 50.146,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
@@ -664,7 +664,7 @@
    "id": "R-GEN-1",
    "eigenschaft": "genauigkeit",
    "datenstatus": "demonstrationsdaten_nicht_rueckfuehrbar",
-   "herkunft_daten": "synthetisch: ist = t + 0,08 + 0,0006 (t - 40) + 0,00002 (t - 40)^2 + (i mod 5 - 2) * 0,005 (+0,03 abwaerts); demonstriert nur die Auswertung, KEINE Messung",
+   "herkunft_daten": "synthetisch: ist = t + 0,08 + 0,0006 (t - 10) + 0,00002 (t - 10)^2 + (i mod 5 - 2) * 0,005 (+0,03 abwaerts); demonstriert nur die Auswertung, KEINE Messung",
    "sensor_id": "DEMO",
    "seriennummer": null,
    "datum": "2026-11-19",
@@ -687,141 +687,281 @@
    },
    "punkte": [
     {
-     "ref": -20,
-     "ist": -19.894,
+     "ref": -30,
+     "ist": -29.922,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.917,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.912,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.907,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.902,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.922,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.917,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.912,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.907,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.902,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.889,
+     "ist": -19.93,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.884,
+     "ist": -19.925,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.879,
+     "ist": -19.92,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.874,
+     "ist": -19.915,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.894,
+     "ist": -19.91,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.889,
+     "ist": -19.93,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.884,
+     "ist": -19.925,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.879,
+     "ist": -19.92,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.874,
+     "ist": -19.915,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.91,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.934,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.929,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.924,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.919,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.914,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.934,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.929,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.924,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.919,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.914,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.078,
+     "ist": 0.066,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.083,
+     "ist": 0.071,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.088,
+     "ist": 0.076,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.093,
+     "ist": 0.081,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.098,
+     "ist": 0.086,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.078,
+     "ist": 0.066,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.083,
+     "ist": 0.071,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.088,
+     "ist": 0.076,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.093,
+     "ist": 0.081,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.098,
+     "ist": 0.086,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
@@ -898,420 +1038,280 @@
     },
     {
      "ref": 20,
-     "ist": 20.066,
+     "ist": 20.078,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.071,
+     "ist": 20.083,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.076,
+     "ist": 20.088,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.081,
+     "ist": 20.093,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.086,
+     "ist": 20.098,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.066,
+     "ist": 20.078,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.071,
+     "ist": 20.083,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.076,
+     "ist": 20.088,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.081,
+     "ist": 20.093,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.086,
+     "ist": 20.098,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.066,
+     "ist": 30.09,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.071,
+     "ist": 30.095,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.076,
+     "ist": 30.1,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.081,
+     "ist": 30.105,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.086,
+     "ist": 30.11,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.066,
+     "ist": 30.09,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.071,
+     "ist": 30.095,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.076,
+     "ist": 30.1,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.081,
+     "ist": 30.105,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.086,
+     "ist": 30.11,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.07,
+     "ist": 40.106,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.075,
+     "ist": 40.111,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.08,
+     "ist": 40.116,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.085,
+     "ist": 40.121,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.09,
+     "ist": 40.126,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.07,
+     "ist": 40.106,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.075,
+     "ist": 40.111,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.08,
+     "ist": 40.116,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.085,
+     "ist": 40.121,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.09,
+     "ist": 40.126,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.078,
+     "ist": 50.126,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.083,
+     "ist": 50.131,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.088,
+     "ist": 50.136,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.093,
+     "ist": 50.141,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.098,
+     "ist": 50.146,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.078,
+     "ist": 50.126,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.083,
+     "ist": 50.131,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.088,
+     "ist": 50.136,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.093,
+     "ist": 50.141,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.098,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.106,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.111,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.116,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.121,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.126,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.106,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.111,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.116,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.121,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.126,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.178,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.183,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.188,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.193,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.198,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.178,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.183,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.188,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.193,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.198,
+     "ist": 50.146,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
@@ -1323,7 +1323,7 @@
    "id": "R-LIN-1",
    "eigenschaft": "linearitaet",
    "datenstatus": "demonstrationsdaten_nicht_rueckfuehrbar",
-   "herkunft_daten": "synthetisch: ist = t + 0,08 + 0,0006 (t - 40) + 0,00002 (t - 40)^2 + (i mod 5 - 2) * 0,005 (+0,03 abwaerts); demonstriert nur die Auswertung, KEINE Messung",
+   "herkunft_daten": "synthetisch: ist = t + 0,08 + 0,0006 (t - 10) + 0,00002 (t - 10)^2 + (i mod 5 - 2) * 0,005 (+0,03 abwaerts); demonstriert nur die Auswertung, KEINE Messung",
    "sensor_id": "DEMO",
    "seriennummer": null,
    "datum": "2026-11-19",
@@ -1346,141 +1346,281 @@
    },
    "punkte": [
     {
-     "ref": -20,
-     "ist": -19.894,
+     "ref": -30,
+     "ist": -29.922,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.917,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.912,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.907,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.902,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.922,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.917,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.912,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.907,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.902,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.889,
+     "ist": -19.93,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.884,
+     "ist": -19.925,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.879,
+     "ist": -19.92,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.874,
+     "ist": -19.915,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.894,
+     "ist": -19.91,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.889,
+     "ist": -19.93,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.884,
+     "ist": -19.925,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.879,
+     "ist": -19.92,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.874,
+     "ist": -19.915,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.91,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.934,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.929,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.924,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.919,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.914,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.934,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.929,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.924,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.919,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.914,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.078,
+     "ist": 0.066,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.083,
+     "ist": 0.071,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.088,
+     "ist": 0.076,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.093,
+     "ist": 0.081,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.098,
+     "ist": 0.086,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.078,
+     "ist": 0.066,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.083,
+     "ist": 0.071,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.088,
+     "ist": 0.076,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.093,
+     "ist": 0.081,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.098,
+     "ist": 0.086,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
@@ -1557,420 +1697,280 @@
     },
     {
      "ref": 20,
-     "ist": 20.066,
+     "ist": 20.078,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.071,
+     "ist": 20.083,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.076,
+     "ist": 20.088,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.081,
+     "ist": 20.093,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.086,
+     "ist": 20.098,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.066,
+     "ist": 20.078,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.071,
+     "ist": 20.083,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.076,
+     "ist": 20.088,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.081,
+     "ist": 20.093,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.086,
+     "ist": 20.098,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.066,
+     "ist": 30.09,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.071,
+     "ist": 30.095,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.076,
+     "ist": 30.1,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.081,
+     "ist": 30.105,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.086,
+     "ist": 30.11,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.066,
+     "ist": 30.09,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.071,
+     "ist": 30.095,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.076,
+     "ist": 30.1,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.081,
+     "ist": 30.105,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.086,
+     "ist": 30.11,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.07,
+     "ist": 40.106,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.075,
+     "ist": 40.111,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.08,
+     "ist": 40.116,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.085,
+     "ist": 40.121,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.09,
+     "ist": 40.126,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.07,
+     "ist": 40.106,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.075,
+     "ist": 40.111,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.08,
+     "ist": 40.116,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.085,
+     "ist": 40.121,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.09,
+     "ist": 40.126,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.078,
+     "ist": 50.126,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.083,
+     "ist": 50.131,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.088,
+     "ist": 50.136,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.093,
+     "ist": 50.141,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.098,
+     "ist": 50.146,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.078,
+     "ist": 50.126,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.083,
+     "ist": 50.131,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.088,
+     "ist": 50.136,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.093,
+     "ist": 50.141,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.098,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.106,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.111,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.116,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.121,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.126,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.106,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.111,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.116,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.121,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.126,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.178,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.183,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.188,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.193,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.198,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.178,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.183,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.188,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.193,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.198,
+     "ist": 50.146,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
@@ -1982,7 +1982,7 @@
    "id": "R-WDH-1",
    "eigenschaft": "wiederholbarkeit",
    "datenstatus": "demonstrationsdaten_nicht_rueckfuehrbar",
-   "herkunft_daten": "synthetisch: ist = t + 0,08 + 0,0006 (t - 40) + 0,00002 (t - 40)^2 + (i mod 5 - 2) * 0,005 (+0,03 abwaerts); demonstriert nur die Auswertung, KEINE Messung",
+   "herkunft_daten": "synthetisch: ist = t + 0,08 + 0,0006 (t - 10) + 0,00002 (t - 10)^2 + (i mod 5 - 2) * 0,005 (+0,03 abwaerts); demonstriert nur die Auswertung, KEINE Messung",
    "sensor_id": "DEMO",
    "seriennummer": null,
    "datum": "2026-11-19",
@@ -2005,141 +2005,281 @@
    },
    "punkte": [
     {
-     "ref": -20,
-     "ist": -19.894,
+     "ref": -30,
+     "ist": -29.922,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.917,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.912,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.907,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.902,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.922,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.917,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.912,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.907,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.902,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.889,
+     "ist": -19.93,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.884,
+     "ist": -19.925,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.879,
+     "ist": -19.92,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.874,
+     "ist": -19.915,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.894,
+     "ist": -19.91,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.889,
+     "ist": -19.93,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.884,
+     "ist": -19.925,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.879,
+     "ist": -19.92,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.874,
+     "ist": -19.915,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.91,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.934,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.929,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.924,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.919,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.914,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.934,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.929,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.924,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.919,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.914,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.078,
+     "ist": 0.066,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.083,
+     "ist": 0.071,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.088,
+     "ist": 0.076,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.093,
+     "ist": 0.081,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.098,
+     "ist": 0.086,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.078,
+     "ist": 0.066,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.083,
+     "ist": 0.071,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.088,
+     "ist": 0.076,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.093,
+     "ist": 0.081,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.098,
+     "ist": 0.086,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
@@ -2216,420 +2356,280 @@
     },
     {
      "ref": 20,
-     "ist": 20.066,
+     "ist": 20.078,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.071,
+     "ist": 20.083,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.076,
+     "ist": 20.088,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.081,
+     "ist": 20.093,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.086,
+     "ist": 20.098,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.066,
+     "ist": 20.078,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.071,
+     "ist": 20.083,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.076,
+     "ist": 20.088,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.081,
+     "ist": 20.093,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.086,
+     "ist": 20.098,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.066,
+     "ist": 30.09,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.071,
+     "ist": 30.095,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.076,
+     "ist": 30.1,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.081,
+     "ist": 30.105,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.086,
+     "ist": 30.11,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.066,
+     "ist": 30.09,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.071,
+     "ist": 30.095,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.076,
+     "ist": 30.1,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.081,
+     "ist": 30.105,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.086,
+     "ist": 30.11,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.07,
+     "ist": 40.106,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.075,
+     "ist": 40.111,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.08,
+     "ist": 40.116,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.085,
+     "ist": 40.121,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.09,
+     "ist": 40.126,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.07,
+     "ist": 40.106,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.075,
+     "ist": 40.111,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.08,
+     "ist": 40.116,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.085,
+     "ist": 40.121,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.09,
+     "ist": 40.126,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.078,
+     "ist": 50.126,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.083,
+     "ist": 50.131,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.088,
+     "ist": 50.136,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.093,
+     "ist": 50.141,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.098,
+     "ist": 50.146,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.078,
+     "ist": 50.126,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.083,
+     "ist": 50.131,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.088,
+     "ist": 50.136,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.093,
+     "ist": 50.141,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.098,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.106,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.111,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.116,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.121,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.126,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.106,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.111,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.116,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.121,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.126,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.178,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.183,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.188,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.193,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.198,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.178,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.183,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.188,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.193,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.198,
+     "ist": 50.146,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
@@ -2641,7 +2641,7 @@
    "id": "R-HYS-1",
    "eigenschaft": "hysterese",
    "datenstatus": "demonstrationsdaten_nicht_rueckfuehrbar",
-   "herkunft_daten": "synthetisch: ist = t + 0,08 + 0,0006 (t - 40) + 0,00002 (t - 40)^2 + (i mod 5 - 2) * 0,005 (+0,03 abwaerts); demonstriert nur die Auswertung, KEINE Messung",
+   "herkunft_daten": "synthetisch: ist = t + 0,08 + 0,0006 (t - 10) + 0,00002 (t - 10)^2 + (i mod 5 - 2) * 0,005 (+0,03 abwaerts); demonstriert nur die Auswertung, KEINE Messung",
    "sensor_id": "DEMO",
    "seriennummer": null,
    "datum": "2026-11-19",
@@ -2664,141 +2664,281 @@
    },
    "punkte": [
     {
-     "ref": -20,
-     "ist": -19.894,
+     "ref": -30,
+     "ist": -29.922,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.917,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.912,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.907,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.902,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.922,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.917,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.912,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.907,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -30,
+     "ist": -29.902,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.889,
+     "ist": -19.93,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.884,
+     "ist": -19.925,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.879,
+     "ist": -19.92,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.874,
+     "ist": -19.915,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.894,
+     "ist": -19.91,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.889,
+     "ist": -19.93,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.884,
+     "ist": -19.925,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.879,
+     "ist": -19.92,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.874,
+     "ist": -19.915,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.91,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.934,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.929,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.924,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.919,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.914,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.934,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.929,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.924,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.919,
+     "richtung": "auf",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.914,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.078,
+     "ist": 0.066,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.083,
+     "ist": 0.071,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.088,
+     "ist": 0.076,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.093,
+     "ist": 0.081,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.098,
+     "ist": 0.086,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.078,
+     "ist": 0.066,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.083,
+     "ist": 0.071,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.088,
+     "ist": 0.076,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.093,
+     "ist": 0.081,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.098,
+     "ist": 0.086,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
@@ -2875,560 +3015,560 @@
     },
     {
      "ref": 20,
-     "ist": 20.066,
+     "ist": 20.078,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.071,
+     "ist": 20.083,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.076,
+     "ist": 20.088,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.081,
+     "ist": 20.093,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.086,
+     "ist": 20.098,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.066,
+     "ist": 20.078,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.071,
+     "ist": 20.083,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.076,
+     "ist": 20.088,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.081,
+     "ist": 20.093,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.086,
+     "ist": 20.098,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.066,
+     "ist": 30.09,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.071,
+     "ist": 30.095,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.076,
+     "ist": 30.1,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.081,
+     "ist": 30.105,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.086,
+     "ist": 30.11,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.066,
+     "ist": 30.09,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.071,
+     "ist": 30.095,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.076,
+     "ist": 30.1,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.081,
+     "ist": 30.105,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.086,
+     "ist": 30.11,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.07,
+     "ist": 40.106,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.075,
+     "ist": 40.111,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.08,
+     "ist": 40.116,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.085,
+     "ist": 40.121,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.09,
+     "ist": 40.126,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.07,
+     "ist": 40.106,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.075,
+     "ist": 40.111,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.08,
+     "ist": 40.116,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.085,
+     "ist": 40.121,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.09,
+     "ist": 40.126,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.078,
+     "ist": 50.126,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.083,
+     "ist": 50.131,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.088,
+     "ist": 50.136,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.093,
+     "ist": 50.141,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.098,
+     "ist": 50.146,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.078,
+     "ist": 50.126,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.083,
+     "ist": 50.131,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.088,
+     "ist": 50.136,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.093,
+     "ist": 50.141,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 50,
-     "ist": 50.098,
+     "ist": 50.146,
      "richtung": "auf",
      "zeit": null,
      "roh_code": null
     },
     {
-     "ref": 70,
-     "ist": 70.106,
-     "richtung": "auf",
+     "ref": -30,
+     "ist": -29.892,
+     "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
-     "ref": 70,
-     "ist": 70.111,
-     "richtung": "auf",
+     "ref": -30,
+     "ist": -29.887,
+     "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
-     "ref": 70,
-     "ist": 70.116,
-     "richtung": "auf",
+     "ref": -30,
+     "ist": -29.882,
+     "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
-     "ref": 70,
-     "ist": 70.121,
-     "richtung": "auf",
+     "ref": -30,
+     "ist": -29.877,
+     "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
-     "ref": 70,
-     "ist": 70.126,
-     "richtung": "auf",
+     "ref": -30,
+     "ist": -29.872,
+     "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
-     "ref": 70,
-     "ist": 70.106,
-     "richtung": "auf",
+     "ref": -30,
+     "ist": -29.892,
+     "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
-     "ref": 70,
-     "ist": 70.111,
-     "richtung": "auf",
+     "ref": -30,
+     "ist": -29.887,
+     "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
-     "ref": 70,
-     "ist": 70.116,
-     "richtung": "auf",
+     "ref": -30,
+     "ist": -29.882,
+     "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
-     "ref": 70,
-     "ist": 70.121,
-     "richtung": "auf",
+     "ref": -30,
+     "ist": -29.877,
+     "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
-     "ref": 70,
-     "ist": 70.126,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.178,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.183,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.188,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.193,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.198,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.178,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.183,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.188,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.193,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.198,
-     "richtung": "auf",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": -20,
-     "ist": -19.864,
+     "ref": -30,
+     "ist": -29.872,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.859,
+     "ist": -19.9,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.854,
+     "ist": -19.895,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.849,
+     "ist": -19.89,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.844,
+     "ist": -19.885,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.864,
+     "ist": -19.88,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.859,
+     "ist": -19.9,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.854,
+     "ist": -19.895,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.849,
+     "ist": -19.89,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": -20,
-     "ist": -19.844,
+     "ist": -19.885,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -20,
+     "ist": -19.88,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.904,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.899,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.894,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.889,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.884,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.904,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.899,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.894,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.889,
+     "richtung": "ab",
+     "zeit": null,
+     "roh_code": null
+    },
+    {
+     "ref": -10,
+     "ist": -9.884,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.108,
+     "ist": 0.096,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.113,
+     "ist": 0.101,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.118,
+     "ist": 0.106,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.123,
+     "ist": 0.111,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.128,
+     "ist": 0.116,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.108,
+     "ist": 0.096,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.113,
+     "ist": 0.101,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.118,
+     "ist": 0.106,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.123,
+     "ist": 0.111,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 0,
-     "ist": 0.128,
+     "ist": 0.116,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
@@ -3505,420 +3645,210 @@
     },
     {
      "ref": 20,
-     "ist": 20.096,
+     "ist": 20.108,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.101,
+     "ist": 20.113,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.106,
+     "ist": 20.118,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.111,
+     "ist": 20.123,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.116,
+     "ist": 20.128,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.096,
+     "ist": 20.108,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.101,
+     "ist": 20.113,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.106,
+     "ist": 20.118,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.111,
+     "ist": 20.123,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 20,
-     "ist": 20.116,
+     "ist": 20.128,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.096,
+     "ist": 30.12,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.101,
+     "ist": 30.125,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.106,
+     "ist": 30.13,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.111,
+     "ist": 30.135,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.116,
+     "ist": 30.14,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.096,
+     "ist": 30.12,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.101,
+     "ist": 30.125,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.106,
+     "ist": 30.13,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.111,
+     "ist": 30.135,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 30,
-     "ist": 30.116,
+     "ist": 30.14,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.1,
+     "ist": 40.136,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.105,
+     "ist": 40.141,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.11,
+     "ist": 40.146,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.115,
+     "ist": 40.151,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.12,
+     "ist": 40.156,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.1,
+     "ist": 40.136,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.105,
+     "ist": 40.141,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.11,
+     "ist": 40.146,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.115,
+     "ist": 40.151,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null
     },
     {
      "ref": 40,
-     "ist": 40.12,
-     "richtung": "ab",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 50,
-     "ist": 50.108,
-     "richtung": "ab",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 50,
-     "ist": 50.113,
-     "richtung": "ab",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 50,
-     "ist": 50.118,
-     "richtung": "ab",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 50,
-     "ist": 50.123,
-     "richtung": "ab",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 50,
-     "ist": 50.128,
-     "richtung": "ab",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 50,
-     "ist": 50.108,
-     "richtung": "ab",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 50,
-     "ist": 50.113,
-     "richtung": "ab",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 50,
-     "ist": 50.118,
-     "richtung": "ab",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 50,
-     "ist": 50.123,
-     "richtung": "ab",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 50,
-     "ist": 50.128,
-     "richtung": "ab",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.136,
-     "richtung": "ab",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.141,
-     "richtung": "ab",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.146,
-     "richtung": "ab",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.151,
-     "richtung": "ab",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.156,
-     "richtung": "ab",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.136,
-     "richtung": "ab",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.141,
-     "richtung": "ab",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.146,
-     "richtung": "ab",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.151,
-     "richtung": "ab",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 70,
-     "ist": 70.156,
-     "richtung": "ab",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.208,
-     "richtung": "ab",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.213,
-     "richtung": "ab",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.218,
-     "richtung": "ab",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.223,
-     "richtung": "ab",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.228,
-     "richtung": "ab",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.208,
-     "richtung": "ab",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.213,
-     "richtung": "ab",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.218,
-     "richtung": "ab",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.223,
-     "richtung": "ab",
-     "zeit": null,
-     "roh_code": null
-    },
-    {
-     "ref": 100,
-     "ist": 100.228,
+     "ist": 40.156,
      "richtung": "ab",
      "zeit": null,
      "roh_code": null

@@ -78,9 +78,9 @@ def test_sensitivitaeten_numerisch_gegen_analytisch():
     assert abs(z['dR_leitung']['c'] - 1 / s) < 1e-4, z['dR_leitung']                       # Leitungsdifferenz voll
     assert abs(z['dt_sensor']['c'] - 1.0) < 1e-6                                           # Element 1:1
     assert abs(z['m_idac']['c']) < 1e-6                                                    # Tausch
-    # TK R_ref: 10 ppm/K * 17 K (T_kal 23, Elektronik 10 ... 40) als Rechteck
-    assert abs(z['tk_ref_rel']['u_i'] - 10e-6 * 17 / math.sqrt(3)) < 1e-12, z['tk_ref_rel']
-    assert abs(z['tk_ref_rel']['beitrag'] - 10e-6 * 17 / math.sqrt(3) * r / s) < 1e-6
+    # TK R_ref: 10 ppm/K * 53 K (T_kal 23, Elektronik draussen -30 ... 50) als Rechteck
+    assert abs(z['tk_ref_rel']['u_i'] - 10e-6 * 53 / math.sqrt(3)) < 1e-12, z['tk_ref_rel']
+    assert abs(z['tk_ref_rel']['beitrag'] - 10e-6 * 53 / math.sqrt(3) * r / s) < 1e-6
     # Quantisierung getrennt vom Rauschen, Rauschen durch sqrt(mittelung)
     assert abs(z['v_rausch']['u_i'] - 1e-6 / math.sqrt(2)) < 1e-15
     assert abs(z['v_quant']['u_i'] - rtd.lsb_eingang(mk) / 2 / math.sqrt(3)) < 1e-18
@@ -117,7 +117,7 @@ def test_demonstrator_mit_datenblattwerten():
     e = {x['id']: x for x in rtd.pruefe(mk, hk)}
     assert e['MK1']['stufe'] == 'uebersprungen' and 'dt_kal_referenz' in e['MK1']['hinweis'], e['MK1']
     plan = e['MK1']['daten']['planung']                          # Modus kalibriert: was darf die Kalibrierung kosten?
-    assert abs(plan['u_rest'] - 0.0416) < 0.002 and abs(plan['u_frei_max'] - 0.247) < 0.002, plan
+    assert abs(plan['u_rest'] - 0.1128) < 0.002 and abs(plan['u_frei_max'] - 0.2231) < 0.002, plan
     mk['modus'] = 'ab_werk'
     e = {x['id']: x for x in rtd.pruefe(mk, hk)}
     for i in ('MK2', 'MK3', 'MK4-REF', 'MK4-IDAC', 'MK4-PGA', 'MK5'):
@@ -128,7 +128,7 @@ def test_demonstrator_mit_datenblattwerten():
     info['vernachlaessigt'] = {'dt_selbst': 'nur fuer diesen Test'}
     b = {x['id']: x for x in rtd.pruefe(info, hk)}['MK1']
     d = b['daten']
-    assert b['stufe'] == 'fehler' and 0.55 < d['U'] < 0.7 and d['schlechtester_punkt_C'] == 100, (b['stufe'], d['U'])
+    assert b['stufe'] == 'fehler' and 0.5 < d['U'] < 0.6 and d['schlechtester_punkt_C'] == 50, (b['stufe'], d['U'])
     gross = max(d['beitraege'], key=lambda z: z['beitrag'])
     assert gross['name'] == 'e_gain', gross
 
@@ -154,7 +154,7 @@ def test_aufloesung_effektiv_nicht_nominal():
 
 def test_uebersteuerung_und_grenzen():
     e16 = {x['id']: x for x in rtd.pruefe(mk_fix(), lambda f: 'datenblatt')}
-    assert e16['MK3']['stufe'] == 'ok' and abs(e16['MK3']['wert'] - 0.6715) < 1e-3, e16['MK3']
+    assert e16['MK3']['stufe'] == 'ok' and abs(e16['MK3']['wert'] - 0.5789) < 1e-3, e16['MK3']   # 50 °C
     assert 'groesste zulaessige Verstaerkung 16' in e16['MK3']['hinweis']
     for i in ('MK4-REF', 'MK4-IDAC', 'MK4-PGA', 'MK4-SELBST', 'MK5'):
         assert e16[i]['stufe'] == 'ok', e16[i]
@@ -167,7 +167,7 @@ def test_uebersteuerung_und_grenzen():
     klein = {x['id']: x for x in rtd.pruefe(mk_fix(R_ref_ohm=600, gain=32), lambda f: 'datenblatt')}
     assert klein['MK4-PGA']['stufe'] == 'fehler', klein['MK4-PGA']
     # Zeitbudget: 4 Wandlungen a 50 ms passen nicht in 200 ms
-    assert {x['id']: x for x in rtd.pruefe(mk_fix(mittelung=4), lambda f: 'datenblatt')}['MK5']['stufe'] == 'fehler'
+    assert {x['id']: x for x in rtd.pruefe(mk_fix(mittelung=4, messrate_Hz=5), lambda f: 'datenblatt')}['MK5']['stufe'] == 'fehler'
 
 
 # ---------------------------------------------------------------------------------------------- Demonstrator
@@ -327,7 +327,7 @@ def test_kalibriert_budget():
     e = {x['id']: x for x in rtd.pruefe(mk_fix('kalibriert'), lambda f: 'datenblatt')}
     d = e['MK1']['daten']
     namen = {z['name'] for z in d['beitraege']}
-    assert e['MK1']['stufe'] == 'ok' and d['U'] < 0.2, e['MK1']['hinweis']
+    assert e['MK1']['stufe'] == 'ok' and d['U'] < 0.25, e['MK1']['hinweis']
     assert {'dt_kal_referenz', 'dt_kal_fit', 'dt_kal_kopplung', 'dt_selbst', 'tk_ref_rel'} <= namen, namen
     assert not ({'dt_sensor', 'e_gain', 'dR_ref_rel', 'm_idac'} & namen), namen   # in der Korrektur enthalten
 

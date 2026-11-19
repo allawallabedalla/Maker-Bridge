@@ -16,12 +16,12 @@
   {
    "id": "A-MESS-TEMP",
    "ebene": "system",
-   "herkunft": "Lastenheft MB2-TEMP-001 (Nutzer 19.11.2026)",
-   "text": "Temperatur -20 ... +100 °C: Genauigkeit +-0,5 °C, Linearitaet <= 0,2 °C, Hysterese <= 0,2 °C, Wiederholbarkeit <= 0,1 °C; Drift offen.",
+   "herkunft": "Lastenheft MB2-TEMP-001 (Nutzer 19.11.2026, Aussenluft fuer ML-Daten)",
+   "text": "Temperatur -30 ... +50 °C (Aussenluft): Genauigkeit +-0,5 °C, Linearitaet <= 0,2 °C, Hysterese <= 0,2 °C, Wiederholbarkeit <= 0,1 °C; Drift offen.",
    "messtechnik": {
     "messbereich": {
-     "min": -20,
-     "max": 100,
+     "min": -30,
+     "max": 50,
      "einheit": "°C"
     },
     "genauigkeit": {
@@ -63,15 +63,15 @@
     "wiederholungen": 10,
     "dauer_h": 720,
     "temperaturpunkte_C": [
+     -30,
      -20,
+     -10,
      0,
      10,
      20,
      30,
      40,
-     50,
-     70,
-     100
+     50
     ],
     "verfahren": "PRUEFPLAN.md",
     "referenzmittel": "kalibriertes Referenzthermometer, siehe PRUEFPLAN.md"
@@ -119,18 +119,18 @@
    "id": "A-MESSRATE",
    "ebene": "system",
    "herkunft": "Lastenheft MB2-TEMP-001 (Nutzer 19.11.2026)",
-   "text": "Mindestens 5 Temperaturwerte je Sekunde.",
+   "text": "Ein Temperaturwert je 10 s, jeder mit Zeitstempel.",
    "nachweise": [
     {
      "art": "abnahme",
      "ref": "AB-MESSRATE",
      "stufe": "abnahme",
-     "anweisung": "Firmware 60 s laufen lassen, Zahl der Datensaetze mit gueltigem Zeitstempel zaehlen, durch 60 teilen.",
+     "anweisung": "Firmware 10 min laufen lassen, Datensaetze zaehlen; Abstand zweier Zeitstempel darf 10 s nicht ueberschreiten.",
      "kriterium": {
-      "groesse": "messrate_Hz",
-      "op": ">=",
-      "wert": 5,
-      "einheit": "Hz"
+      "groesse": "max_abstand_s",
+      "op": "<=",
+      "wert": 10,
+      "einheit": "s"
      }
     }
    ]
@@ -214,6 +214,67 @@
      "art": "katalog",
      "ref": "FW1",
      "stufe": "komponente"
+    }
+   ]
+  },
+  {
+   "id": "A-STRAHLUNG",
+   "ebene": "system",
+   "herkunft": "Lastenheft MB2-TEMP-001 (Nutzer 19.11.2026, Aussenluft fuer ML-Daten)",
+   "text": "Sonne und Waermestrahlung verfaelschen die Lufttemperatur hoechstens um einen festzulegenden Wert (Fuehler im belueftetem Strahlungsschutz).",
+   "notiz": "Zielwert offen - Vorschlag des Nutzers einholen. Nachweis: Parallelmessung neben einer aktiv belueften Referenz bzw. Wetterstation ueber sonnige und windstille Tage.",
+   "nachweise": [
+    {
+     "art": "feld",
+     "ref": "strahlungsfehler",
+     "stufe": "feld",
+     "kriterium": {
+      "groesse": "strahlungsfehler_C",
+      "op": "<=",
+      "wert": null,
+      "einheit": "°C"
+     }
+    }
+   ]
+  },
+  {
+   "id": "A-REAKTION",
+   "ebene": "system",
+   "herkunft": "Lastenheft MB2-TEMP-001 (Nutzer 19.11.2026, Aussenluft fuer ML-Daten)",
+   "text": "Der Fuehler im Strahlungsschutz folgt einem Temperatursprung schnell genug fuer die ML-Daten (Zeit bis 90 %).",
+   "notiz": "Zielwert offen: haengt davon ab, welche zeitliche Aufloesung das ML-Modell braucht.",
+   "nachweise": [
+    {
+     "art": "abnahme",
+     "ref": "AB-REAKTION",
+     "stufe": "abnahme",
+     "anweisung": "Fuehler im Strahlungsschutz von Raumluft in eine Kammer/Kaltluft mit anderer Temperatur bringen, Zeit bis 90 % des Sprungs aus dem Log ablesen.",
+     "kriterium": {
+      "groesse": "t90_s",
+      "op": "<=",
+      "wert": null,
+      "einheit": "s"
+     }
+    }
+   ]
+  },
+  {
+   "id": "A-DATEN",
+   "ebene": "system",
+   "herkunft": "Lastenheft MB2-TEMP-001 (Nutzer 19.11.2026, Aussenluft fuer ML-Daten)",
+   "text": "Datensatz ML-tauglich: jeder Wert mit Zeitstempel und Fehlerbits; Ausfaelle erscheinen als markierte Zeile, nie als fehlender, wiederholter oder geschaetzter Wert.",
+   "nachweise": [
+    {
+     "art": "abnahme",
+     "ref": "AB-DATEN",
+     "stufe": "abnahme",
+     "anweisung": "Waehrend der Aufzeichnung den PT100-Stecker 60 s abziehen und wieder stecken; im Log pruefen, dass jede Periode eine Zeile hat und die Ausfallzeilen Fehlerbits != 0 tragen.",
+     "kriterium": {
+      "groesse": "unmarkierte_luecken",
+      "op": "==",
+      "wert": 0,
+      "einheit": "Zeilen"
+     }
     }
    ]
   }

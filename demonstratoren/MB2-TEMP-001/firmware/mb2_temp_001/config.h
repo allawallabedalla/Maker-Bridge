@@ -9,7 +9,7 @@
 #define IDAC_UA 500          /* messkette.schaltung.I_idac_A = 500 uA je Stromquelle */
 #define IDAC_TAUSCH 1        /* 1 = je Messwert zwei Wandlungen mit getauschten IDACs, Mittelwert */
 #define RTD_R0_OHM 100.0     /* PT100, IEC 60751 */
-#define MESSRATE_HZ 5        /* Lastenheft A-MESSRATE */
+#define MESSPERIODE_MS 10000 /* Lastenheft A-MESSRATE: 1 Wert je 10 s (Aussenluft) */
 #define EINSCHWING_US 1000   /* messkette.schaltung.einschwing_s: Wartezeit nach IDAC-Tausch (Filter noch offen) */
 #define WANDLUNG_TIMEOUT_MS 100  /* Einzelwandlung 20 SPS = 50,06 ms (SBAS501D S. 30, Tab. 8-4) + Reserve */
 #define OFFSET_MITTEL 8      /* Wandlungen fuer die Offsetkalibrierung beim Start */

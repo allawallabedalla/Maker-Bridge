@@ -5,7 +5,7 @@
 | `config.h` | Konstanten mit Prüfwirkung (Verstärkung, R_ref, IDAC-Strom, IDAC-Tausch, Messrate). FW1 vergleicht sie mit `cad/soll.json` | fertig |
 | `rtd_rechnung.h` | Rohwert → Widerstand → Temperatur (IEC 60751), Fehlerbits (Übersteuerung, unplausibel, Tausch-Abweichung), Kalibrierkorrektur `rtd_korrektur` | fertig, auf dem PC getestet |
 | `ads1220.h` | Treiber: RESET, Register schreiben und gegenlesen, Offsetkalibrierung (MUX 1110b), Messung mit IDAC-Tausch. Jeder Code mit Seite in SBAS501D | fertig, auf dem PC mit SPI-Attrappe getestet |
-| `mb2_temp_001.ino` | ESP32-Sketch (Arduino): SPI Modus 1, 5 Hz, Ausgabe `zeit_ms;code_a;code_b;offset_code;fehlerbits;r_ohm;t_c` | geschrieben, **nicht übersetzt** (kein ESP32-Toolchain im Container) |
+| `mb2_temp_001.ino` | ESP32-Sketch (Arduino): SPI Modus 1, 1 Wert je 10 s, Ausgabe `zeit_ms;code_a;code_b;offset_code;fehlerbits;r_ohm;t_roh_c;t_c` | geschrieben, **nicht übersetzt** (kein ESP32-Toolchain im Container) |
 
 ## Register (SBAS501D S. 42–46)
 

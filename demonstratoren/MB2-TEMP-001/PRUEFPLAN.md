@@ -22,35 +22,35 @@ Reihenfolge, damit kein Zirkelschluss entsteht:
 4. **Nachweisreihen** R-GEN, R-LIN, R-HYS, R-WDH, R-BER **neu messen**, mit Korrektur, an einem anderen Termin. Die Kalibrierreihe zählt nie als Nachweis (`kalibrierdaten_als_nachweis`).
 
 **Budget für die Kalibrierung** (Planungsrechnung MK1, Modus kalibriert, mit den ADS1220-Werten):
-- Alles außer Kalibrierung und Eigenerwärmung ergibt u = 0,042 °C, vor allem den Temperaturgang von R_ref und ADC.
-- Für Referenz, Ausgleichsrest, thermische Kopplung und Eigenerwärmung **zusammen** bleiben höchstens u = 0,247 °C, damit U ≤ 0,5 °C.
+- Alles außer Kalibrierung und Eigenerwärmung ergibt u = 0,113 °C. Den größten Anteil hat der Temperaturgang von R_ref (Elektronik draußen −30 … +50 °C).
+- Für Referenz, Ausgleichsrest, thermische Kopplung und Eigenerwärmung **zusammen** bleiben höchstens u = 0,223 °C, damit U ≤ 0,5 °C.
 
 **Zielwerte (Vorgabe, noch nicht gemessen):** Referenzthermometer U ≤ 0,1 °C (k = 2), Kopplung ≤ 0,05 °C Halbbreite, Ausgleichsrest u_fit ≤ 0,05 °C.
-Damit ergäbe sich U ≈ 0,17 °C, mit Reserve für das ILAC-G8-Schutzband beim Nachweis.
+Damit ergäbe sich U ≈ 0,27 °C, mit Reserve für das ILAC-G8-Schutzband beim Nachweis.
 
 ## 2 Ablauf je Temperaturpunkt
 
-Punkte: −20, 0, 10, 20, 30, 40, 50, 70, 100 °C.
+Punkte: −30, −20, −10, 0, 10, 20, 30, 40, 50 °C.
 1. Prüfling und Referenz nebeneinander im Medium. Messspitzen auf gleicher Höhe, Abstand ≤ 10 mm.
 2. Einschwingen ≥ 600 s (`einschwingzeit_min_s`). Erst messen, wenn die Referenz über 60 s weniger als 1/10 von U_ref driftet. Einschwingzeit in `bedingungen` eintragen.
-3. ≥ 10 Messungen mit 5 Hz. Je Messung: Zeit, Referenzwert, Sensorwert, Rohcodes (`roh_code`). Rohdaten bleiben in der Reihe.
+3. ≥ 10 Messungen (Firmware liefert 1 Wert je 10 s, also ≥ 100 s je Punkt). Je Messung: Zeit, Referenzwert, Sensorwert, Rohcodes (`roh_code`). Rohdaten bleiben in der Reihe.
 4. Umgebung festhalten: `T_umgebung_C`, `U_versorgung_V`.
 
 ## 3 Eigenschaften
 
 | Eigenschaft | Reihe | Verfahren |
 |---|---|---|
-| Messbereich | R-BER | Punkte −20 und +100 °C angefahren |
+| Messbereich | R-BER | Punkte −30 und +50 °C angefahren |
 | Genauigkeit | R-GEN | alle Punkte, Abweichung Mittelwert − Referenz |
 | Linearität | R-LIN | alle 9 Punkte, Restfehler zur Ausgleichsgeraden. Eine Zweipunktkalibrierung reicht nicht |
-| Hysterese | R-HYS | Aufheizen −20 → 100 °C (`richtung: auf`), dann Abkühlen 100 → −20 °C (`richtung: ab`), gleiche Punkte |
+| Hysterese | R-HYS | Aufheizen −30 → 50 °C (`richtung: auf`), dann Abkühlen 50 → −30 °C (`richtung: ab`), gleiche Punkte |
 | Wiederholbarkeit | R-WDH | ≥ 10 Messungen je Punkt, Standardabweichung |
 | Drift | R-DRI | **offen**: Zielwert fehlt, Langzeittest ≥ 720 h. Bis dahin `unbewiesen` (`grenze_fehlt` / `ohne_referenzmessung`) |
 
 ## 4 Thermische Kopplung (Prüfunsicherheit)
 
 Diese Einflüsse verfälschen die Messabweichung systematisch. Jeden davon bestimmen und als Beitrag in `pruefunsicherheit` der Reihe eintragen, jeweils `{name, wert, verteilung, herkunft}`:
-- **Eintauchtiefe und Wärmeableitung über Schaft und Leitung:** Bei 0 und 100 °C die Eintauchtiefe um 20 mm verringern. Halbe Änderung der Anzeige als Rechteck-Halbbreite eintragen.
+- **Eintauchtiefe und Wärmeableitung über Schaft und Leitung:** Bei −30 und 50 °C die Eintauchtiefe um 20 mm verringern. Halbe Änderung der Anzeige als Rechteck-Halbbreite eintragen.
 - **Gradient zwischen den Fühlern:** Prüfling und Referenz tauschen. Halbe Differenz eintragen.
 - **Stabilität des Mediums:** Spanne der Referenz über die Messzeit eintragen.
 - **Eigenerwärmung:** Prüfling mit 500 µA und, falls möglich, mit kleinerem Strom messen. Daraus den Eigenerwärmungskoeffizienten ableiten (`sensor.eigenerwaermung_mW_K`).

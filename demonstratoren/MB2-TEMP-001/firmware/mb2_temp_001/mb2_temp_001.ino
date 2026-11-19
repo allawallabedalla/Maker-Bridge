@@ -58,7 +58,7 @@ void loop()
 {
     if ((int32_t)(millis() - naechster) < 0)
         return;
-    naechster += 1000 / MESSRATE_HZ;
+    naechster += MESSPERIODE_MS;
     ads1220_messwert_t m = ads1220_messen(&adc);
     Serial.printf("%lu;%ld;%ld;%ld;%d;%.5f;%.4f;%.4f\n", (unsigned long)m.zeit_ms, (long)m.code_a, (long)m.code_b,
                   (long)m.offset_code, m.fehler, m.r_ohm, m.t_roh_c, m.t_c);
