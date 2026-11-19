@@ -10,6 +10,7 @@ import sys
 import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from mb2 import anforderungen as an, pruefungen   # noqa: E402
 
@@ -200,6 +201,81 @@ def test_weglassprobe_dauer_toleranz_schwingung():
                   open(os.path.join(d, 'out', 'teil.pruefung.json'), 'w'))
     funde = _weglassprobe('wp_dauer', DAUER_SOLL, ['dauer', 'toleranz', 'schwingung'], teil)
     assert not funde, f'Entfernte Angabe macht ein Ergebnis besser (Scheinsicherheit): {funde[:10]}'
+
+
+def _fem_projekt():
+    """Oeffentliches FEM-Projekt (Wandhaken wie tests/test_durchlauf.py), einmal gebaut und gerechnet."""
+    from mb2 import befehle as B, werkzeuge
+    if not werkzeuge.ccx():
+        from _nachweis import NichtAusgefuehrt
+        raise NichtAusgefuehrt('werkzeug_fehlt', 'CalculiX (ccx) fehlt')
+    from test_durchlauf import HAKEN
+    alt = B.PROJEKTE
+    B.PROJEKTE = os.path.join(TMP, 'fem_basis')
+    try:
+        B.project_new('haken', 'Haken an der Innenwand', '',
+                      einsatz={'aussen': False, 'T_min_C': 15, 'T_max_C': 30, 'material': 'PETG', 'lebensdauer_h': 20000})
+        d = os.path.join(B.PROJEKTE, 'haken')
+        open(os.path.join(d, 'cad', 'haken.py'), 'w', encoding='utf-8').write(HAKEN.format(b=14, h=10))
+        s = json.load(open(os.path.join(d, 'cad', 'soll.json'), encoding='utf-8'))
+        s['haken'] = FEM_TEIL
+        json.dump(s, open(os.path.join(d, 'cad', 'soll.json'), 'w', encoding='utf-8'))
+        assert B.cad_build('haken', 'haken')['ok']
+        json.dump(FEM_FALL, open(os.path.join(d, 'fem', 'haken.json'), 'w', encoding='utf-8'))
+        B.fem_mech('haken', 'haken')
+    finally:
+        B.PROJEKTE = alt
+    return d
+
+
+FEM_TEIL = {'material': 'PETG', 'druckrichtung': 'x',
+            'balken': [{'fall': 'haken', 'last': 'jacke', 'art': 'kragarm', 'L_mm': 30, 'a_mm': 21, 'b_mm': 14, 'h_mm': 10}],
+            'dauerlast': {'dauer_h': 20000, 'sigma_MPa': 2, 'durchbiegung_mm': 0.05, 'durchbiegung_zul_mm': 0.5},
+            'wechsellast': {'sigma_a_MPa': 1, 'sigma_m_MPa': 1, 'zyklen': 1e4}, 'masse_g': 10, 'anregung_Hz': 50}
+FEM_FALL = {'koerper': [{'step': 'out/haken.step', 'material': 'PETG'}], 'netz': {'groesse': 1.5},
+            'lagerung': [{'wo': {'ebene': ['y', 0.0]}, 'fest': 'xyz'}],
+            'lasten': [{'name': 'jacke', 'wo': {'ebene': ['z', 10.0], 'box': [-14, 20, 9, 14, 30.5, 11]},
+                        'kraft_N': [0, 0, -20]}], 'schwerkraft': True}
+FEM_MODULE = ('mechanik', 'fem_plausi', 'dauer', 'toleranz', 'schwingung')
+
+
+def test_weglassprobe_fem():
+    """FEM-gestuetzte Pruefungen (M3, M7, M9, F23-F25, D*, T*, S*): jede Angabe in soll.json (Teil und _projekt) und
+    im Lastfall einzeln entfernen - kein Ergebnis darf dadurch von warnung/fehler auf ok springen."""
+    import importlib
+    basis_dir = _fem_projekt()
+    mods = [importlib.import_module(f'mb2.pruefungen.{m}') for m in FEM_MODULE]
+    soll = json.load(open(os.path.join(basis_dir, 'cad', 'soll.json'), encoding='utf-8'))
+
+    def lauf(neu_soll=None, neu_fall=None):
+        d = os.path.join(TMP, 'fem_probe')
+        shutil.rmtree(d, ignore_errors=True)
+        shutil.copytree(basis_dir, d)
+        if neu_soll is not None:
+            json.dump(neu_soll, open(os.path.join(d, 'cad', 'soll.json'), 'w', encoding='utf-8'))
+        if neu_fall is not None:
+            json.dump(neu_fall, open(os.path.join(d, 'fem', 'haken.json'), 'w', encoding='utf-8'))
+        return {(e['id'], e.get('teil'), e['titel']): e['stufe'] for m in mods for e in m.pruefe(d)}
+    basis = lauf()
+    aktiv = sorted({k[0] for k, v in basis.items() if v != 'uebersprungen'})
+    assert {'M3', 'M7', 'M9', 'F23'} <= set(aktiv), aktiv          # die Probe muss die FEM-Pruefungen wirklich treffen
+    funde = []
+    for quelle, daten in (('soll', soll), ('fall', FEM_FALL)):
+        for pfad in _blaetter(daten):
+            if isinstance(pfad[-1], int) or pfad[-1] in ZIELFELDER:
+                continue
+            neu = lauf(**({'neu_soll': _ohne(daten, pfad)} if quelle == 'soll' else {'neu_fall': _ohne(daten, pfad)}))
+            for k, alt in basis.items():
+                if alt in SCHLECHTER and neu.get(k) == 'ok':
+                    funde.append((quelle + ':' + '/'.join(map(str, pfad)), k, alt))
+    assert not funde, f'Entfernte Angabe macht ein Ergebnis besser (Scheinsicherheit): {funde[:10]}'
+    # Randwert: anregung_Hz = 0 liess das Modul schwingung abstuerzen (Division durch null, 19.11.2026)
+    import copy
+    null = copy.deepcopy(soll)
+    null['haken']['anregung_Hz'] = 0
+    r = lauf(neu_soll=null)
+    assert not [k for k, v in r.items() if k[0] == 'schwingung'], 'Modul schwingung abgestuerzt'
+    assert r[('S2', 'haken', next(k[2] for k in r if k[0] == 'S2'))] == 'uebersprungen'
 
 
 if __name__ == '__main__':

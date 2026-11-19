@@ -137,6 +137,19 @@ def _ablauf():
     assert m3 and abs(m3[0]['grenze'] - 20 * 21 ** 3 / (3 * 1500 * 14 * 10 ** 3 / 12)) < 1e-3, m3
     assert m3[0]['stufe'] == 'warnung' and 0.3 < m3[0]['daten']['abweichung'] < 0.8, m3
     assert B.cad_plate(P, ['haken'])
+    assert not [m for m in B.audit(P)['maengel'] if m.startswith('Druckplatte')]
+    # Eine Angabe in soll.json aendert sich (Herkunft) -> cad_build schreibt das STEP neu, Geometrie gleich:
+    # die Druckplatte bleibt gueltig (Geometrie-Hash), kein neues Slicen noetig
+    s = _json(d, 'cad/soll.json')
+    s['_projekt']['_herkunft']['lebensdauer_h'] = 'geschaetzt: 2 Jahre Flur'
+    _json(d, 'cad/soll.json', s)
+    au = B.audit(P)
+    assert not [m for m in au['maengel'] if m.startswith('Druckplatte')], au['maengel']
+    # Geometrie aendert sich -> Platte veraltet
+    _entwurf(d, 14, 11)
+    assert [m for m in B.audit(P)['maengel'] if m.startswith('Druckplatte')]
+    _entwurf(d, 14, 10)
+    assert B.cad_plate(P, ['haken'])
     au = B.audit(P)
     rest = [m for m in au['maengel'] if not m.startswith(('Kein G-Code', 'Anforderung'))]
     assert all('M9' in m or 'gesliced' in m for m in rest), rest        # M9 rechnet ohne Slice mit 15 % Fuellung

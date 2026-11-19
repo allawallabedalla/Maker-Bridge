@@ -502,10 +502,16 @@ def _pruefe_balken(k, teil, mat):
             dq = 'max. Verschiebung (keine Lastflaeche)'
         dv = d_fem / d_an - 1
         st = 'ok' if abs(dv) <= 0.2 else 'info' if abs(dv) <= 0.3 else 'warnung'
+        # Kragarm ohne a_mm: Last an der Spitze angenommen - passt die Gegenprobe dann, ist das Zufall, kein Beleg
+        # (Weglass-Probe 19.11.2026: ohne a_mm sprang die Spannung von warnung auf ok)
+        annahme = b['art'] == 'kragarm' and b.get('a_mm') is None
+        ann_txt = '; a_mm fehlt: Last an der Spitze angenommen (a = L) - Gegenprobe nicht belastbar' if annahme else ''
+        if annahme and st == 'ok':
+            st = 'warnung'
         out.append(ergebnis('M3', titel + ': Weg', st, wert=_r(d_fem, 4), grenze=_r(d_an, 4), einheit='mm',
                             quelle=Q['M3'], teil=teil, daten={'abweichung': _r(dv, 3)},
                             hinweis=f'FEM ({dq}) {dv:+.0%} gegen Balken {b["art"]} (E {m["E_MPa"]:.0f}, F {F:.2f} N); '
-                                    '+15..20 % durch nachgiebige Einspannung ist normal; > 30 % Netz/RB pruefen'))
+                                    '+15..20 % durch nachgiebige Einspannung ist normal; > 30 % Netz/RB pruefen' + ann_txt))
         s_fem = lf.get('max_vonMises_integrationspunkte_MPa') or lf.get('max_vonMises_MPa')
         if s_fem:
             q = float(s_fem) / s_an
@@ -516,6 +522,9 @@ def _pruefe_balken(k, teil, mat):
                 st, hw = 'warnung', 'FEM unter Balkenwert: Netz zu grob oder Lagerung/Last falsch gesetzt'
             else:
                 st, hw = 'ok', 'Balken und FEM passen'
+            if annahme and st == 'ok':
+                st = 'warnung'
+            hw += ann_txt
             out.append(ergebnis('M3', titel + ': Spannung', st, wert=_r(s_fem, 2), grenze=_r(s_an, 2), einheit='MPa',
                                 quelle=Q['M3'], teil=teil, daten={'verhaeltnis': _r(q, 2)},
                                 hinweis=f'sigma = M c / I = {s_an:.2f} MPa; ' + hw))

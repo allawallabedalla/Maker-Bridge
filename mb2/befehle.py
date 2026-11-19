@@ -588,6 +588,28 @@ def pruefkatalog(projekt: str, module: list[str] | None = None):
             'datei': os.path.join(d, 'pruef', 'katalog.json')}
 
 
+def _platte_aktuell(d, teile):
+    """Druckplatte passt noch, wenn jedes Teil darauf dieselbe Geometrie und Druckdrehung hat (Hash in platte.json).
+    Neu geschriebene, aber gleiche STEP-Dateien erzwingen so kein neues cad_plate und kein neues Slicen."""
+    from . import cad
+    pj = os.path.join(d, 'print', 'platte.json')
+    alt = json.load(open(pj, encoding='utf-8')).get('geometrie_hash') if os.path.exists(pj) else None
+    if not alt:
+        return False
+    t_platte = os.path.getmtime(os.path.join(d, 'print', 'platte.3mf'))
+    neuer = [t for t in teile if os.path.exists(os.path.join(d, 'out', t + '.step')) and
+             os.path.getmtime(os.path.join(d, 'out', t + '.step')) > t_platte]
+    if any(t not in alt for t in neuer):          # neues Teil nach dem Legen der Platte -> wie bisher veraltet
+        return False
+    for t in alt:
+        st, pr = os.path.join(d, 'out', t + '.step'), os.path.join(d, 'out', t + '.pruefung.json')
+        if not (os.path.exists(st) and os.path.exists(pr)):
+            return False
+        if cad.geometrie_hash(st, json.load(open(pr, encoding='utf-8')).get('druck_drehung')) != alt[t]:
+            return False
+    return True
+
+
 @befehl('audit')
 def audit(projekt: str):
     """Alle messbaren Pruefungen des Audit-Kreises in EINEM Aufruf, deterministisch: cad_build je Teil und jeder
@@ -656,7 +678,7 @@ def audit(projekt: str):
     steps = [x for x in steps if x]
     if mt(platte) is None:
         maengel.append('Keine Druckplatte (cad_plate)')
-    elif steps and mt(platte) < max(steps):
+    elif steps and mt(platte) < max(steps) and not _platte_aktuell(d, teile):
         maengel.append('Druckplatte aelter als ein Teil - cad_plate neu')
     if os.path.exists(platte):
         bilder.append(os.path.join(d, 'print', 'platte.png'))

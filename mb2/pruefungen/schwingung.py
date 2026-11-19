@@ -498,6 +498,10 @@ def _s1_s4(P):
             erg.append(uebersprungen('S2', T['S2'], 'soll-Feld anregung_Hz fehlt', Q['S2'], teil))
             continue
         fmin, fmax = band
+        if fmax <= 0 or fmin < 0:       # 0 Hz = keine Anregung; negative Werte sind ein Eingabefehler (19.11.2026: Absturz)
+            erg.append(uebersprungen('S2', T['S2'], f'anregung_Hz {band} ungueltig - ohne Anregung Feld weglassen, '
+                                     'sonst f > 0 angeben', Q['S2'], teil))
+            continue
         # Jede f1-Schaetzung einzeln bewerten, die schaerfste Stufe gilt (Befund S2-min-untergrenze):
         # die tiefste Schaetzung ist fuer die Isolationsaussage NICHT konservativ (S1b ~20 % unter S3,
         # S1c Untergrenze) - ein Resonanzalarm einer anderen Schaetzung darf nicht verloren gehen.

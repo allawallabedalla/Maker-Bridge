@@ -362,6 +362,19 @@ def pruefe_3mf(pfad, ziel_dir, wand_min=WAND_MIN, spalt_min=SPALT_MIN):
 
 # ---------------------------------------------------------------- Druckplatte
 
+def geometrie_hash(step_pfad, drehung=None):
+    """Hash der STEP-Geometrie ohne Kopfzeile FILE_NAME (dort steht nur der Exportzeitpunkt) plus Druckdrehung.
+    Gleicher Hash -> gleiches Teil auf dem Bett, auch wenn cad_build die Datei neu geschrieben hat (seit 19.11.2026)."""
+    import hashlib
+    h = hashlib.sha256()
+    with open(step_pfad, 'rb') as f:
+        for z in f:
+            if not z.startswith(b'FILE_NAME('):
+                h.update(z)
+    h.update(json.dumps(list(drehung or ())).encode())
+    return h.hexdigest()[:16]
+
+
 def platte(projekt_dir, teile, abstand=10.0):
     """Mehrere geprueften Teile druckfertig (gedreht, Unterseite Z=0) nebeneinander auf EIN 3MF legen.
     Reihen-Packung im Bett 250 x 210, Mitte des Pakets in der Bettmitte."""
@@ -400,7 +413,11 @@ def platte(projekt_dir, teile, abstand=10.0):
         b = g.bounding_box()
         boxen[n] = [round(b.min.X, 2), round(b.min.Y, 2), round(b.min.Z, 2),
                     round(b.max.X, 2), round(b.max.Y, 2), round(b.max.Z, 2)]
-    json.dump({'teile': [n for n, *_ in lage], 'bbox_mm': boxen},
+    hashes = {}
+    for n in teile:
+        ber = json.load(open(os.path.join(out, n + '.pruefung.json'), encoding='utf-8'))
+        hashes[n] = geometrie_hash(os.path.join(out, n + '.step'), ber.get('druck_drehung'))
+    json.dump({'teile': [n for n, *_ in lage], 'bbox_mm': boxen, 'geometrie_hash': hashes},
               open(os.path.join(projekt_dir, 'print', 'platte.json'), 'w', encoding='utf-8'), indent=1)
     from . import render
     png = os.path.join(projekt_dir, 'print', 'platte.png')
