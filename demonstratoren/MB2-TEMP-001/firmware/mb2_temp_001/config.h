@@ -14,4 +14,10 @@
 #define WANDLUNG_TIMEOUT_MS 100  /* Einzelwandlung 20 SPS = 50,06 ms (SBAS501D S. 30, Tab. 8-4) + Reserve */
 #define OFFSET_MITTEL 8      /* Wandlungen fuer die Offsetkalibrierung beim Start */
 
+/* Kalibrierkorrektur dieses EINEN Geraets: t = t_roh + K0 + K1 t_roh + K2 t_roh^2 (kalibrierung_auswerten).
+ * 0 / 0 / 0 = unkalibriert. FW1 vergleicht mit soll.json messkette.kalibrierung.koeffizienten. */
+#define KAL_K0 0.0
+#define KAL_K1 0.0
+#define KAL_K2 0.0
+
 #endif

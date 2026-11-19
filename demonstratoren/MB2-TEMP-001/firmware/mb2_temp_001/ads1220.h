@@ -128,7 +128,7 @@ typedef struct {
     int32_t code_a, code_b;   /* Rohwerte (offsetkorrigiert NICHT enthalten -> roh) */
     int32_t offset_code;
     int fehler;
-    double r_ohm, t_c;
+    double r_ohm, t_roh_c, t_c;   /* t_roh_c ohne, t_c mit Kalibrierkorrektur */
 } ads1220_messwert_t;
 
 /* Eine Phase: IDAC-Routing schreiben (startet eine Wandlung), Einschwingen abwarten, mit START neu starten. */
@@ -150,7 +150,8 @@ static inline ads1220_messwert_t ads1220_messen(ads1220_t *d)
     if (IDAC_TAUSCH && !m.fehler)
         m.fehler |= ads1220_phase(d, ADS1220_REG3_B, &m.code_b);
     m.fehler |= rtd_rechnen(m.code_a - d->offset_code, m.code_b - d->offset_code, IDAC_TAUSCH, RREF_OHM, PGA_GAIN,
-                            RTD_R0_OHM, &m.r_ohm, &m.t_c);
+                            RTD_R0_OHM, &m.r_ohm, &m.t_roh_c);
+    m.t_c = rtd_korrektur(m.t_roh_c, KAL_K0, KAL_K1, KAL_K2);
     return m;
 }
 

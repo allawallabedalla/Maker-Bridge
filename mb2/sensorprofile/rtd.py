@@ -100,7 +100,8 @@ def anzeige(t, x, mk):
         return g * eg * (ia * (r + rl1) - ib * rl2 + v_err) / ((ia + ib - i_refein) * rref_w)
 
     dd = (d(i1, i2) + d(i2, i1)) / 2 if sc.get('idac_tausch') else d(i1, i2)
-    return t_von_r(dd * 2 * rref / g, r0) + x.get('dt_kal', 0.0)
+    return t_von_r(dd * 2 * rref / g, r0) + sum(x.get(k, 0.0) for k in ('dt_kal', 'dt_kal_referenz', 'dt_kal_fit',
+                                                                         'dt_kal_kopplung'))
 
 
 def lsb_eingang(mk):
@@ -165,11 +166,15 @@ def eingaben(mk, t, herkunft=lambda f: None):
               'bauteile.adc.inl_ppm_fsr'),
         ]
     else:
-        uk = None
-        if kal.get('u_referenz') is not None and kal.get('u_fit') is not None:
-            uk = math.sqrt(kal['u_referenz'] ** 2 + kal['u_fit'] ** 2 + kal.get('u_kopplung', 0.0) ** 2)
-        z.append(('dt_kal', {'wert': 0.0, 'u': {'wert': uk, 'verteilung': 'u'}, 'einheit': '°C',
-                             'herkunft': herkunft('kalibrierung')}))
+        # Mehrpunktkalibrierung gegen Referenz: Systematik von Element, R_ref, Verstaerkung, Offset, INL, Leitungen und
+        # IDAC steckt in der Korrektur. Es bleiben die Unsicherheit der Kalibrierung selbst (drei Beitraege) und alles,
+        # was sich zwischen Kalibrierung und Einsatz aendert (Elektroniktemperatur, Eigenerwaermung im anderen Medium).
+        z += [
+            e('dt_kal_referenz', 'u', kal.get('u_referenz'), '°C', 'kalibrierung.u_referenz'),
+            e('dt_kal_fit', 'u', kal.get('u_fit'), '°C', 'kalibrierung.u_fit'),
+            e('dt_kal_kopplung', 'u', kal.get('u_kopplung'), '°C', 'kalibrierung.u_kopplung'),
+            e('dt_selbst', 'rechteck', dts, '°C', 'sensor.eigenerwaermung_mW_K'),
+        ]
     weg = mk.get('vernachlaessigt') or {}
     return {k: v for k, v in z if k not in weg}
 
@@ -202,6 +207,66 @@ def _punkte(mk):
     return [lo + (hi - lo) * j / (n - 1) for j in range(n)]
 
 
+def kalibrierung_auswerten(reihe, messbereich, grad=2):
+    """Mehrpunktkalibrierung gegen Referenz: Korrektur t_korr = t_roh + k0 + k1 t_roh + k2 t_roh^2.
+    Eingabe: Messreihe mit punkte [{ref, ist}] (ist = unkorrigierte Anzeige des Geraets, je Punkt gemittelt).
+    Mindestverfahren: >= grad + 3 verschiedene Referenzwerte ueber >= 80 % des Messbereichs.
+    u_fit = Standardabweichung der Reste der Punktmittel; u_referenz aus dem Kalibrierschein der Referenz (U / k);
+    u_kopplung aus pruefunsicherheit 'thermische_kopplung' der Reihe (Rechteck-Halbbreite / sqrt(3)).
+    nachweisfaehig nur bei datenstatus 'rueckfuehrbar_gemessen'."""
+    stat = MK.punkt_statistik([p for p in reihe.get('punkte', []) if isinstance(p.get('ref'), (int, float))
+                               and isinstance(p.get('ist'), (int, float))])
+    refs = sorted({z['ref'] for z in stat})
+    spanne = float(messbereich['max']) - float(messbereich['min'])
+    gruende = []
+    if len(refs) < grad + 3 or (refs[-1] - refs[0] if refs else 0) < 0.8 * spanne:
+        gruende.append(f'verfahren_unzureichend: {len(refs)} Referenzwerte ueber '
+                       f'{(refs[-1] - refs[0]) if refs else 0:g} von {spanne:g} (verlangt >= {grad + 3} ueber 80 %)')
+        return {'gruende': gruende, 'nachweisfaehig': False}
+    x = [z['mittel'] for z in stat]
+    f = MK.korrektur_fit(x, [z['ref'] - z['mittel'] for z in stat], grad)
+    ref = reihe.get('referenz') or {}
+    u_ref = MK._u_referenz(ref)
+    kopp = next((b for b in reihe.get('pruefunsicherheit') or [] if b.get('name') == 'thermische_kopplung'), None)
+    u_k = MK.standardunsicherheit(kopp) if kopp else None
+    if reihe.get('datenstatus') != 'rueckfuehrbar_gemessen':
+        gruende.append(f'{reihe.get("datenstatus") or "datenstatus_fehlt"}: Koeffizienten nur zur Demonstration')
+    if u_ref is None:
+        gruende.append('referenz_ohne_unsicherheit')
+    if u_k is None:
+        gruende.append('thermische_kopplung nicht bestimmt (pruefunsicherheit)')
+    k = f['koeffizienten'] + [0.0] * (3 - len(f['koeffizienten']))
+    return {'koeffizienten': {'k0': k[0], 'k1': k[1], 'k2': k[2]}, 'grad': grad, 'u_fit': f['s'],
+            'freiheitsgrade_fit': f['freiheitsgrade'], 'max_rest': f['max_rest'], 'u_referenz': u_ref,
+            'u_kopplung': u_k, 'reihe': reihe.get('id'), 'datum': reihe.get('datum'),
+            'datenstatus': reihe.get('datenstatus'), 'gruende': gruende,
+            'nachweisfaehig': reihe.get('datenstatus') == 'rueckfuehrbar_gemessen' and u_ref is not None and u_k is not None,
+            'punkte': [{'t_roh': z['mittel'], 'ref': z['ref'], 'rest': r} for z, r in zip(stat, f['reste'])]}
+
+
+def korrigieren(t_roh, koeff):
+    return t_roh + koeff['k0'] + koeff['k1'] * t_roh + koeff['k2'] * t_roh ** 2
+
+
+def planung(mk, fehlt, herkunft=lambda f: None):
+    """Wie viel Unsicherheit duerfen die fehlenden Beitraege zusammen noch haben, damit U <= ziel_U bleibt?
+    Rechnet das Budget ohne sie; u_frei_max = sqrt((ziel_U / k)^2 - u_rest^2). Planungswert, kein Nachweis."""
+    import copy
+    ziel = mk.get('ziel_U')
+    if ziel is None:
+        return None
+    m2 = copy.deepcopy(mk)
+    m2['vernachlaessigt'] = {**(mk.get('vernachlaessigt') or {}), **{f: 'Planung' for f in fehlt}}
+    tab = [(t, budget_bei(m2, t, herkunft)) for t in _punkte(m2)]
+    if any(b['u_c'] is None for _, b in tab):
+        return None
+    t_w, b_w = max(tab, key=lambda tb: tb[1]['u_c'])
+    rest = (ziel / b_w['k']) ** 2 - b_w['u_c'] ** 2
+    return {'u_rest': b_w['u_c'], 't_C': t_w, 'k': b_w['k'], 'ziel_U': ziel, 'fehlt': list(fehlt),
+            'u_frei_max': math.sqrt(rest) if rest > 0 else None,
+            'beitraege_rest': [{'name': z['name'], 'beitrag': z['beitrag']} for z in b_w['beitraege']]}
+
+
 def pruefe(mk, herkunft_klasse):
     """MK1-MK4 fuer das RTD-Profil. herkunft_klasse(feld) -> 'datenblatt'|...|None (fuer warnung bei Annahmen)."""
     e = mk.get('einheit', '°C')
@@ -225,9 +290,17 @@ def pruefe(mk, herkunft_klasse):
     schwach = sorted({z['name'] for _, b in tabelle for z in b['beitraege']
                       if (z.get('herkunft') or 'offen') in ('offen', 'geschaetzt', 'angenommen')})
     if fehlt:
-        out.append(uebersprungen('MK1', 'Unsicherheitsbudget Messkette',
-                                 f'Profil rtd, Modus {mk.get("modus", "ab_werk")}: Werte fehlen fuer '
-                                 f'{", ".join(fehlt)} (Datenblatt/Messung eintragen, keine Annahme)', Q))
+        txt = (f'Profil rtd, Modus {mk.get("modus", "ab_werk")}: Werte fehlen fuer {", ".join(fehlt)} '
+               f'(Datenblatt/Messung eintragen, keine Annahme)')
+        plan = planung(mk, fehlt, hk)
+        if plan:
+            txt += (f'. Planung: die uebrigen Beitraege ergeben u = {plan["u_rest"]:.3g} {e} (schlechtester Punkt '
+                    f'{plan["t_C"]:g} {e}); fuer {", ".join(fehlt)} zusammen bleiben hoechstens u = '
+                    f'{plan["u_frei_max"]:.3g} {e}' if plan['u_frei_max'] else '; Ziel schon ohne sie verfehlt')
+        r = uebersprungen('MK1', 'Unsicherheitsbudget Messkette', txt, Q)
+        if plan:
+            r['daten'] = {'planung': plan}
+        out.append(r)
     else:
         t_w, b_w = max(tabelle, key=lambda tb: tb[1]['U'])
         daten = {'modus': mk.get('modus', 'ab_werk'), 'schlechtester_punkt_C': t_w, 'beitraege': b_w['beitraege'],

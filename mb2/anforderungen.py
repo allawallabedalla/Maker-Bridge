@@ -294,9 +294,14 @@ def _manuell_status(nw, pdir):
     return 'unbewiesen', 'manueller Nachweis ohne Beleg-Datei/Pruefer', []
 
 
-def _messung_status(nw, anforderung, messung):
-    """Referenzmessreihe gegen den messtechnik-Block der Anforderung. (status, text, [], info)."""
+def _messung_status(nw, anforderung, messung, kal_reihe=None):
+    """Referenzmessreihe gegen den messtechnik-Block der Anforderung. (status, text, [], info).
+    kal_reihe: Reihe, aus der die Kalibrierkorrektur stammt - sie darf nicht zugleich Nachweis sein (Zirkelschluss)."""
     from .pruefungen import messkette
+    if kal_reihe and nw.get('ref') == kal_reihe:
+        info = {'grund': 'kalibrierdaten_als_nachweis', 'gruende': ['kalibrierdaten_als_nachweis'], 'reihe': nw.get('ref')}
+        return ('unbewiesen', f'Messung {nw.get("ref")}: dieselbe Reihe lieferte die Kalibrierkorrektur - Nachweis '
+                              f'braucht eine unabhaengige Messreihe nach dem Laden der Korrektur', [], info)
     mt = (anforderung or {}).get('messtechnik')
     eig = nw.get('eigenschaft')
     if not mt:
@@ -368,6 +373,7 @@ def pruefen(pdir, katalog=None, extra=None):
     abnahme = lade(pdir, 'abnahme.json', {})
     feld = lade(pdir, 'feld.json', {})
     messung = lade(pdir, 'messung.json', {})
+    kal_reihe = ((soll.get('_projekt', {}).get('messkette') or {}).get('kalibrierung') or {}).get('reihe')
     if katalog is None:
         from . import pruefungen
         katalog = pruefungen.alle(pdir)['module']
@@ -397,7 +403,7 @@ def pruefen(pdir, katalog=None, extra=None):
         for nw in nws:
             info = None
             if nw.get('art') == 'messung':
-                st, txt, treffer, info = _messung_status(nw, a, messung)
+                st, txt, treffer, info = _messung_status(nw, a, messung, kal_reihe)
             else:
                 st, txt, treffer = nachweis_status(nw, pdir, katalog, abnahme, feld, extra)
             # Reserve gegen Unsicherheit (nur bei bestandenem Katalog-Nachweis mit Wert/Grenze)
@@ -742,6 +748,32 @@ def messreihe_eintragen(pdir, reihe):
     m['reihen'] = [r for r in m['reihen'] if r.get('id') != reihe['id']] + [reihe]
     speichere(pdir, 'messung.json', m)
     return {'id': reihe['id'], 'punkte': len(reihe.get('punkte', [])), 'reihen': len(m['reihen'])}
+
+
+def kalibrierung_auswerten(pdir, reihe_id, grad=2):
+    """Kalibrierreihe (messung.json) auswerten und - nur wenn nachweisfaehig (rueckfuehrbar gemessen, Referenz- und
+    Kopplungsunsicherheit bekannt) - Koeffizienten und Unsicherheiten in soll.json _projekt.messkette.kalibrierung
+    schreiben, Herkunft 'gemessen: Reihe ...'. Sonst nur Ergebnis zurueckgeben, nichts schreiben."""
+    from .sensorprofile import rtd
+    reihe = next((r for r in lade(pdir, 'messung.json', {}).get('reihen', []) if r.get('id') == reihe_id), None)
+    if not reihe:
+        raise ValueError(f'Reihe {reihe_id} nicht in messung.json')
+    p = os.path.join(pdir, 'cad', 'soll.json')
+    s = lade(pdir, 'cad/soll.json', {})
+    mk = s.get('_projekt', {}).get('messkette') or {}
+    erg = rtd.kalibrierung_auswerten(reihe, mk.get('messbereich') or {}, grad)
+    erg['geschrieben'] = False
+    if erg.get('nachweisfaehig'):
+        kal = mk.setdefault('kalibrierung', {})
+        kal.update({k: erg[k] for k in ('koeffizienten', 'grad', 'u_fit', 'u_referenz', 'u_kopplung', 'reihe', 'datum')})
+        h = s['_projekt'].setdefault('_herkunft', {})
+        quelle = f'gemessen: Kalibrierreihe {reihe_id} vom {reihe.get("datum")}, Referenz ' \
+                 f'{(reihe.get("referenz") or {}).get("kalibrierschein")}'
+        for f in ('koeffizienten', 'u_fit', 'u_referenz', 'u_kopplung'):
+            h[f'messkette.kalibrierung.{f}'] = quelle
+        json.dump(s, open(p, 'w', encoding='utf-8'), indent=1, ensure_ascii=False)
+        erg['geschrieben'] = True
+    return erg
 
 
 def feld_abgleich(pdir, katalog=None, feldfall_ordner=None):

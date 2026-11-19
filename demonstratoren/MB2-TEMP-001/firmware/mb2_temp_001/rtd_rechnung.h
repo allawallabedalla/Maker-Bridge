@@ -70,4 +70,10 @@ static inline int rtd_rechnen(int32_t code_a, int32_t code_b, int tausch, double
     return f;
 }
 
+/* Kalibrierkorrektur (Mehrpunktkalibrierung gegen Referenz, Polynom in der Rohtemperatur) */
+static inline double rtd_korrektur(double t_roh, double k0, double k1, double k2)
+{
+    return t_roh + k0 + k1 * t_roh + k2 * t_roh * t_roh;
+}
+
 #endif

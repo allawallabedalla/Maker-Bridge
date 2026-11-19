@@ -35,8 +35,10 @@ def soll_demo():
     return json.load(open(os.path.join(DEMO, 'cad', 'soll.json'), encoding='utf-8'))
 
 
-def mk_fix(**schaltung):
+def mk_fix(modus='ab_werk', **schaltung):
     mk = copy.deepcopy(soll_demo()['_projekt']['messkette'])
+    mk['modus'] = modus
+    mk['kalibrierung'] = {'u_referenz': 0.015, 'u_fit': 0.02, 'u_kopplung': 0.02}   # TESTFIXTURE
     mk['bauteile']['adc'] = dict(ADC_FIX)
     mk['sensor']['eigenerwaermung_mW_K'] = 1.0
     mk['schaltung'].update(schaltung)
@@ -110,10 +112,14 @@ def test_fehlende_adc_daten_kein_budget():
 def test_demonstrator_mit_datenblattwerten():
     """ADS1220-Werte aus SBAS501D: MK2-MK5 bestanden; MK1 offen (Eigenerwaermung des Elements fehlt). Mit
     Eigenerwaermung als bewusst vernachlaessigt zeigt das Budget: ab Werk verfehlt (Verstaerkungsfehler max 0,1 %)."""
-    mk = soll_demo()['_projekt']['messkette']
+    mk = copy.deepcopy(soll_demo()['_projekt']['messkette'])
     hk = MK.herkunft_klasse(soll_demo()['_projekt'])
     e = {x['id']: x for x in rtd.pruefe(mk, hk)}
-    assert e['MK1']['stufe'] == 'uebersprungen' and 'dt_selbst' in e['MK1']['hinweis'], e['MK1']
+    assert e['MK1']['stufe'] == 'uebersprungen' and 'dt_kal_referenz' in e['MK1']['hinweis'], e['MK1']
+    plan = e['MK1']['daten']['planung']                          # Modus kalibriert: was darf die Kalibrierung kosten?
+    assert abs(plan['u_rest'] - 0.0416) < 0.002 and abs(plan['u_frei_max'] - 0.247) < 0.002, plan
+    mk['modus'] = 'ab_werk'
+    e = {x['id']: x for x in rtd.pruefe(mk, hk)}
     for i in ('MK2', 'MK3', 'MK4-REF', 'MK4-IDAC', 'MK4-PGA', 'MK5'):
         assert e[i]['stufe'] == 'ok', e[i]
     assert e['MK2']['wert'] < 0.01, e['MK2']                      # 0,35 uVrms (Tab. 7-1) -> 0,009 °C
@@ -185,7 +191,7 @@ def test_demonstrator_ehrlicher_stand():
         assert mess[e]['status'] == 'unbewiesen' and 'demonstrationsdaten_nicht_rueckfuehrbar' in mess[e]['gruende']
         assert mess[e]['auswertung_status'] == 'bewiesen' and mess[e]['kennwert'] is not None, mess[e]
     assert mess['drift']['grund'] == 'ohne_referenzmessung'
-    assert z['S-MESSKETTE']['status'] == 'unbewiesen' and z['K-FIRMWARE']['status'] == 'bewiesen'
+    assert z['S-MESSKETTE']['status'] == 'unbewiesen' and z['K-FIRMWARE']['status'] == 'unbewiesen'   # KAL_K* offen
     prot = open(os.path.join(d, 'pruef', 'messprotokoll.md'), encoding='utf-8').read()
     for s in ('gemessen', 'zulaessig', 'U_pruef', 'Akzeptanzgrenze', 'ILAC-G8', 'Fehlentscheidung',
               'demonstrationsdaten_nicht_rueckfuehrbar', 'nicht_freigegeben'):
@@ -199,6 +205,8 @@ def _echt_machen(d, kalibrierschein='TESTFIXTURE-KEIN-NACHWEIS', gueltig_bis='20
     mk = s['_projekt']['messkette']
     mk['bauteile']['adc'] = dict(ADC_FIX)
     mk['sensor']['eigenerwaermung_mW_K'] = 1.0
+    mk['kalibrierung'].update(u_referenz=0.015, u_fit=0.02, u_kopplung=0.02, reihe='R-KAL-1',
+                              koeffizienten={'k0': 0.0, 'k1': 0.0, 'k2': 0.0})       # = config.h, FW1 ok
     h = s['_projekt']['_herkunft']
     for k in list(h):
         if k.startswith('messkette'):
@@ -315,6 +323,71 @@ def test_firmware_rechnung_auf_dem_pc():
     assert zeilen[6].strip() == '-1'
 
 
+def test_kalibriert_budget():
+    e = {x['id']: x for x in rtd.pruefe(mk_fix('kalibriert'), lambda f: 'datenblatt')}
+    d = e['MK1']['daten']
+    namen = {z['name'] for z in d['beitraege']}
+    assert e['MK1']['stufe'] == 'ok' and d['U'] < 0.2, e['MK1']['hinweis']
+    assert {'dt_kal_referenz', 'dt_kal_fit', 'dt_kal_kopplung', 'dt_selbst', 'tk_ref_rel'} <= namen, namen
+    assert not ({'dt_sensor', 'e_gain', 'dR_ref_rel', 'm_idac'} & namen), namen   # in der Korrektur enthalten
+
+
+def _kal_reihe(datenstatus='rueckfuehrbar_gemessen', punkte=None, kopplung=True):
+    # TESTFIXTURE: Geraet zeigt t_roh = t - 0,1 - 0,002 t + 0,00001 t^2 an; Rauschen deterministisch +-0,004
+    pk = punkte or [{'ref': t, 'ist': t - 0.1 - 0.002 * t + 1e-5 * t * t + ((i % 3) - 1) * 0.004}
+                    for t in (-20, 0, 10, 20, 30, 40, 50, 70, 100) for i in range(10)]
+    r = {'id': 'R-KAL-1', 'eigenschaft': 'genauigkeit', 'datenstatus': datenstatus, 'datum': '2026-11-19',
+         'sensor_id': 'TESTFIXTURE', 'seriennummer': 'TESTFIXTURE', 'verfahren': 'TESTFIXTURE',
+         'referenz': {'mittel': 'T', 'seriennummer': 'T', 'kalibrierschein': 'TESTFIXTURE', 'rueckfuehrung': 'T',
+                      'U': 0.03, 'k': 2, 'einheit': '°C', 'gueltig_bis': '2027-12-31'}, 'punkte': pk}
+    if kopplung:
+        r['pruefunsicherheit'] = [{'name': 'thermische_kopplung', 'wert': 0.02, 'verteilung': 'rechteck'}]
+    return r
+
+
+def test_kalibrierung_auswerten():
+    mb = {'min': -20, 'max': 100}
+    k = rtd.kalibrierung_auswerten(_kal_reihe(), mb)
+    for t in (-20, 25, 100):
+        t_roh = t - 0.1 - 0.002 * t + 1e-5 * t * t
+        assert abs(rtd.korrigieren(t_roh, k['koeffizienten']) - t) < 1e-3, (t, k['koeffizienten'])
+    assert k['nachweisfaehig'] and k['u_fit'] < 1e-3 and abs(k['u_referenz'] - 0.015) < 1e-12, k
+    assert abs(k['u_kopplung'] - 0.02 / math.sqrt(3)) < 1e-12
+    demo = rtd.kalibrierung_auswerten(_kal_reihe('demonstrationsdaten_nicht_rueckfuehrbar'), mb)
+    assert not demo['nachweisfaehig'] and demo['gruende'], demo
+    assert not rtd.kalibrierung_auswerten(_kal_reihe(kopplung=False), mb)['nachweisfaehig']
+    zwei = rtd.kalibrierung_auswerten(_kal_reihe(punkte=[{'ref': 0, 'ist': 0}, {'ref': 100, 'ist': 100}]), mb)
+    assert 'verfahren_unzureichend' in zwei['gruende'][0], zwei
+    # Ins Projekt: nur rueckfuehrbar wird geschrieben, mit Herkunft 'gemessen'
+    d = _kopie('kal')
+    pm = os.path.join(d, 'messung.json')
+    m = json.load(open(pm, encoding='utf-8'))
+    m['reihen'].append(_kal_reihe('demonstrationsdaten_nicht_rueckfuehrbar'))
+    json.dump(m, open(pm, 'w', encoding='utf-8'), ensure_ascii=False)
+    assert an.kalibrierung_auswerten(d, 'R-KAL-1')['geschrieben'] is False
+    m['reihen'][-1] = _kal_reihe()
+    json.dump(m, open(pm, 'w', encoding='utf-8'), ensure_ascii=False)
+    assert an.kalibrierung_auswerten(d, 'R-KAL-1')['geschrieben'] is True
+    pj = json.load(open(os.path.join(d, 'cad', 'soll.json'), encoding='utf-8'))['_projekt']
+    assert pj['messkette']['kalibrierung']['reihe'] == 'R-KAL-1'
+    assert pj['_herkunft']['messkette.kalibrierung.u_fit'].startswith('gemessen')
+    # FW1 merkt, dass config.h noch die alten Konstanten hat
+    fw = [e for e in pruefungen.alle(d)['module']['firmware'] if e['id'] == 'FW1' and 'KAL_K0' in e['titel']]
+    assert fw and fw[0]['stufe'] == 'fehler', fw
+
+
+def test_kalibrierreihe_ist_kein_nachweis():
+    d = _kopie('zirkel')
+    _echt_machen(d)
+    p = os.path.join(d, 'cad', 'soll.json')
+    s = json.load(open(p, encoding='utf-8'))
+    s['_projekt']['messkette']['kalibrierung']['reihe'] = 'R-GEN-1'
+    json.dump(s, open(p, 'w', encoding='utf-8'), ensure_ascii=False)
+    z = {x['id']: x for x in an.pruefen(d)['anforderungen']}['A-MESS-TEMP']
+    g = next(n for n in z['nachweise'] if n['eigenschaft'] == 'genauigkeit')
+    assert g['status'] == 'unbewiesen' and g['grund'] == 'kalibrierdaten_als_nachweis', g
+
+
 def test_ads1220_treiber_mit_spi_attrappe():
     """ads1220.h gegen SBAS501D: Befehlsbytes, Registerwerte, Ablauf (RESET, WREG/RREG, Offset, IDAC-Tausch)."""
     if not shutil.which('g++'):
@@ -341,14 +414,15 @@ int main() {
   int f = ads1220_start(&d); f |= ads1220_offset_kalibrieren(&d, OFFSET_MITTEL);
   ads1220_messwert_t m = ads1220_messen(&d);
   printf("F %d %d %ld\n", f, m.fehler, (long)d.offset_code);
-  printf("R %.9f %.9f\n", m.r_ohm, m.t_c);
+  printf("R %.9f %.9f %.9f\n", m.r_ohm, m.t_c, rtd_korrektur(10.0, 0.1, 0.01, 0.001));
   for (auto& v : log_) { for (int b : v) printf("%02X ", b); printf("\n"); }
 }''')
     subprocess.run(['g++', '-O2', '-Wall', '-Werror', '-I', fw, src, '-o', exe], check=True)
     z = subprocess.run([exe], capture_output=True, text=True, check=True).stdout.strip().split('\n')
     f, fm, off = z[0].split()[1:]
     assert f == '0' and fm == '0' and off == '101', z[0]
-    r = float(z[1].split()[1])
+    r, t_c, korr = (float(v) for v in z[1].split()[1:])
+    assert abs(korr - 10.3) < 1e-12 and abs(t_c - rtd.t_von_r(r)) < 1e-9, z[1]   # KAL_K* = 0: t_c = t_roh
     assert abs(r - (4067100 / 2 ** 23) * 2 * 1650 / 16) < 1e-9, z[1]          # Mittel der Phasen, Offset ab
     log = [x.strip() + ' ' for x in z[2:]]
     assert log[0] == '06 ', log[0]                                           # RESET (Tab. 8-7)

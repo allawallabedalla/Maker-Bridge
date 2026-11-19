@@ -144,6 +144,15 @@ def messreihe_eintragen(projekt: str, reihe: dict):
 
 
 @befehl('messtechnik')
+def kalibrierung_auswerten(projekt: str, reihe: str, grad: int = 2):
+    """Kalibrierreihe aus messung.json auswerten (Korrekturpolynom, u_fit, u_referenz, u_kopplung). Schreibt die
+    Koeffizienten nur bei rueckfuehrbar gemessener Reihe in soll.json; danach Firmware-Konstanten KAL_K0..K2 angleichen
+    (FW1) und eine UNABHAENGIGE Nachweisreihe messen - die Kalibrierreihe zaehlt nicht als Nachweis."""
+    from . import anforderungen as an
+    return an.kalibrierung_auswerten(pdir(projekt), reihe, grad)
+
+
+@befehl('messtechnik')
 def messkette_rechnen(projekt: str):
     """Unsicherheitsbudget (Einzelbeitraege, u_c, k, U) und rauschbegrenzte Aufloesung aus soll.json
     _projekt.messkette. Vereinfachtes GUM-Modell, Grenzen stehen im Ergebnis unter 'modell'."""

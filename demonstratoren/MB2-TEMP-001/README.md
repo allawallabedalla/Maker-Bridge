@@ -49,8 +49,14 @@ Ergebnis: `pruef/v_matrix.json` (Feld `messtechnische_freigabe`), `pruef/messpro
 3. **Offset** ±4 µV ist nur typisch angegeben (kein Max für Verstärkung 2–128). Die Firmware kalibriert ihn beim Start (MUX 1110b, S. 32).
 4. **Einschwingzeit nach dem IDAC-Tausch** ist mit 1 ms angenommen. Nach Auslegung des Eingangsfilters neu berechnen (`EINSCHWING_US`).
 
+## Kalibrierkonzept (entschieden 19.11.2026)
+
+Der ganze Sensor wird im Temperaturbad gegen ein rückführbares Referenzthermometer abgeglichen (`modus: kalibriert`).
+Die Korrektur steckt als Polynom in der Firmware (KAL_K0 … K2) und gleicht Klassentoleranz, Verstärkungs- und Offsetfehler, R_ref-Toleranz und Leitungen aus.
+Ablauf und Zielwerte stehen im PRUEFPLAN, Abschnitt 1a.
+Stand: MK1 zeigt die Planung (höchstens u = 0,247 °C für die Kalibrierung). Gerechnet wird es erst mit echten Kalibrierwerten.
+
 ## Nächste Daten, die gebraucht werden
 
-1. Kalibrierkonzept festlegen: Verstärkung per Präzisionswiderständen oder ganzer Sensor gegen Referenz.
-2. Gewähltes PT100-Element: Eigenerwärmungskoeffizient.
+1. Gewähltes PT100-Element: Eigenerwärmungskoeffizient.
 3. Referenzthermometer: Seriennummer, Kalibrierschein, U, Gültigkeit.

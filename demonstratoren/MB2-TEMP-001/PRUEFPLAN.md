@@ -12,6 +12,22 @@ Das Ergebnis steht in `pruef/v_matrix.json` und `pruef/messprotokoll.md`.
 
 Ein Produktangebot oder Datenblatt ist **kein** Kalibriernachweis. Fehlt eine Pflichtangabe, gilt `unbewiesen` mit Grund `nachweisdaten_unvollstaendig`.
 
+## 1a Kalibrierung (Entscheidung 19.11.2026: ganzer Sensor gegen Referenz)
+
+Reihenfolge, damit kein Zirkelschluss entsteht:
+1. **Kalibrierreihe** `R-KAL-1`: Rohtemperatur des Geräts (`t_roh_c`, Firmware mit KAL_K* = 0) gegen Referenz an allen 9 Punkten aufnehmen, ≥ 10 Messungen je Punkt.
+2. `kalibrierung_auswerten(projekt, "R-KAL-1")` rechnet das Korrekturpolynom 2. Grades, `u_fit`, `u_referenz` und `u_kopplung`.
+   In `soll.json` geschrieben wird nur bei Datenstatus `rueckfuehrbar_gemessen`.
+3. KAL_K0 … K2 in `firmware/mb2_temp_001/config.h` eintragen und neu flashen. FW1 prüft die Übereinstimmung.
+4. **Nachweisreihen** R-GEN, R-LIN, R-HYS, R-WDH, R-BER **neu messen**, mit Korrektur, an einem anderen Termin. Die Kalibrierreihe zählt nie als Nachweis (`kalibrierdaten_als_nachweis`).
+
+**Budget für die Kalibrierung** (Planungsrechnung MK1, Modus kalibriert, mit den ADS1220-Werten):
+- Alles außer Kalibrierung und Eigenerwärmung ergibt u = 0,042 °C, vor allem den Temperaturgang von R_ref und ADC.
+- Für Referenz, Ausgleichsrest, thermische Kopplung und Eigenerwärmung **zusammen** bleiben höchstens u = 0,247 °C, damit U ≤ 0,5 °C.
+
+**Zielwerte (Vorgabe, noch nicht gemessen):** Referenzthermometer U ≤ 0,1 °C (k = 2), Kopplung ≤ 0,05 °C Halbbreite, Ausgleichsrest u_fit ≤ 0,05 °C.
+Damit ergäbe sich U ≈ 0,17 °C, mit Reserve für das ILAC-G8-Schutzband beim Nachweis.
+
 ## 2 Ablauf je Temperaturpunkt
 
 Punkte: −20, 0, 10, 20, 30, 40, 50, 70, 100 °C.

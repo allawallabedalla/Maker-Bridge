@@ -559,6 +559,23 @@ def _entscheide(fertig, kennwert, u, grenze, zusatz=''):
         ausw = 'bewiesen'
     return fertig(kennwert, u, ausw, zusatz)
 
+def korrektur_fit(x, y, grad=2):
+    """Ausgleichspolynom y = k0 + k1 x + ... (kleinste Quadrate). Rueckgabe Koeffizienten, Restfehler je Punkt,
+    Standardabweichung der Reste s (Freiheitsgrade n - grad - 1) als u_fit. Generisch, ohne Sensorwissen."""
+    import numpy as np
+    x, y = np.asarray(x, float), np.asarray(y, float)
+    n, m = len(x), grad + 1
+    if n <= m:
+        raise ValueError(f'{n} Punkte fuer Grad {grad} zu wenig (mindestens {m + 1})')
+    A = np.vander(x, m, increasing=True)
+    k, *_ = np.linalg.lstsq(A, y, rcond=None)
+    rest = y - A @ k
+    nu = n - m
+    s = float(np.sqrt((rest ** 2).sum() / nu))
+    return {'koeffizienten': [float(v) for v in k], 'reste': [float(v) for v in rest], 's': s, 'freiheitsgrade': nu,
+            'n': n, 'max_rest': float(abs(rest).max())}
+
+
 # ---------------------------------------------------------------------------------------------- Teil 4: Katalog
 
 PFLICHT = ('adc_bits', 'v_ref_V', 'adc_rauschen_V', 'u_ref_V', 'empfindlichkeit_V_je_einheit')

@@ -1,5 +1,5 @@
 /* MB2-TEMP-001: ESP32 (Arduino) + ADS1220 + PT100 3-Leiter. Ausgabe je Messwert ueber USB-Seriell:
- *   zeit_ms;code_a;code_b;offset_code;fehlerbits;r_ohm;t_c
+ *   zeit_ms;code_a;code_b;offset_code;fehlerbits;r_ohm;t_roh_c;t_c   (t_c mit Kalibrierkorrektur KAL_K0..K2)
  * Rohwerte und Rechnung stehen getrennt in der Zeile; die Auswertung ist nachtraeglich wiederholbar.
  * Pinbelegung ist eine ANNAHME (Schaltplan fehlt noch) - vor dem Aufbau anpassen.
  */
@@ -48,9 +48,10 @@ void setup()
     SPI.begin();
     int f = ads1220_start(&adc);
     f |= ads1220_offset_kalibrieren(&adc, OFFSET_MITTEL);
-    Serial.printf("# MB2-TEMP-001 gain=%d rref=%.1f idac_ua=%d tausch=%d offset_code=%ld start_fehler=%d\n",
-                  PGA_GAIN, RREF_OHM, IDAC_UA, IDAC_TAUSCH, (long)adc.offset_code, f);
-    Serial.println("# zeit_ms;code_a;code_b;offset_code;fehlerbits;r_ohm;t_c");
+    Serial.printf("# MB2-TEMP-001 gain=%d rref=%.1f idac_ua=%d tausch=%d offset_code=%ld start_fehler=%d "
+                  "kal=%.9g/%.9g/%.9g\n", PGA_GAIN, RREF_OHM, IDAC_UA, IDAC_TAUSCH, (long)adc.offset_code, f,
+                  KAL_K0, KAL_K1, KAL_K2);
+    Serial.println("# zeit_ms;code_a;code_b;offset_code;fehlerbits;r_ohm;t_roh_c;t_c");
 }
 
 void loop()
@@ -59,6 +60,6 @@ void loop()
         return;
     naechster += 1000 / MESSRATE_HZ;
     ads1220_messwert_t m = ads1220_messen(&adc);
-    Serial.printf("%lu;%ld;%ld;%ld;%d;%.5f;%.4f\n", (unsigned long)m.zeit_ms, (long)m.code_a, (long)m.code_b,
-                  (long)m.offset_code, m.fehler, m.r_ohm, m.t_c);
+    Serial.printf("%lu;%ld;%ld;%ld;%d;%.5f;%.4f;%.4f\n", (unsigned long)m.zeit_ms, (long)m.code_a, (long)m.code_b,
+                  (long)m.offset_code, m.fehler, m.r_ohm, m.t_roh_c, m.t_c);
 }

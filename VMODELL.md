@@ -123,6 +123,7 @@ Darum gibt es zwei Ebenen:
   - Die Modellgleichung liefert numerische Sensitivitäten (`budget_aus_modell`).
   - Das erste Profil ist `rtd_ratiometrisch_3leiter`: IEC 60751, IDAC-Tausch, MK4-Bauteilgrenzen. Bauteilgrenzen sind Daten, keine eingebauten Datenblattwerte.
   - Der Demonstrator dazu liegt unter `demonstratoren/MB2-TEMP-001/`.
+- **Kalibrierung** (`kalibrierung_auswerten`): Eine Reihe liefert die Korrektur. Sie darf nicht zugleich Nachweis sein (Grund `kalibrierdaten_als_nachweis`). Der Nachweis braucht eine unabhängige Reihe nach dem Laden der Korrektur.
 - Grenze: Der KI-Prüfer organisiert und rechnet den Nachweis. Beweiskraft hat nur die Messung mit rückführbarer Referenz. Eine kritische Freigabe macht ein Mensch.
 
 ## Befehle (MCP mb2)
