@@ -56,4 +56,7 @@ Hintergrund: Der ADS1220 spricht SPI – SPI ist nur für kurze Leitungen
   (A-STRAHLUNG.risiko): Sonnenfehler > 0,5 °C bei Sonne und Schwachwind möglich; ±0,5 °C gilt nur für den Sensor
   selbst, nicht für die gemessene Lufttemperatur.
 
+- 19.11.2026: Strahlungsschutz wird **gekauft** (Nutzer), nicht gedruckt. Auswahlkriterien in README → Kaufteile.
+  Folge: kein Lüfter nachrüstbar, sofern das Modell es nicht vorsieht; Schutzwirkung nur über den Feldvergleich bekannt.
+
 ## Audit

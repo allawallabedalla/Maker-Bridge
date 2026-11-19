@@ -56,6 +56,16 @@ Die Korrektur steckt als Polynom in der Firmware (KAL_K0 … K2) und gleicht Kla
 Ablauf und Zielwerte stehen im PRUEFPLAN, Abschnitt 1a.
 Stand: MK1 zeigt die Planung (höchstens u = 0,249 °C für die Kalibrierung). Gerechnet wird es erst mit echten Kalibrierwerten.
 
+## Kaufteile
+
+**Strahlungsschutz (passiv, gekauft – Entscheidung 19.11.2026).** Auswahlkriterien:
+1. Mehrere übereinanderliegende Lamellen, weiß, UV-beständiger Kunststoff (z. B. ASA) – keine einfache Kappe.
+2. Durchführung/Halter passend zum Fühlerdurchmesser; Fühlerspitze in der Mitte, ohne Kontakt zu den Lamellen.
+3. Befestigung für Mast oder Wand, Montagehöhe frei wählbar (für Lufttemperatur üblich ca. 2 m über Boden, über Gras).
+4. Angaben des Herstellers zum Strahlungsfehler, falls vorhanden, mitnehmen (Herkunft „datenblatt“); sonst gilt
+   nur der Feldvergleich (A-STRAHLUNG).
+5. Kauf nicht über Amazon (Vorgabe Nutzer).
+
 ## Nächste Daten, die gebraucht werden
 
 1. Gewähltes PT100-Element: Eigenerwärmungskoeffizient.
