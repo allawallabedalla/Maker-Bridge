@@ -4,19 +4,19 @@
 |---|---|---|
 | `config.h` | Konstanten mit Prüfwirkung (Verstärkung, R_ref, IDAC-Strom, IDAC-Tausch, Messrate). FW1 vergleicht sie mit `cad/soll.json` | fertig |
 | `rtd_rechnung.h` | Rohwert → Widerstand → Temperatur (IEC 60751), Fehlerbits (Übersteuerung, unplausibel, Tausch-Abweichung) | fertig, auf dem PC getestet |
-| ADS1220-Treiber (Register, SPI, IDAC-Routing) | **blockiert** | siehe unten |
+| `ads1220.h` | Treiber: RESET, Register schreiben und gegenlesen, Offsetkalibrierung (MUX 1110b), Messung mit IDAC-Tausch. Jeder Code mit Seite in SBAS501D | fertig, auf dem PC mit SPI-Attrappe getestet |
+| `mb2_temp_001.ino` | ESP32-Sketch (Arduino): SPI Modus 1, 5 Hz, Ausgabe `zeit_ms;code_a;code_b;offset_code;fehlerbits;r_ohm;t_c` | geschrieben, **nicht übersetzt** (kein ESP32-Toolchain im Container) |
 
-## Warum der Treiber fehlt
+## Register (SBAS501D S. 42–46)
 
-Die Registerbelegung des ADS1220 (MUX-, GAIN-, DR-, MODE-, VREF-, IDAC-, I1MUX/I2MUX-Codes, SPI-Befehle und SPI-Modus)
-muss aus dem TI-Datenblatt übernommen werden. Das Datenblatt war in dieser Sitzung nicht abrufbar.
-Registerwerte aus dem Gedächtnis wären eine unbelegte Bauteilspezifikation. Das verbietet die Qualitätsregel des Demonstrators.
+| Register | Wert | Bedeutung |
+|---|---|---|
+| 00h | 68h | AINP = AIN1, AINN = AIN0, Verstärkung 16, PGA aktiv (Offset: E8h = Eingänge kurz) |
+| 01h | 00h | 20 SPS, Normalmodus, Einzelwandlung |
+| 02h | 55h | externe Referenz REFP0/REFN0, 50 + 60 Hz FIR, IDAC 500 µA |
+| 03h | 70h / 8Ch | IDAC1 → AIN2, IDAC2 → AIN3 / getauscht |
 
-Vorgesehener Ablauf je Messwert (5 Hz):
-1. Wandlung A: IDAC1 → Leitung 1 (RTD), IDAC2 → Leitung 2 (Kompensation), Einzelwandlung, Rohcode speichern.
-2. Wandlung B: IDACs getauscht, Rohcode speichern.
-3. `rtd_rechnen(code_a, code_b, IDAC_TAUSCH, RREF_OHM, PGA_GAIN, RTD_R0_OHM, &r, &t)`.
-4. Ausgabe je Zeile: `zeitstempel_ms;code_a;code_b;fehlerbits;r_ohm;t_c`. Rohwerte und Rechnung stehen getrennt in der Zeile.
+Ablauf je Messwert: WREG 03h (startet eine Wandlung), warten `EINSCHWING_US`, START/SYNC (startet neu, S. 38), auf DRDY warten, RDATA. Dann das Gleiche mit getauschten IDACs, Mittelwert, Offset abziehen.
 
-Ob zwei Wandlungen je 200 ms möglich sind, hängt von der Wandlungszeit im Einzelwandlungsbetrieb ab. Diesen Wert liefert das Datenblatt.
+Zwei Wandlungen à 50,06 ms (S. 30, Tab. 8-4) plus Einschwingen passen in 200 ms (MK5).
 Nachgewiesen wird die Messrate am Gerät mit AB-MESSRATE.

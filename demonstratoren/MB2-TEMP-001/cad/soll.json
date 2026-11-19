@@ -66,25 +66,38 @@
      40
     ],
     "T_kal_C": 23,
-    "R_filter_ohm": 0
+    "R_filter_ohm": 0,
+    "messrate_Hz": 5,
+    "einschwing_s": 0.001
    },
    "bauteile": {
     "adc": {
      "name": "TI ADS1220",
      "avdd_V": 3.3,
-     "rauschen_Vrms": null,
-     "verstaerkungsfehler_rel": null,
-     "verstaerkungsdrift_ppm_K": null,
-     "offset_V": null,
-     "offsetdrift_V_K": null,
-     "inl_ppm_fsr": null,
-     "idac_fehlanpassung_rel": null,
-     "idac_compliance_rand_V": null,
-     "pga_rand_V": null,
-     "pga_formel_geprueft": false,
-     "vref_min_V": null,
-     "vref_max_V": null,
-     "verstaerkungen": null,
+     "rauschen_Vrms": 3.5e-07,
+     "verstaerkungsfehler_rel": 0.001,
+     "verstaerkungsdrift_ppm_K": 4,
+     "offset_V": 4e-06,
+     "offsetdrift_V_K": 3e-07,
+     "inl_ppm_fsr": 15,
+     "idac_fehlanpassung_rel": 0.003,
+     "ref_eingangsstrom_A": 1e-08,
+     "idac_compliance_rand_V": 0.9,
+     "pga_ausgang_rand_V": 0.2,
+     "vcm_min_avdd_anteil": 0.25,
+     "vref_min_V": 0.75,
+     "vref_max_V": 3.3,
+     "verstaerkungen": [
+      1,
+      2,
+      4,
+      8,
+      16,
+      32,
+      64,
+      128
+     ],
+     "wandlungszeit_s": 0.05006220703125,
      "aussteuerung_reserve": 0.05
     }
    }
@@ -103,8 +116,25 @@
    "messkette.schaltung.dR_leitung_ohm": "angenommen: Leitungslaenge/-paarung unbekannt - am Aufbau messen",
    "messkette.schaltung.R_leitung_ohm": "angenommen: Leitungslaenge unbekannt - am Aufbau messen",
    "messkette.schaltung.T_elektronik_C": "angenommen: Laborbetrieb 10 ... 40 °C",
-   "messkette.bauteile.adc": "offen: TI ADS1220 Datenblatt - Wert nicht abgerufen (www.ti.com in dieser Sitzung nicht lesbar), eintragen mit Tabelle/Seite",
-   "messkette.bauteile.adc.avdd_V": "berechnet: Versorgung 3,3 V (Lastenheft)"
+   "messkette.bauteile.adc.avdd_V": "berechnet: Versorgung 3,3 V (Lastenheft)",
+   "messkette.bauteile.adc.rauschen_Vrms": "datenblatt: TI ADS1220 SBAS501D (Rev. Mai 2026), S. 16, Tab. 7-1: 0,35 uVrms (1,16 uVpp) bei Gain 16, 20 SPS, Normalmodus; TYP, interne Referenz 2,048 V (externe Referenz laut S. 16 nur geringfuegig anders)",
+   "messkette.bauteile.adc.verstaerkungsfehler_rel": "datenblatt: TI ADS1220 SBAS501D (Rev. Mai 2026), S. 7, Tab. 6.5 Gain error: Gain 1-128, TA 25 C, MAX 0,1 %",
+   "messkette.bauteile.adc.verstaerkungsdrift_ppm_K": "datenblatt: TI ADS1220 SBAS501D (Rev. Mai 2026), S. 7, Tab. 6.5 Gain drift: Gain 1-128, MAX 4 ppm/C",
+   "messkette.bauteile.adc.offset_V": "datenblatt: TI ADS1220 SBAS501D (Rev. Mai 2026), S. 7, Tab. 6.5 Input offset voltage: Gain 2-128 TYP +-4 uV (kein Max angegeben); Offsetkalibrierung (S. 32) in der Firmware",
+   "messkette.bauteile.adc.offsetdrift_V_K": "datenblatt: TI ADS1220 SBAS501D (Rev. Mai 2026), S. 7, Tab. 6.5 Offset drift: Gain 1-128, TA -40...+85 C, MAX 0,3 uV/C",
+   "messkette.bauteile.adc.inl_ppm_fsr": "datenblatt: TI ADS1220 SBAS501D (Rev. Mai 2026), S. 7, Tab. 6.5 INL: Gain 1-128, best fit, MAX 15 ppm FSR",
+   "messkette.bauteile.adc.idac_fehlanpassung_rel": "datenblatt: TI ADS1220 SBAS501D (Rev. Mai 2026), S. 7, Tab. 6.5 IDAC current match: TYP +-0,3 % (kein Max); faellt durch IDAC-Tausch heraus",
+   "messkette.bauteile.adc.ref_eingangsstrom_A": "datenblatt: TI ADS1220 SBAS501D (Rev. Mai 2026), S. 7, Tab. 6.5 Reference input current: TYP +-10 nA",
+   "messkette.bauteile.adc.idac_compliance_rand_V": "datenblatt: TI ADS1220 SBAS501D (Rev. Mai 2026), S. 7, Tab. 6.5 Compliance voltage: MAX AVDD - 0,9 V; S. 57 Gl. 26",
+   "messkette.bauteile.adc.pga_ausgang_rand_V": "datenblatt: TI ADS1220 SBAS501D (Rev. Mai 2026), S. 22 Gl. 6 / S. 23 Gl. 12-13: PGA-Ausgaenge AVSS + 0,2 V ... AVDD - 0,2 V",
+   "messkette.bauteile.adc.vcm_min_avdd_anteil": "datenblatt: TI ADS1220 SBAS501D (Rev. Mai 2026), S. 23 Gl. 14: V_CMMIN >= AVSS + 1/4 (AVDD - AVSS)",
+   "messkette.bauteile.adc.vref_min_V": "datenblatt: TI ADS1220 SBAS501D (Rev. Mai 2026), S. 6, Tab. 6.3 V_REF: MIN 0,75 V",
+   "messkette.bauteile.adc.vref_max_V": "datenblatt: TI ADS1220 SBAS501D (Rev. Mai 2026), S. 6, Tab. 6.3 V_REF: MAX AVDD - AVSS",
+   "messkette.bauteile.adc.verstaerkungen": "datenblatt: TI ADS1220 SBAS501D (Rev. Mai 2026), S. 21, Tab. 8-1",
+   "messkette.bauteile.adc.wandlungszeit_s": "datenblatt: TI ADS1220 SBAS501D (Rev. Mai 2026), S. 30, Tab. 8-4: Einzelwandlung 20 SPS = 204850 t_CLK bei 4,096 MHz + 50 us Anlauf interner Oszillator",
+   "messkette.bauteile.adc.aussteuerung_reserve": "angenommen: 5 % Reserve gegen Vollausschlag (Toleranz R_ref, Verstaerkung)",
+   "messkette.schaltung.messrate_Hz": "berechnet: Lastenheft A-MESSRATE 5 Hz",
+   "messkette.schaltung.einschwing_s": "angenommen: Eingangsfilter noch nicht ausgelegt - nach Filterauslegung berechnen"
   }
  }
 }

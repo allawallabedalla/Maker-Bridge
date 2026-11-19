@@ -25,7 +25,8 @@ TMP = tempfile.mkdtemp(prefix='mb2_temp001_')
 FIX = 'datenblatt: TESTFIXTURE - kein echter Datenblattwert'
 ADC_FIX = {'name': 'TESTFIXTURE', 'avdd_V': 3.3, 'rauschen_Vrms': 1e-6, 'verstaerkungsfehler_rel': 1e-4,
            'verstaerkungsdrift_ppm_K': 1, 'offset_V': 2e-6, 'offsetdrift_V_K': 5e-9, 'inl_ppm_fsr': 10,
-           'idac_fehlanpassung_rel': 3e-3, 'idac_compliance_rand_V': 0.9, 'pga_rand_V': 0.2, 'pga_formel_geprueft': True,
+           'idac_fehlanpassung_rel': 3e-3, 'idac_compliance_rand_V': 0.9, 'pga_ausgang_rand_V': 0.2,
+           'vcm_min_avdd_anteil': 0.25, 'ref_eingangsstrom_A': 1e-8, 'wandlungszeit_s': 0.05,
            'vref_min_V': 0.75, 'vref_max_V': 3.3, 'verstaerkungen': [1, 2, 4, 8, 16, 32, 64, 128],
            'aussteuerung_reserve': 0.05}
 
@@ -98,10 +99,32 @@ def test_budget_dokumentation_vollstaendig():
 
 
 def test_fehlende_adc_daten_kein_budget():
-    mk = soll_demo()['_projekt']['messkette']
+    mk = copy.deepcopy(soll_demo()['_projekt']['messkette'])
+    for k in ('rauschen_Vrms', 'pga_ausgang_rand_V'):
+        mk['bauteile']['adc'][k] = None
     e = {x['id']: x for x in rtd.pruefe(mk, lambda f: None)}
     assert e['MK1']['stufe'] == 'uebersprungen' and 'v_rausch' in e['MK1']['hinweis'], e['MK1']
     assert e['MK2']['stufe'] == 'uebersprungen' and e['MK4-PGA']['stufe'] == 'uebersprungen'
+
+
+def test_demonstrator_mit_datenblattwerten():
+    """ADS1220-Werte aus SBAS501D: MK2-MK5 bestanden; MK1 offen (Eigenerwaermung des Elements fehlt). Mit
+    Eigenerwaermung als bewusst vernachlaessigt zeigt das Budget: ab Werk verfehlt (Verstaerkungsfehler max 0,1 %)."""
+    mk = soll_demo()['_projekt']['messkette']
+    hk = MK.herkunft_klasse(soll_demo()['_projekt'])
+    e = {x['id']: x for x in rtd.pruefe(mk, hk)}
+    assert e['MK1']['stufe'] == 'uebersprungen' and 'dt_selbst' in e['MK1']['hinweis'], e['MK1']
+    for i in ('MK2', 'MK3', 'MK4-REF', 'MK4-IDAC', 'MK4-PGA', 'MK5'):
+        assert e[i]['stufe'] == 'ok', e[i]
+    assert e['MK2']['wert'] < 0.01, e['MK2']                      # 0,35 uVrms (Tab. 7-1) -> 0,009 °C
+    assert abs(e['MK5']['wert'] - 2 * (204850 / 4.096e6 + 50e-6 + 1e-3)) < 1e-9
+    info = copy.deepcopy(mk)
+    info['vernachlaessigt'] = {'dt_selbst': 'nur fuer diesen Test'}
+    b = {x['id']: x for x in rtd.pruefe(info, hk)}['MK1']
+    d = b['daten']
+    assert b['stufe'] == 'fehler' and 0.55 < d['U'] < 0.7 and d['schlechtester_punkt_C'] == 100, (b['stufe'], d['U'])
+    gross = max(d['beitraege'], key=lambda z: z['beitrag'])
+    assert gross['name'] == 'e_gain', gross
 
 
 def test_vernachlaessigt_nur_mit_begruendung_und_warnung():
@@ -127,17 +150,18 @@ def test_uebersteuerung_und_grenzen():
     e16 = {x['id']: x for x in rtd.pruefe(mk_fix(), lambda f: 'datenblatt')}
     assert e16['MK3']['stufe'] == 'ok' and abs(e16['MK3']['wert'] - 0.6715) < 1e-3, e16['MK3']
     assert 'groesste zulaessige Verstaerkung 16' in e16['MK3']['hinweis']
-    for i in ('MK4-REF', 'MK4-IDAC', 'MK4-PGA', 'MK4-SELBST'):
+    for i in ('MK4-REF', 'MK4-IDAC', 'MK4-PGA', 'MK4-SELBST', 'MK5'):
         assert e16[i]['stufe'] == 'ok', e16[i]
     e32 = {x['id']: x for x in rtd.pruefe(mk_fix(gain=32), lambda f: 'datenblatt')}
     assert e32['MK3']['stufe'] == 'fehler' and e32['MK3']['wert'] > 1, e32['MK3']
     # IDAC-Compliance: zu grosser R_ref hebt die Pins ueber AVDD - Rand
     gross = {x['id']: x for x in rtd.pruefe(mk_fix(R_ref_ohm=2500), lambda f: 'datenblatt')}
     assert gross['MK4-IDAC']['stufe'] == 'fehler', gross['MK4-IDAC']
-    # PGA-Formel nicht bestaetigt -> hoechstens warnung
-    mk = mk_fix()
-    mk['bauteile']['adc']['pga_formel_geprueft'] = False
-    assert {x['id']: x for x in rtd.pruefe(mk, lambda f: 'datenblatt')}['MK4-PGA']['stufe'] == 'warnung'
+    # PGA-Gleichtakt (SBAS501D Gl. 12-14): kleiner R_ref senkt V_CM unter AVDD/4
+    klein = {x['id']: x for x in rtd.pruefe(mk_fix(R_ref_ohm=600, gain=32), lambda f: 'datenblatt')}
+    assert klein['MK4-PGA']['stufe'] == 'fehler', klein['MK4-PGA']
+    # Zeitbudget: 4 Wandlungen a 50 ms passen nicht in 200 ms
+    assert {x['id']: x for x in rtd.pruefe(mk_fix(mittelung=4), lambda f: 'datenblatt')}['MK5']['stufe'] == 'fehler'
 
 
 # ---------------------------------------------------------------------------------------------- Demonstrator
@@ -289,6 +313,52 @@ def test_firmware_rechnung_auf_dem_pc():
         assert int(f) == 0 and abs(float(tc) - t) < 1e-9, (z, t)
     assert int(zeilen[4].split()[0]) & 1 and int(zeilen[5].split()[0]) & 2, zeilen
     assert zeilen[6].strip() == '-1'
+
+
+def test_ads1220_treiber_mit_spi_attrappe():
+    """ads1220.h gegen SBAS501D: Befehlsbytes, Registerwerte, Ablauf (RESET, WREG/RREG, Offset, IDAC-Tausch)."""
+    if not shutil.which('g++'):
+        raise RuntimeError('g++ fehlt - Treiber nicht geprueft')
+    fw = os.path.join(DEMO, 'firmware', 'mb2_temp_001')
+    src, exe = os.path.join(TMP, 'd.cpp'), os.path.join(TMP, 'd')
+    open(src, 'w').write(r'''
+#include <cstdio>
+#include <cstring>
+#include <vector>
+#include "ads1220.h"
+static std::vector<std::vector<int>> log_; static uint8_t regs[4]; static int32_t codes[16]; static int ci = 0;
+static void tr(void*, const uint8_t* tx, uint8_t* rx, int n) {
+  std::vector<int> v(tx, tx + n); log_.push_back(v);
+  if ((tx[0] & 0xF0) == 0x40) { int rr = (tx[0] >> 2) & 3; for (int i = 1; i < n; i++) regs[rr + i - 1] = tx[i]; }
+  if ((tx[0] & 0xF0) == 0x20 && rx) { int rr = (tx[0] >> 2) & 3; for (int i = 1; i < n; i++) rx[i] = regs[rr + i - 1]; }
+  if (tx[0] == 0x10 && rx) { uint32_t c = (uint32_t)codes[ci++] & 0xFFFFFF; rx[1] = c >> 16; rx[2] = c >> 8; rx[3] = c; }
+}
+static int dr(void*, uint32_t) { return 1; } static void us(void*, uint32_t) {} static uint32_t ms(void*) { return 42; }
+int main() {
+  for (int i = 0; i < 8; i++) codes[i] = 100 + (i % 2) * 2;   /* Offset: Mittel 101 */
+  codes[8] = 4067000 + 101; codes[9] = 4067200 + 101;
+  ads1220_t d = {tr, dr, us, ms, 0, 0};
+  int f = ads1220_start(&d); f |= ads1220_offset_kalibrieren(&d, OFFSET_MITTEL);
+  ads1220_messwert_t m = ads1220_messen(&d);
+  printf("F %d %d %ld\n", f, m.fehler, (long)d.offset_code);
+  printf("R %.9f %.9f\n", m.r_ohm, m.t_c);
+  for (auto& v : log_) { for (int b : v) printf("%02X ", b); printf("\n"); }
+}''')
+    subprocess.run(['g++', '-O2', '-Wall', '-Werror', '-I', fw, src, '-o', exe], check=True)
+    z = subprocess.run([exe], capture_output=True, text=True, check=True).stdout.strip().split('\n')
+    f, fm, off = z[0].split()[1:]
+    assert f == '0' and fm == '0' and off == '101', z[0]
+    r = float(z[1].split()[1])
+    assert abs(r - (4067100 / 2 ** 23) * 2 * 1650 / 16) < 1e-9, z[1]          # Mittel der Phasen, Offset ab
+    log = [x.strip() + ' ' for x in z[2:]]
+    assert log[0] == '06 ', log[0]                                           # RESET (Tab. 8-7)
+    # WREG 4 Register: AIN1/AIN0 G16 | 20 SPS Einzel | REFP0 50/60 500 uA | IDAC1 AIN2, IDAC2 AIN3
+    assert log[1] == '43 68 00 55 70 ', log[1]
+    assert log[2] == '23 00 00 00 00 ', log[2]                               # RREG zur Kontrolle
+    assert log[3] == '43 E8 00 55 70 ', log[3]                               # Offset: MUX 1110b
+    assert log[5:7] == ['08 ', '10 00 00 00 '], log[5:7]                    # START, RDATA
+    ende = log[-6:]
+    assert ende == ['4C 70 ', '08 ', '10 00 00 00 ', '4C 8C ', '08 ', '10 00 00 00 '], ende   # Phase A, B getauscht
 
 
 if __name__ == '__main__':

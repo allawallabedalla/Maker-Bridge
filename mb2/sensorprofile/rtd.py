@@ -36,6 +36,7 @@ ADC_FELDER = {
     'offsetdrift_V_K': 'Offsetdrift',
     'inl_ppm_fsr': 'Integrale Nichtlinearitaet',
     'idac_fehlanpassung_rel': 'Fehlanpassung IDAC1/IDAC2 (relativ)',
+    'ref_eingangsstrom_A': 'Strom in den Referenzeingang (Betrag)',
 }
 
 
@@ -91,11 +92,12 @@ def anzeige(t, x, mk):
     i1, i2 = i * (1 + m / 2), i * (1 - m / 2)
     rl1, rl2 = rl + x.get('dR_leitung', 0.0) / 2, rl - x.get('dR_leitung', 0.0) / 2
     rref_w = rref * (1 + x.get('dR_ref_rel', 0.0) + x.get('tk_ref_rel', 0.0))
+    i_refein = x.get('i_ref_eingang', 0.0)       # Strom in den Referenzeingang, verringert den Strom durch R_ref
     v_err = sum(x.get(k, 0.0) for k in ('v_offset', 'v_offsetdrift', 'v_rausch', 'v_quant', 'v_inl'))
     eg = 1 + x.get('e_gain', 0.0) + x.get('e_gaindrift', 0.0)
 
     def d(ia, ib):
-        return g * eg * (ia * (r + rl1) - ib * rl2 + v_err) / ((ia + ib) * rref_w)
+        return g * eg * (ia * (r + rl1) - ib * rl2 + v_err) / ((ia + ib - i_refein) * rref_w)
 
     dd = (d(i1, i2) + d(i2, i1)) / 2 if sc.get('idac_tausch') else d(i1, i2)
     return t_von_r(dd * 2 * rref / g, r0) + x.get('dt_kal', 0.0)
@@ -158,6 +160,7 @@ def eingaben(mk, t, herkunft=lambda f: None):
             e('m_idac', 'rechteck', m, '1', 'bauteile.adc.idac_fehlanpassung_rel'),
             e('e_gain', 'rechteck', adc.get('verstaerkungsfehler_rel'), '1', 'bauteile.adc.verstaerkungsfehler_rel'),
             e('v_offset', 'rechteck', adc.get('offset_V'), 'V', 'bauteile.adc.offset_V'),
+            e('i_ref_eingang', 'rechteck', adc.get('ref_eingangsstrom_A'), 'A', 'bauteile.adc.ref_eingangsstrom_A'),
             e('v_inl', 'rechteck', mal(adc.get('inl_ppm_fsr') and adc['inl_ppm_fsr'] * 1e-6, fsr), 'V',
               'bauteile.adc.inl_ppm_fsr'),
         ]
@@ -328,24 +331,33 @@ def _bauteilgrenzen(mk, ap, herkunft_klasse):
         out.append(ergebnis('MK4-IDAC', 'IDAC-Compliance', st_ok(v_pin <= gr, ['bauteile.adc.idac_compliance_rand_V']),
                             wert=v_pin, grenze=gr, einheit='V', quelle=Q,
                             hinweis=f'IDAC-Pin max {v_pin:.4g} V (inkl. Filter {rf:g} Ohm) gegen AVDD - {cr} = {gr:.4g} V'))
-    pr = adc.get('pga_rand_V')
+    pr, anteil = adc.get('pga_ausgang_rand_V'), adc.get('vcm_min_avdd_anteil')
     if pr is None or avdd is None:
-        out.append(uebersprungen('MK4-PGA', 'PGA-Eingangsbereich', 'bauteile.adc.pga_rand_V/avdd_V fehlt', Q))
+        out.append(uebersprungen('MK4-PGA', 'PGA-Gleichtaktbereich', 'bauteile.adc.pga_ausgang_rand_V/avdd_V fehlt', Q))
     else:
         vin = max(abs(p['V_in_V']) for p in ap)
-        unten, oben = pr + vin * (g - 1) / 2, avdd - pr - vin * (g - 1) / 2
-        vmin = min(min(p['V_ain_p_V'], p['V_ain_n_V']) for p in ap)
-        vmax = max(max(p['V_ain_p_V'], p['V_ain_n_V']) for p in ap)
-        ok = unten <= vmin and vmax <= oben
-        geprueft = adc.get('pga_formel_geprueft') is True
-        st = st_ok(ok, ['bauteile.adc.pga_rand_V'])
-        if ok and not geprueft:
-            st = 'warnung'
-        out.append(ergebnis('MK4-PGA', 'PGA-Eingangsbereich', st, wert=[vmin, vmax], grenze=[unten, oben], einheit='V',
-                            quelle=Q, hinweis=f'Eingaenge {vmin:.4g} ... {vmax:.4g} V gegen AVSS + {pr} + |V_in|(G-1)/2 '
-                                              f'= {unten:.4g} ... {oben:.4g} V'
-                                              + ('' if geprueft else '; Formel nicht gegen Datenblatt bestaetigt '
-                                                                     '(pga_formel_geprueft: true setzen)')))
+        vcm = [(p['V_ain_p_V'] + p['V_ain_n_V']) / 2 for p in ap]
+        unten = pr + g * vin / 2
+        if anteil is not None:
+            unten = max(unten, anteil * avdd)
+        oben = avdd - pr - g * vin / 2
+        ok = unten <= min(vcm) and max(vcm) <= oben
+        out.append(ergebnis('MK4-PGA', 'PGA-Gleichtaktbereich', st_ok(ok, ['bauteile.adc.pga_ausgang_rand_V']),
+                            wert=[min(vcm), max(vcm)], grenze=[unten, oben], einheit='V', quelle=Q,
+                            hinweis=f'V_CM {min(vcm):.4g} ... {max(vcm):.4g} V gegen max(AVSS + {pr} + G*V_in,max/2, '
+                                    f'{anteil} AVDD) = {unten:.4g} ... AVDD - {pr} - G*V_in,max/2 = {oben:.4g} V '
+                                    f'(G = {g:g}, V_in,max = {vin * 1e3:.4g} mV)'))
+    tw, f = adc.get('wandlungszeit_s'), sc.get('messrate_Hz')
+    if tw is None or f is None:
+        out.append(uebersprungen('MK5', 'Zeitbudget Messrate', 'bauteile.adc.wandlungszeit_s/schaltung.messrate_Hz fehlt', Q))
+    else:
+        n = max(int(sc.get('mittelung', 1)), 1)
+        t = n * (float(tw) + float(sc.get('einschwing_s', 0.0)))
+        out.append(ergebnis('MK5', 'Zeitbudget Messrate', st_ok(t <= 1 / f, ['bauteile.adc.wandlungszeit_s']),
+                            wert=t, grenze=1 / f, einheit='s', quelle=Q,
+                            hinweis=f'{n} Wandlungen x ({float(tw) * 1e3:.4g} ms + Einschwingen '
+                                    f'{float(sc.get("einschwing_s", 0.0)) * 1e3:.3g} ms) = {t * 1e3:.4g} ms je Messwert '
+                                    f'gegen {1e3 / f:.4g} ms bei {f:g} Hz (SPI-Zeit nicht enthalten)'))
     s = mk.get('sensor') or {}
     p = max(x['P_rtd_W'] for x in ap)
     if s.get('eigenerwaermung_mW_K'):

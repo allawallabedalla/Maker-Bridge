@@ -154,10 +154,10 @@ Die Messreihen stehen in `messung.json`.
 | Feld | Bedeutung |
 |---|---|
 | `sensor {R0_ohm, klasse (AA/A/B/C), eigenerwaermung_mW_K}` | Element nach IEC 60751 |
-| `schaltung {I_idac_A, R_ref_ohm, R_ref_tol_rel, R_ref_tk_ppm_K, gain, bits, R_leitung_ohm, dR_leitung_ohm, idac_tausch, mittelung, T_elektronik_C [min, max], T_kal_C, R_filter_ohm}` | ratiometrische 3-Leiter-Schaltung |
-| `bauteile.adc {avdd_V, rauschen_Vrms, verstaerkungsfehler_rel, verstaerkungsdrift_ppm_K, offset_V, offsetdrift_V_K, inl_ppm_fsr, idac_fehlanpassung_rel, idac_compliance_rand_V, pga_rand_V, pga_formel_geprueft, vref_min_V, vref_max_V, verstaerkungen, aussteuerung_reserve}` | ADC-Grenzen aus dem Datenblatt. Fehlt ein Wert, wird nicht gerechnet |
+| `schaltung {I_idac_A, R_ref_ohm, R_ref_tol_rel, R_ref_tk_ppm_K, gain, bits, R_leitung_ohm, dR_leitung_ohm, idac_tausch, mittelung, T_elektronik_C [min, max], T_kal_C, R_filter_ohm, messrate_Hz, einschwing_s}` | ratiometrische 3-Leiter-Schaltung |
+| `bauteile.adc {avdd_V, rauschen_Vrms, verstaerkungsfehler_rel, verstaerkungsdrift_ppm_K, offset_V, offsetdrift_V_K, inl_ppm_fsr, idac_fehlanpassung_rel, ref_eingangsstrom_A, idac_compliance_rand_V, pga_ausgang_rand_V, vcm_min_avdd_anteil, vref_min_V, vref_max_V, verstaerkungen, wandlungszeit_s, aussteuerung_reserve}` | ADC-Grenzen aus dem Datenblatt. Fehlt ein Wert, wird nicht gerechnet |
 | `kalibrierung {u_referenz, u_fit, u_kopplung}` | nur im Modus kalibriert |
 | `vernachlaessigt {beitrag: Begründung}` | Beitrag bewusst weggelassen, MK1 ergibt dann höchstens `warnung` |
 
-MK4-REF (Referenzspannung), MK4-IDAC (Compliance), MK4-PGA (Eingangsbereich, `pga_formel_geprueft`), MK4-SELBST (Eigenerwärmung).
+MK4-REF (Referenzspannung), MK4-IDAC (Compliance), MK4-PGA (Gleichtaktbereich: max(AVSS + Rand + G·V_in,max/2, Anteil·AVDD) ≤ V_CM ≤ AVDD − Rand − G·V_in,max/2), MK4-SELBST (Eigenerwärmung), MK5 (Zeitbudget: mittelung × (wandlungszeit + einschwing) ≤ 1/messrate).
 Messreihe in `messung.json`: `datenstatus`, `sensor_id`, `seriennummer`, `datum`, `verfahren`, `referenz {mittel, seriennummer, kalibrierschein, rueckfuehrung, U, k, einheit, gueltig_bis}`, `bedingungen` (Schlüssel `_min`/`_max` als Mindest- bzw. Höchstwert), `pruefunsicherheit [Beiträge]`, `punkte [{ref, ist, richtung, t_h, zeit, roh_code}]`.

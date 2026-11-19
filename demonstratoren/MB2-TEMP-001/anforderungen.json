@@ -167,7 +167,7 @@
     "A-MESS-TEMP"
    ],
    "herkunft": "abgeleitet aus A-MESS-TEMP",
-   "text": "Keine Uebersteuerung, Referenz-, IDAC-Compliance- und PGA-Grenzen des ADS1220 ueber den Messbereich eingehalten; Eigenerwaermung vernachlaessigbar.",
+   "text": "Keine Uebersteuerung, Referenz-, IDAC-Compliance- und PGA-Grenzen des ADS1220 ueber den Messbereich eingehalten; Eigenerwaermung vernachlaessigbar; Zeitbudget fuer 5 Hz eingehalten (MK5).",
    "nachweise": [
     {
      "art": "katalog",
@@ -192,6 +192,11 @@
     {
      "art": "katalog",
      "ref": "MK4-SELBST",
+     "stufe": "integration"
+    },
+    {
+     "art": "katalog",
+     "ref": "MK5",
      "stufe": "integration"
     }
    ]

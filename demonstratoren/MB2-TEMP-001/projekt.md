@@ -16,4 +16,6 @@ Auflösung ≤ 0,05 °C, 5 Messungen/s. Drift: offen. Als Daten in `anforderunge
 - 19.11.2026: Verstärkung 16 (MK3: 67 % Aussteuerung bei 100 °C; 32 würde übersteuern).
 - 19.11.2026: IDAC-Tausch je Messwert, damit die Fehlanpassung der Stromquellen herausfällt (ohne Tausch wirkt sie als Verstärkungsfehler m/2).
 
+- 19.11.2026: ADS1220-Werte aus SBAS501D eingetragen. MK2 bis MK5 ok. MK1 ab Werk verfehlt (0,61 °C), weil der maximale Verstärkungsfehler dominiert → Kalibrierkonzept nötig.
+
 ## Audit
