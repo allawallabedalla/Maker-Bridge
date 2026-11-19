@@ -555,7 +555,8 @@ def _m7(pdir, t, r, spec, so, fr=None):
         h += f'; ohne Druckrichtung nicht bewertet: {fehlend}'
     h += f'; roh {S_roh:.3g} / f {f_r:.2f} = wirksam {S:.3g}; {txt_r}'
     return ergebnis('M7', 'Tsai-Hill (Druckrichtung)', stufe, wert=round(S, 3), grenze=round(S_Z, 3), quelle=Q_M7, teil=t,
-                    hinweis=h, daten={'index_max': info['index_max']})
+                    hinweis=h, daten={'index_max': info['index_max'], 'S_roh': round(S_roh, 4), 'f': round(f_r, 4),
+                                      'S_ziel': round(S_Z, 3), 'angenommen': bool(ang_r)})
 
 
 def _m8(fall, spec, erg):
@@ -682,6 +683,8 @@ def _m9(t, r, sl, fr=None):
     daten.update({'sigma_kern_max_MPa': round(wo[1], 4), 'festigkeit_kern_MPa': round(wo[2], 4)})
     m9_mat = wo[3]
     f_r, S_Z, ang_r, txt_r = fr(m9_mat) if (fr and m9_mat) else (1.0, S_ZIEL, True, 'ohne Realterme (angenommen)')
+    daten.update({'S_roh': round(S_min, 4) if S_min != float('inf') else None, 'f': round(f_r, 4),
+                  'S_ziel': round(S_Z, 3), 'angenommen': bool(ang or ang_r)})
     S_min = S_min / f_r if S_min != float('inf') else S_min
     stufe = realterme.deckel('ok' if S_min >= S_Z else 'warnung' if S_min >= 1.0 else 'fehler', ang or ang_r)
     h = vor + (f'Fuellung {sl["fill"]:.0f} %, Schale {schale:.2f} mm; Kern ({100 * anteil:.0f} % Volumen) traegt bis '

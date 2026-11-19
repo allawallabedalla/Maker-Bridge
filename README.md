@@ -143,6 +143,6 @@ Stand der roten Dateien: `tests/TESTSTATUS.md`.
 
 ## 8. Grenzen
 
-- Werkzeugpfade (CalculiX, Elmer, KiCad, PrusaSlicer, Blender) sind nur für Windows hinterlegt (`mb2/werkzeuge.py`). Die Python-Teile und Tests ohne diese Werkzeuge laufen auch unter Linux (Stand 19.11.2026, `tests/TESTSTATUS.md`).
+- Werkzeugpfade: CalculiX und Elmer werden unter Windows an festen Orten, sonst im PATH gesucht (`ccx`, `ElmerSolver`). KiCad, PrusaSlicer und Blender sind weiter nur für Windows hinterlegt (`mb2/werkzeuge.py`). Die Python-Teile und Tests ohne diese Werkzeuge laufen auch unter Linux (Stand 19.11.2026, `tests/TESTSTATUS.md`).
 - Kein Druckerupload, keine Fusion-Anbindung (das war maker-bridge 1).
 - KiCad nur Standardbibliothek.

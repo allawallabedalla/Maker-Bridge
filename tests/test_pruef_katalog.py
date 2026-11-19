@@ -47,10 +47,12 @@ def test_schwerkraft_fem_nach_schwingung():
     json.dump(e, open(os.path.join(d, 'fem', 'g.erg.json'), 'w'), default=str)
     lf = e['lastfaelle']
     assert 'eigengewicht' in lf and 'spitze' in lf, list(lf)
-    E, I, rho, A = 2000.0, B ** 4 / 12, 1270e-12, B * B
+    from mb2.material import MATERIAL
+    E, I, rho, A = MATERIAL['PETG']['E_MPa'], B ** 4 / 12, 1270e-12, B * B   # PETG E 1500 seit 19.11.2026
     w = rho * A * 9810 * LK ** 4 / (8 * E * I)
     f_exakt = 1.875 ** 2 / (2 * math.pi) * math.sqrt(E * I / (rho * A * LK ** 4))
-    assert abs(w - 0.007569) < 2e-6 and abs(f_exakt - 225.2) < 0.2, (w, f_exakt)
+    # Kontrolle der Formel selbst gegen die Handwerte mit E 2000 (w 0,007569 mm, f 225,2 Hz) - skaliert mit E
+    assert abs(w * E / 2000 - 0.007569) < 2e-6 and abs(f_exakt * math.sqrt(2000 / E) - 225.2) < 0.2, (w, f_exakt)
     d_fem = lf['eigengewicht']['max_verschiebung_mm']
     assert abs(d_fem / w - 1) < 0.05, (d_fem, w)
     r = schwingung.pruefe(d)

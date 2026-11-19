@@ -16,7 +16,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from _nachweis import beispielprojekt, lang  # noqa: E402,F401
 
-from mb2 import fem                                   # noqa: E402
+from mb2 import fem, material                                   # noqa: E402
 from mb2.material import MATERIAL                     # noqa: E402
 from mb2.pruefungen import fem_plausi as fp           # noqa: E402
 
@@ -37,6 +37,18 @@ def projekt(name, faelle, soll=None, slice_json=None):
         os.makedirs(os.path.join(d, 'print'), exist_ok=True)
         json.dump(slice_json, open(os.path.join(d, 'print', 'slice.json'), 'w'))
     return d
+
+
+E_PETG = material.MATERIAL['PETG']['E_MPa']          # Handrechnungen haengen am Werkstoffwert, nicht an einer Zahl
+
+
+def wirksam_ok(e, s_roh_hand):
+    """M7/M9 seit 19.11.2026: Rohwert = Handrechnung, wert = Rohwert / f, Stufe gegen S_ziel, Annahmen -> warnung."""
+    d = e['daten']
+    assert abs(d['S_roh'] / s_roh_hand - 1) < 2e-3, (d, s_roh_hand)
+    assert abs(e['wert'] - round(d['S_roh'] / d['f'], 3)) < 2e-3, e
+    roh = 'ok' if e['wert'] >= d['S_ziel'] else ('warnung' if e['wert'] >= 1.0 else 'fehler')
+    assert e['stufe'] == ('warnung' if d['angenommen'] and roh == 'ok' else roh), e
 
 
 def nach_id(liste, id, teil=None):
@@ -199,28 +211,29 @@ def test_zug_isotrop_gleichgewicht_energie_m7_m9():
                             'perimeter': 2})
     e = fem.mechanik(d, 'zug')
     r = e['lastfaelle']['zug']
-    # Hand: sigma = E * w / L = 2000 * 0.125 / 40 = 6,25 MPa, F = sigma * A = 100 N, Energie = F w / 2 = 6,25 Nmm
-    assert abs(r['kraft_in_wegrichtung_N'] - 100.0) < 0.01, r['kraft_in_wegrichtung_N']
-    assert abs(r['max_vonMises_MPa'] - 6.25) < 0.01
-    assert abs(r['energie_Nmm'] - 6.25) < 0.001, r['energie_Nmm']
+    # Hand: sigma = E * w / L (PETG E 1500 -> 4,6875 MPa), F = sigma * A (A = 16), Energie = F w / 2
+    sig = E_PETG * 0.125 / L
+    assert abs(r['kraft_in_wegrichtung_N'] - sig * B * B) < 0.01, r['kraft_in_wegrichtung_N']
+    assert abs(r['max_vonMises_MPa'] - sig) < 0.01
+    assert abs(r['energie_Nmm'] - sig * B * B * 0.125 / 2) < 0.001, r['energie_Nmm']
     f = np.load(r['spannungsfeld'])
-    assert np.allclose(f['tensor'][..., 0], 6.25, atol=1e-3) and np.abs(f['tensor'][..., 1:]).max() < 1e-3
+    assert np.allclose(f['tensor'][..., 0], sig, atol=1e-3) and np.abs(f['tensor'][..., 1:]).max() < 1e-3
     # M7 mit Druckrichtung z (Zug in der Ebene), a = R = sigma/2:
     #   Katalog a^2/X^2 + R^2 max(3/X^2, 1/S_xy^2), Hill sigma^2/X^2 -> bei S_xy = X/sqrt(3): S = X/sigma = 7,2
     X, Z, sxy, sz, _ = fp.festigkeiten('PETG')
-    idx = max(3.125 ** 2 / X ** 2 + 3.125 ** 2 * max(3 / X ** 2, 1 / sxy ** 2), 6.25 ** 2 / X ** 2)
+    idx = max((sig / 2) ** 2 / X ** 2 + (sig / 2) ** 2 * max(3 / X ** 2, 1 / sxy ** 2), sig ** 2 / X ** 2)
     S_hand = 1 / math.sqrt(idx)
     assert abs(r['tsai_hill']['sicherheit'] / S_hand - 1) < 1e-3, (r['tsai_hill'], S_hand)
     assert abs(e['bewertung']['min_sicherheit_tsai_hill'] - round(S_hand, 2)) < 0.011
     out = fp.pruefe(d)
     f23 = nach_id(out, 'F23')[0]
     assert f23['stufe'] == 'ok' and f23['wert'] < 1e-3, f23
-    assert nach_id(out, 'M7')[0]['stufe'] == 'ok' and abs(nach_id(out, 'M7')[0]['wert'] / S_hand - 1) < 1e-3
-    # M9: 20 % Fuellung, Schale 2 x 0,45 = 0,9 mm; Kern traegt 6,25 MPa gegen 0,3 * 0,2^1,5 * 28 = 0,7513 MPa
-    # -> S = 0,12 < 1: seit Audit 15.11.2026 'fehler' (vorher hoechstens warnung)
+    wirksam_ok(nach_id(out, 'M7')[0], S_hand)
+    # M9: 20 % Fuellung, Schale 2 x 0,45 = 0,9 mm; Kern traegt sigma gegen 0,3 * 0,2^1,5 * 28 = 0,7513 MPa
+    # -> S << 1: 'fehler' (seit Audit 15.11.2026)
     m9 = nach_id(out, 'M9')[0]
-    soll = 0.3 * 0.2 ** 1.5 * 28 / 6.25
-    assert m9['stufe'] == 'fehler' and abs(m9['wert'] - soll) < 1e-3, (m9, soll)
+    wirksam_ok(m9, 0.3 * 0.2 ** 1.5 * 28 / sig)
+    assert m9['stufe'] == 'fehler', m9
     assert abs(m9['daten']['schale_mm'] - 0.9) < 1e-9 and abs(m9['daten']['E_faktor'] - 0.04) < 1e-9
     assert nach_id(out, 'M8')[0]['stufe'] == 'uebersprungen'
     assert nach_id(out, 'F25')[0]['stufe'] == 'ok'
@@ -229,13 +242,14 @@ def test_zug_isotrop_gleichgewicht_energie_m7_m9():
     d3 = projekt('zug_falsch', {'zug': spec_falsch})
     fem.mechanik(d3, 'zug')
     assert nach_id(fp.pruefe(d3), 'M7')[0]['stufe'] == 'uebersprungen'
-    # Druckrichtung x aus soll.json (Zug quer zu den Schichten): S = Z / sigma = 28 / 6,25 = 4,48
+    # Druckrichtung x aus soll.json (Zug quer zu den Schichten): S_roh = Z / sigma
     spec = zug_spec()
     json.dump(spec, open(os.path.join(d, 'fem', 'zug.json'), 'w'))
     json.dump({'stab': {'druckrichtung': 'x'}}, open(os.path.join(d, 'cad', 'soll.json'), 'w'))
     fem.mechanik(d, 'zug')
     m7 = nach_id(fp.pruefe(d), 'M7')[0]
-    assert abs(m7['wert'] / 4.48 - 1) < 1e-3 and 'soll.json' in m7['hinweis'], m7
+    wirksam_ok(m7, 28 / sig)
+    assert 'soll.json' in m7['hinweis'], m7
 
 
 def test_m9_ungesliced_standardprofil():
@@ -244,11 +258,12 @@ def test_m9_ungesliced_standardprofil():
       Weg 0,125: sigma 6,25 -> S = 0,0781 < 1 -> fehler (vorher 'uebersprungen')
       Weg 0,004: sigma = 2000*0,004/40 = 0,2 MPa -> S = 2,44 >= 2 -> rechnerisch ok, Profil angenommen -> warnung"""
     sk = 0.3 * 0.15 ** 1.5 * 28
-    for weg, sigma, stufe in ((0.125, 6.25, 'fehler'), (0.004, 0.2, 'warnung')):
+    for weg in (0.125, 0.004):
+        sigma = E_PETG * weg / L
         d = projekt(f'zug_ungesliced_{weg}', {'zug': zug_spec(weg=weg)})
         fem.mechanik(d, 'zug')
         m9 = nach_id(fp.pruefe(d), 'M9')[0]
-        assert m9['stufe'] == stufe and abs(m9['wert'] / (sk / sigma) - 1) < 2e-3, (weg, m9, sk / sigma)
+        wirksam_ok(m9, sk / sigma)                                  # Profil angenommen -> hoechstens warnung
         assert abs(m9['daten']['schale_mm'] - 0.6) < 1e-9 and m9['daten']['profil_angenommen'] is True, m9
         assert '0.20mm SPEED @MK4IS 0.4' in m9['hinweis']
 
@@ -261,7 +276,8 @@ def test_m7_druckrichtung_aus_cad_druck_drehung():
     json.dump({'druck_drehung': [0, 90, 0]}, open(os.path.join(d, 'out', 'stab.pruefung.json'), 'w'))
     fem.mechanik(d, 'zug')
     m7 = nach_id(fp.pruefe(d), 'M7')[0]
-    assert m7['stufe'] == 'ok' and abs(m7['wert'] / 4.48 - 1) < 1e-3 and 'druck_drehung' in m7['hinweis'], m7
+    wirksam_ok(m7, 28 / (E_PETG * 0.125 / L))
+    assert 'druck_drehung' in m7['hinweis'], m7
 
 
 def test_bewertung_realterme_hand():
@@ -313,17 +329,17 @@ def test_zug_orthotrop_m8():
     kn, tets, kp, namen, _ = fem.netz(d, spec, 2)
     u = fem._lies_dat(os.path.join(d, 'fem', 'zug', 'lauf.dat'), len(kn))[0][0]
     rand_y = np.abs(kn[:, 1] - B) < 1e-9
-    assert abs(u[rand_y, 1].mean() + 0.38 * 3.125 / 2000 * 4) < 2e-6, u[rand_y, 1].mean()
+    assert abs(u[rand_y, 1].mean() + 0.38 * 3.125 / E_PETG * 4) < 2e-6, u[rand_y, 1].mean()
     out = fp.pruefe(d)
     assert nach_id(out, 'M8')[0]['stufe'] == 'info'
-    assert abs(nach_id(out, 'M7')[0]['wert'] / (28 / 3.125) - 1) < 1e-3  # Z / sigma = 8,96
+    wirksam_ok(nach_id(out, 'M7')[0], 28 / 3.125)                    # Z / sigma = 8,96 roh
     assert nach_id(out, 'F23')[0]['stufe'] == 'ok'
     # orthotrop ohne Werte (kennwerte.py: E_z unbekannt) -> isotrop gerechnet + Hinweis, M8 warnt
     d2 = projekt('ortho_leer', {'zug': zug_spec(druckrichtung='x', orthotrop=True)})
     e2 = fem.mechanik(d2, 'zug')
     from mb2 import kennwerte
     if kennwerte.wert('PETG', 'E_z_MPa') is None:
-        assert abs(e2['lastfaelle']['zug']['kraft_in_wegrichtung_N'] - 100.0) < 0.01
+        assert abs(e2['lastfaelle']['zug']['kraft_in_wegrichtung_N'] - E_PETG * 0.125 / L * B * B) < 0.01
         assert any('E_z unbekannt' in h for h in e2['hinweise'])
         assert nach_id(fp.pruefe(d2), 'M8')[0]['stufe'] == 'warnung'
 
@@ -337,7 +353,7 @@ def test_kragarm_schwerkraft_rayleigh():
     d = projekt('kragarm', {'g': spec})
     e = fem.mechanik(d, 'g')
     r = e['lastfaelle']['eigengewicht']
-    E, I, rho = 2000.0, B ** 4 / 12, 1270e-12
+    E, I, rho = E_PETG, B ** 4 / 12, 1270e-12
     q = rho * A * 9810
     w = q * Lk ** 4 / (8 * E * I)
     f1 = 1.875 ** 2 / (2 * math.pi) * math.sqrt(E * I / (rho * A * Lk ** 4))
@@ -372,7 +388,8 @@ def test_konvergenz_f20_f22():
     k = e['konvergenz']
     assert k['faktoren'] == [1.0, 0.7, 0.5] and k['tetraeder'][0] < k['tetraeder'][1] < k['tetraeder'][2]
     Fw = k['lastfaelle']['biegen']['kraft_weg_N']
-    assert abs(Fw[-1] / 2.0 - 1) < 0.05, Fw
+    F_hand = 3 * E_PETG * (B ** 4 / 12) * 1.0 / L ** 3         # E 2000 -> 2,0 N; E 1500 -> 1,5 N
+    assert abs(Fw[-1] / F_hand - 1) < 0.05, (Fw, F_hand)
     E_ = k['lastfaelle']['biegen']['energie_Nmm']
     assert E_[0] >= E_[1] >= E_[2], E_                 # Wegvorgabe: Energie faellt mit Verfeinerung (zu steif -> weicher)
     assert abs(E_[0] - 0.5 * Fw[0] * 1.0) < 1e-3 * E_[0]  # Energie = F w / 2
@@ -412,9 +429,10 @@ def test_kontakt_f24():
     d = projekt('kontakt', {'druck': spec})
     e = fem.mechanik(d, 'druck')
     r = e['lastfaelle']['druck']
-    assert abs(-r['reaktionskraft_N'][0][2] - 40.0) / 40 < 0.03, r['reaktionskraft_N']
+    sig = 0.01 / (4 / E_PETG + 1 / 500)                          # E 2000 -> 2,5 MPa (40 N); E 1500 -> 2,143 MPa
+    assert abs(-r['reaktionskraft_N'][0][2] - sig * 16) / (sig * 16) < 0.03, (r['reaktionskraft_N'], sig * 16)
     k = r['kontakt'][0]
-    assert abs(k['durchdringung_max_mm'] - 0.005) < 0.0005, k
+    assert abs(k['durchdringung_max_mm'] - sig / 500) < 0.0005, k
     assert abs(r['newton']['zeit_erreicht'] - 1.0) < 1e-9
     out = fp.pruefe(d)
     st = {(x['id'], x['titel']): x for x in out}

@@ -4,9 +4,9 @@ Klassifiziert wird je Testfunktion. **Nicht ausgeführt heißt nicht bestanden.*
 
 | Klasse | Funktionen | Bedeutung |
 |---|---|---|
-| bestanden | 218 | lief durch |
+| bestanden | 226 | lief durch (mit CalculiX im PATH; ohne CalculiX 218) |
 | beispielprojekt_fehlt | 16 | braucht `projects/<name>` (gitignored) oder `../maker-bridge/projects/` |
-| werkzeug_fehlt | 14 | CalculiX (8) bzw. Elmer (6) nicht installiert, im Container nicht verfügbar |
+| werkzeug_fehlt | 6 | Elmer nicht installiert (unter Linux nicht im Standard-Paketbestand); ohne CalculiX zusätzlich 8 |
 | lauf_nicht_angefordert | 1 | `test_taster_echt_lang` nur mit `MB2_LANG=1` |
 | fehlgeschlagen | **0** | kein erkannter Softwarefehler |
 
@@ -37,4 +37,4 @@ Das ist gewollt. `tests/alle.py` zeigt je Funktion den richtigen Stand.
 ## Was fehlt, um alles auszuführen
 
 1. Beispielprojekte `projects/{testdose, schnapphaken, stifthalter-fem, frag-mich-alles-gehaeuse, bodenklima-sondenkopf}` und `../maker-bridge/projects/{klimalogger, evolve-kiesel, rad-warnknopf, bodenklima}`. Sie sind nicht öffentlich.
-2. CalculiX und Elmer, nach Anleitung im README (Windows) oder als Linux-Paket. Linux ist nicht getestet.
+2. CalculiX: unter Linux im PATH reicht (`apt install calculix-ccx`, 2.21 geprüft, alle 8 CalculiX-Tests bestanden). Elmer: unter Linux selbst installieren, `ElmerSolver` in den PATH.

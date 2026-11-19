@@ -5,20 +5,24 @@
   Build vom 20.01.2026 = rel26.1) + Microsoft MPI (winget Microsoft.msmpi)
 - KiCad 10, PrusaSlicer: normal installiert
 - Java + Freerouting: portabel in ~/tools (alte Bridge, freerouting_setup)
+Linux/macOS (seit 19.11.2026): CalculiX und Elmer werden im PATH gesucht (`ccx`, `ElmerSolver`), z. B.
+Debian/Ubuntu `apt install calculix-ccx` (geprueft: 2.21). Elmer gibt es dort nicht im Standard-Paketbestand.
 """
 import functools
 import glob
 import os
 import re
+import shutil
 import subprocess
 
 TOOLS = os.path.join(os.path.expanduser('~'), 'tools')
 MSYS2_BIN = r'C:\msys64\ucrt64\bin'
 INSTALL = {
-    'ccx': 'MSYS2 installieren (winget install MSYS2.MSYS2), dann in "MSYS2 UCRT64": '
-           'pacman -S mingw-w64-ucrt-x86_64-calculix-ccx',
-    'elmer': 'Elmer-Installer ElmerFEM-nogui-mpi-Windows-AMD64-rel26.1.exe von '
-             'nic.funet.fi/pub/sci/physics/elmer/bin/windows/rel26.1/ + winget install Microsoft.msmpi',
+    'ccx': 'Windows: MSYS2 installieren (winget install MSYS2.MSYS2), dann in "MSYS2 UCRT64": '
+           'pacman -S mingw-w64-ucrt-x86_64-calculix-ccx; Linux: ccx in den PATH (Debian/Ubuntu: apt install calculix-ccx)',
+    'elmer': 'Windows: Elmer-Installer ElmerFEM-nogui-mpi-Windows-AMD64-rel26.1.exe von '
+             'nic.funet.fi/pub/sci/physics/elmer/bin/windows/rel26.1/ + winget install Microsoft.msmpi; '
+             'Linux: ElmerSolver in den PATH (nicht im Ubuntu-Standardbestand, siehe Elmer-Projektseite)',
 }
 
 
@@ -30,7 +34,9 @@ def _newest(pattern):
 
 def ccx():
     p = os.path.join(MSYS2_BIN, 'ccx.exe')
-    return p if os.path.exists(p) else None
+    if os.path.exists(p):
+        return p
+    return shutil.which('ccx') or shutil.which('ccx_2.21') or None
 
 
 @functools.cache
@@ -52,7 +58,19 @@ def ccx_env():
 
 def elmer_bin():
     p = _newest(os.path.join(os.environ.get('ProgramFiles', r'C:\Program Files'), 'Elmer*', 'bin', 'ElmerSolver.exe'))
+    p = p or shutil.which('ElmerSolver')
     return os.path.dirname(p) if p else None
+
+
+def elmer_solver():
+    """Pfad der ElmerSolver-Datei (Windows .exe oder Linux ohne Endung)."""
+    b = elmer_bin()
+    if not b:
+        return None
+    for n in ('ElmerSolver.exe', 'ElmerSolver'):
+        if os.path.exists(os.path.join(b, n)):
+            return os.path.join(b, n)
+    return None
 
 
 def elmer_env():
@@ -110,7 +128,7 @@ def status():
         st['ccx_version'] = subprocess.run([ccx(), '-v'], capture_output=True, text=True, timeout=60,
                                            stdin=subprocess.DEVNULL).stdout.strip()
     if elmer_bin():
-        v = subprocess.run([os.path.join(elmer_bin(), 'ElmerSolver.exe'), '-v'], capture_output=True, text=True,
+        v = subprocess.run([elmer_solver(), '-v'], capture_output=True, text=True,
                            timeout=60, env=elmer_env(), stdin=subprocess.DEVNULL).stdout
         st['elmer_version'] = next((z.strip() for z in v.splitlines() if 'Version' in z), v[-200:])
     return st

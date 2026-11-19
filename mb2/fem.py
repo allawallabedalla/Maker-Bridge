@@ -1408,7 +1408,7 @@ def _elmer_lauf(arbeit, z, n):
     for f in os.listdir(os.path.join(arbeit, 'netz')):
         if f.endswith('.vtu'):
             os.remove(os.path.join(arbeit, 'netz', f))
-    p = subprocess.run([os.path.join(werkzeuge.elmer_bin(), 'ElmerSolver.exe'), 'fall.sif'], cwd=arbeit,
+    p = subprocess.run([werkzeuge.elmer_solver(), 'fall.sif'], cwd=arbeit,
                        capture_output=True, text=True, timeout=7200, env=werkzeuge.elmer_env(),
                        stdin=subprocess.DEVNULL)
     vtus = sorted(f for f in os.listdir(os.path.join(arbeit, 'netz')) if f.endswith('.vtu'))
