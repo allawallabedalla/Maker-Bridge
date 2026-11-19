@@ -328,7 +328,7 @@ def _fem_gecacht(projekt, fall, neu, art):
             with ueberschrieben(spec.get('material_override')):
                 rk, dauer = fem._realkontext(d, spec, fall, list(hit['lastfaelle']))
                 hit['bewertung'] = fem.bewertung_mech(hit['lastfaelle'], hit['bewertung'].get('material', []),
-                                                      kontext=rk, dauer=dauer)
+                                                      kontext=rk, dauer=dauer, projekt=fem.projekt_soll(d))
         return hit
     from . import fem
     return cache.merken(erg_pfad, getattr(fem, art)(d, fall), key)

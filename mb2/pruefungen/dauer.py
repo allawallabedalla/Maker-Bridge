@@ -31,6 +31,7 @@ import statistics
 from .. import kennwerte as kw
 from .. import material as mat
 from .. import realterme as rt
+from .. import sicherheit as _sicherheit
 from . import ergebnis, soll as lade_soll, uebersprungen
 
 R_GAS = 8.314          # J/(mol K)
@@ -592,7 +593,7 @@ def _d9(pdir, teil, ts, material, temp, s):
                         teil=teil, hinweis=f'Timoshenko kappa {kap:.3e} 1/mm, w = kappa L^2/8 ueber {z["L_mm"]} mm; '
                                            f'da {da:.2e} 1/K, dT {dT:.1f} K; alpha aus {qa}')
     sig = abs(m['E_MPa'] * da * dT)
-    S = ts.get('sicherheit', S_STANDARD)
+    S = _sicherheit.ziel(s.get('_projekt', {}), ts, material, 'xy')[0]   # mb2/sicherheit.py
     n_xy = m['festigkeit_xy_MPa'] / sig if sig else math.inf
     n_z = m['festigkeit_z_MPa'] / sig if sig else math.inf
     st = _richtungs_stufe(n_xy, n_z, z.get('richtung'), S)
@@ -673,7 +674,7 @@ def _d11(pdir, teil, ts, material, s):
     Sf_xy = wechselfestigkeit(N, Sut_xy, Se) * k
     Sf_z = Sf_xy * Sut_z / Sut_xy
     n_xy, n_z = goodman_n(sa, sm, Sf_xy, Sut_xy), goodman_n(sa, sm, Sf_z, Sut_z)
-    S = ts.get('sicherheit', S_STANDARD)
+    S = _sicherheit.ziel(s.get('_projekt', {}), ts, material, 'xy')[0]   # mb2/sicherheit.py
     st = _richtungs_stufe(n_xy, n_z, wl.get('richtung'), S)
     return ergebnis('D11', titel, st, wert=round(n_xy if wl.get('richtung') != 'z' else n_z, 2), grenze=S,
                     einheit='n', quelle=Q_ERM, teil=teil,

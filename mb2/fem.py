@@ -270,7 +270,7 @@ def _mechanik(pdir, fall):
             r['spannungsfeld'] = npz
         erg['lastfaelle'][name] = r
     rk, dauer = _realkontext(pdir, spec, fall, list(erg['lastfaelle']))
-    erg['bewertung'] = bewertung_mech(erg['lastfaelle'], stoffe, kontext=rk, dauer=dauer)
+    erg['bewertung'] = bewertung_mech(erg['lastfaelle'], stoffe, kontext=rk, dauer=dauer, projekt=projekt_soll(pdir))
     if L.get('orthotrop'):
         erg['orthotrop'] = L['orthotrop']
     if L.get('schwer') is not None:
@@ -496,6 +496,14 @@ def dauerlast_je_lastfall(spec, namen, soll=None, fall=None):
     return out
 
 
+def projekt_soll(pdir):
+    try:
+        from .pruefungen import soll as _soll
+        return _soll(pdir).get('_projekt', {})
+    except Exception:  # noqa: BLE001
+        return {}
+
+
 def _realkontext(pdir, spec, fall, namen):
     """(realterme-Kontext aus soll.json + Merkmale, Dauerlast je Lastfall); unlesbar -> (None, ...) = Standards."""
     try:
@@ -515,13 +523,16 @@ def _endlich(x, n=3):
     return round(float(x), n) if x is not None and math.isfinite(x) else (None if x is None else 1e9)
 
 
-def bewertung_mech(lastfaelle, stoffe, kontext=None, dauer=None):
+def bewertung_mech(lastfaelle, stoffe, kontext=None, dauer=None, projekt=None):
     """Gesamtbewertung der Mechanik-Lastfaelle (Sicherheit z >= 2 nach Abminderung, Tsai-Hill, Energiebilanz).
     kontext: realterme.kontext (Temperatur, aussen, ...); None -> unguenstige Standards, Ergebnis hoechstens warnung.
     dauer: {lastfall: True/False/None} (dauerlast_je_lastfall). 'min_sicherheit_z' bleibt der Rohwert (23 C,
     Vollmaterial, Kurzzeit); 'ok' haengt am wirksamen Wert sigma_Z / (S f) >= ... d. h. S_roh / f >= 2."""
-    from . import realterme
+    from . import realterme, sicherheit
     k0 = dict(kontext) if kontext is not None else realterme.kontext(None)
+    # Ein Sicherheitsziel fuer alle Pruefungen (mb2/sicherheit.py): Minimum 2,0, Projektziel und M26 erhoehen es
+    s_ziel = {m: sicherheit.ziel(projekt, None, m, 'z')[0] for m in stoffe} if stoffe else {}
+    S_Z = max(s_ziel.values()) if s_ziel else sicherheit.S_STANDARD
     dauer = dauer or {}
     cache = {}
 
@@ -547,14 +558,17 @@ def bewertung_mech(lastfaelle, stoffe, kontext=None, dauer=None):
             ang_alle = ang_alle or ang
             sz = lf['sicherheit'][m]['z']
             sw = 1e9 if sz is None else sz / f
-            je[n][m] = {'S_z': sz, 'f': _endlich(f), 'S_z_wirksam': _endlich(sw, 2), 'dauerlast': dauer.get(n)}
-            if w_min is None or sw < w_min:
+            je[n][m] = {'S_z': sz, 'f': _endlich(f), 'S_z_wirksam': _endlich(sw, 2), 'dauerlast': dauer.get(n),
+                        'S_ziel': round(s_ziel[m], 3)}
+            if w_min is None or sw / s_ziel[m] < w_min / s_ziel[w_wo[1]]:
                 w_min, w_wo = sw, (n, m, f, terme)
     bw = {'material': stoffe, 'min_sicherheit_z': min(mins) if mins else None,
           'min_sicherheit_z_wirksam': _endlich(w_min, 2) if w_min is not None else None,
-          'ok': bool(mins) and w_min is not None and w_min >= 2.0,
-          'hinweis': 'Sicherheit >= 2 gegen Festigkeit in Schichtrichtung nach Abminderung f (Temperatur, Dauerlast/'
-                     'Kriechbruch, aussen; mb2/realterme.py) gefordert',
+          'ok': bool(mins) and w_min is not None and w_min >= s_ziel[w_wo[1]],
+          'S_ziel': round(S_Z, 3),
+          'hinweis': f'Sicherheit >= {S_Z:.2f} (mb2/sicherheit.py: Minimum 2, Projektziel, M26) gegen Festigkeit in '
+                     'Schichtrichtung nach Abminderung f (Temperatur, Dauerlast/Kriechbruch, aussen; mb2/realterme.py) '
+                     'gefordert',
           'angenommen': ang_alle, 'je_lastfall': je}
     if w_wo:
         bw.update({'abminderung': _endlich(w_wo[2]), 'realterme': w_wo[3], 'massgebend': f'{w_wo[0]}/{w_wo[1]}'})
@@ -572,8 +586,8 @@ def bewertung_mech(lastfaelle, stoffe, kontext=None, dauer=None):
             return abm(mat_, n)[0] if mat_ else 1.0
         th_w = min(t[0] / f_th(t[2], t[1]) for t in th)
         bw['min_sicherheit_tsai_hill_wirksam'] = _endlich(th_w, 2)
-        bw['ok'] = bw['ok'] and th_w >= 2.0
-        bw['hinweis'] += '; zusaetzlich Tsai-Hill (Druckrichtung) / f >= 2'
+        bw['ok'] = bw['ok'] and th_w >= S_Z
+        bw['hinweis'] += f'; zusaetzlich Tsai-Hill (Druckrichtung) / f >= {S_Z:.2f}'
     # Energiebilanz (Clapeyron, Befund I2): ein verletzter Lauf darf nie als ok durchgehen
     eb_schlecht = sorted(n for n, lf in lastfaelle.items()
                          if abs((lf.get('energiebilanz') or {}).get('abweichung') or 0.0) > CLAPEYRON_TOL)

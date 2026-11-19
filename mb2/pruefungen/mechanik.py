@@ -248,13 +248,10 @@ class Kontext:
         return r
 
     # ---- Sicherheit
-    def S(self, teil, richtung='z'):
-        """Ziel-Sicherheit: soll.json (Teil, sonst _projekt, sonst 2,0), von M26 hoechstens erhoeht."""
-        ts = self.ts(teil)
-        basis = float(ts.get('sicherheit') or self.projekt.get('sicherheit') or S_STANDARD)
+    def S(self, teil, richtung='z', minimum=S_STANDARD):
+        """Ziel-Sicherheit (mb2/sicherheit.py): max(Minimum der Pruefung, Teil/Projekt-Ziel, M26)."""
         mat, _ = self.material(teil)
-        s26 = m26_sicherheit(self.projekt, mat, richtung) if mat else None
-        return max(basis, s26) if s26 and s26 > 0 else basis
+        return _sicherheit.ziel(self.projekt, self.ts(teil), mat, richtung, minimum)[0]
 
     def kw(self, mat, feld, item=None, key=None):
         if item is not None and item.get(key or feld) is not None:
@@ -407,13 +404,14 @@ def _pruefe_schnapper(k, teil, mat, dr, dr_q):
         # Fuegen ist Kurzzeitlast; vorgespannt in Ruhelage ("vorgespannt": true) ist Dauerlast
         af = k.abm(teil, 'festigkeit', item=s, dauerlast=bool(s.get('vorgespannt')))
         sig_f, sig_n, sig_roh = _fest(m, lage, af)
-        st = 'ok' if r['sigma_MPa'] <= sig_f / 1.5 else 'warnung' if r['sigma_MPa'] <= sig_f else 'fehler'
+        S1 = k.S(teil, 'xy', minimum=1.5)
+        st = 'ok' if r['sigma_MPa'] <= sig_f / S1 else 'warnung' if r['sigma_MPa'] <= sig_f else 'fehler'
         out.append(ergebnis('M1', titel + ': Spannung', realterme.deckel(st, af[2]), wert=_r(r['sigma_MPa'], 2),
-                            grenze=_r(sig_f / 1.5, 2), einheit='MPa', quelle=Q['M1'], teil=teil,
+                            grenze=_r(sig_f / S1, 2), einheit='MPa', quelle=Q['M1'], teil=teil,
                             daten={**daten, 'festigkeit_roh_MPa': sig_roh, 'abminderung': _r(af[0], 3),
                                    'realterme': af[1]},
                             hinweis=f'sigma = E*eps linear (ueberschaetzt, Sekantenmodul kleiner) gegen '
-                                    f'{sig_n} {sig_roh} / {af[0]:.2f} / 1,5'
+                                    f'{sig_n} {sig_roh} / {af[0]:.2f} / {S1:.2f}'
                                     + ('' if lage else '; Lage unbekannt -> sigma_Z') + _rt(af)))
         # M2 Fuegekraft
         if s.get('winkel_grad') is None:
@@ -583,8 +581,9 @@ def _pruefe_knicken(k, teil, mat, dr, dr_q):
         P = float(s['kraft_N'])
         Pcr, lam, art = m4_knicken(E, I, A, float(Kf), float(s['L_mm']), druck)
         q = Pcr / P if P > 0 else float('inf')
-        st = 'ok' if q >= 3 else 'warnung' if q >= 1 else 'fehler'
-        out.append(ergebnis('M4', titel, _schlimmer(st, st_min), wert=_r(q, 2), grenze=3.0, einheit='P_cr/P',
+        S4 = k.S(teil, 'z', minimum=3.0)
+        st = 'ok' if q >= S4 else 'warnung' if q >= 1 else 'fehler'
+        out.append(ergebnis('M4', titel, _schlimmer(st, st_min), wert=_r(q, 2), grenze=round(S4, 3), einheit='P_cr/P',
                             quelle=Q['M4'], teil=teil, daten={'P_cr_N': _r(Pcr, 2), 'schlankheit': _r(lam, 1),
                                                               'verfahren': art},
                             hinweis=f'{art}: P_cr = {Pcr:.1f} N bei K = {Kf}, lineare FEM sieht Knicken nicht; '
@@ -1351,26 +1350,9 @@ def _pruefe_constraints(k, teil):
 
 # ================================================================ M26 Sicherheitsziel aus Streuung
 
-def m26_ke(s_rel, R):
-    """k_e = 1 - s z (z = Quantil der Normalverteilung zur Zuverlaessigkeit R; s = 0,08: Katalogwert 2.72)."""
-    z = statistics.NormalDist().inv_cdf(R)
-    return 1 - s_rel * z, z
-
-
-def _streuung(projekt, mat, richtung):
-    feld = 'streuung_xy' if richtung == 'xy' else 'streuung_z'
-    if projekt.get(feld) is not None:
-        return float(projekt[feld]), 'soll.json _projekt'
-    v = kennwerte.wert(mat, feld) if mat else None
-    return (v, 'kennwerte.py') if v is not None else (None, None)
-
-
-def m26_sicherheit(projekt, mat, richtung):
-    s, _ = _streuung(projekt, mat, richtung)
-    if s is None:
-        return None
-    ke, _ = m26_ke(s, float(projekt.get('zuverlaessigkeit') or 0.99))
-    return float(projekt.get('lastfaktor') or 1.0) / ke if ke > 0 else None
+from ..sicherheit import m26_ke, m26_sicherheit                       # noqa: E402 (seit 19.11.2026 zentral)
+from ..sicherheit import streuung as _streuung                        # noqa: E402
+from .. import sicherheit as _sicherheit                              # noqa: E402
 
 
 def _pruefe_m26(k, stoffe):

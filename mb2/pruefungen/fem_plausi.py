@@ -198,8 +198,9 @@ def pruefe(pdir):
                 out.append(_f23_energie(t, r))
             if nl:
                 out += _f24(t, r, spec)
-            out.append(_m7(pdir, t, r, spec, so))
-            out.append(_m9(t, r, slicer or _standardprofil()))
+            fr = _realfaktor(pdir, so, spec, fall, lf)
+            out.append(_m7(pdir, t, r, spec, so, fr))
+            out.append(_m9(t, r, slicer or _standardprofil(), fr))
         if not nl:
             out.append(uebersprungen('F24', 'Newton/Kontakt-Konvergenz', 'linearer Lastfall - kein Newton', Q_F24, fall))
         out += _f20_22(fall, erg)
@@ -492,7 +493,29 @@ def _vektor(d):
     return v / n
 
 
-def _m7(pdir, t, r, spec, so):
+def _realfaktor(pdir, so, spec, fall, lf):
+    """Abminderung und Sicherheitsziel je Lastfall wie fem.bewertung_mech (realterme + mb2/sicherheit.py):
+    -> funktion(material) = (f, S_ziel, angenommen, text)."""
+    from .. import fem, realterme, sicherheit
+    try:
+        k0 = realterme.kontext(pdir, soll=so)
+    except Exception:  # noqa: BLE001
+        k0 = realterme.kontext(None)
+    dl = fem.dauerlast_je_lastfall(spec, [lf], so, fall).get(lf)
+    pj = (so or {}).get('_projekt', {})
+
+    def je(mat):
+        kk = {**k0, 'material': mat, 'dauerlast': dl}
+        tt, a_t = [], False
+        if kk.get('T_teil_C') is None:
+            kk['T_teil_C'], tt, a_t = realterme.teil_temperatur(kk)
+        f, terme, ang = realterme.abminderung('festigkeit', kk)
+        S, st = sicherheit.ziel(pj, None, mat, 'z')
+        return f, S, ang or a_t, realterme.hinweis(tt + terme) + f'; Ziel {st}'
+    return je
+
+
+def _m7(pdir, t, r, spec, so, fr=None):
     f = _lade_feld(r)
     if f is None:
         return uebersprungen('M7', 'Tsai-Hill (Druckrichtung)', 'kein Spannungsfeld (.npz) - ' + NEU, Q_M7, t)
@@ -519,7 +542,9 @@ def _m7(pdir, t, r, spec, so):
                              f'Druckrichtung unbekannt fuer {fehlend} (Lastfall "druckrichtung", soll.json oder '
                              'cad_build mit druck -> out/<teil>.pruefung.json druck_drehung)', Q_M7, t)
     S, name, mat, dr, woher, info, ort, am = best
-    stufe = 'ok' if S >= S_ZIEL else ('warnung' if S >= 1.0 else 'fehler')
+    f_r, S_Z, ang_r, txt_r = fr(mat) if fr else (1.0, S_ZIEL, True, 'ohne Realterme (angenommen)')
+    S_roh, S = S, S / f_r
+    stufe = realterme.deckel('ok' if S >= S_Z else ('warnung' if S >= 1.0 else 'fehler'), ang_r)
     h = (f'{name} ({mat}), Druckrichtung {dr} aus {woher}, Ort ~{[round(v, 2) for v in ort]}; '
          f'X {info["X_MPa"]}, Z {info["Z_MPa"]}, Schub XY {info["schub_xy_MPa"]}, Z {info["schub_z_MPa"]} MPa')
     if info['geschaetzt']:
@@ -528,7 +553,8 @@ def _m7(pdir, t, r, spec, so):
         h += '; Ort beruehrt eine Lagerflaeche - kann Randbedingungs-Artefakt sein, Lagerung pruefen (Wert gilt trotzdem)'
     if fehlend:
         h += f'; ohne Druckrichtung nicht bewertet: {fehlend}'
-    return ergebnis('M7', 'Tsai-Hill (Druckrichtung)', stufe, wert=round(S, 3), grenze=S_ZIEL, quelle=Q_M7, teil=t,
+    h += f'; roh {S_roh:.3g} / f {f_r:.2f} = wirksam {S:.3g}; {txt_r}'
+    return ergebnis('M7', 'Tsai-Hill (Druckrichtung)', stufe, wert=round(S, 3), grenze=round(S_Z, 3), quelle=Q_M7, teil=t,
                     hinweis=h, daten={'index_max': info['index_max']})
 
 
@@ -614,7 +640,7 @@ def _standardprofil():
     return dict(w)
 
 
-def _m9(t, r, sl):
+def _m9(t, r, sl, fr=None):
     if sl is None or sl.get('fill') is None:
         sl = _standardprofil()
     ang = bool(sl.get('angenommen'))
@@ -652,14 +678,18 @@ def _m9(t, r, sl):
         sig = s_f * M[mats[int(k)]]['festigkeit_z_MPa']
         S = sig / sk if sk > 0 else float('inf')
         if S_min is None or S < S_min:
-            S_min, wo = S, (str(f['namen'][int(k)]), sk, sig)
+            S_min, wo = S, (str(f['namen'][int(k)]), sk, sig, mats[int(k)])
     daten.update({'sigma_kern_max_MPa': round(wo[1], 4), 'festigkeit_kern_MPa': round(wo[2], 4)})
-    stufe = realterme.deckel('ok' if S_min >= S_ZIEL else 'warnung' if S_min >= 1.0 else 'fehler', ang)
+    m9_mat = wo[3]
+    f_r, S_Z, ang_r, txt_r = fr(m9_mat) if (fr and m9_mat) else (1.0, S_ZIEL, True, 'ohne Realterme (angenommen)')
+    S_min = S_min / f_r if S_min != float('inf') else S_min
+    stufe = realterme.deckel('ok' if S_min >= S_Z else 'warnung' if S_min >= 1.0 else 'fehler', ang or ang_r)
     h = vor + (f'Fuellung {sl["fill"]:.0f} %, Schale {schale:.2f} mm; Kern ({100 * anteil:.0f} % Volumen) traegt bis '
          f'{wo[1]:.3g} MPa gegen 0,3 rho^1,5 sigma_Z = {wo[2]:.3g} MPa ({wo[0]})')
     if anteil > 0.05:
         h += f'; Steifigkeit dort nur {E_f:.3g} x E -> Federrate/Verschiebung der FEM zu guenstig'
-    if S_min < S_ZIEL:
+    h += f'; wirksam nach f {f_r:.2f}; {txt_r}'
+    if S_min < S_Z:
         h += ' - voll drucken (Fuellung/Perimeter erhoehen) oder FEM-Kern abmindern'
     return ergebnis('M9', 'Infill-Abminderung', stufe, wert=round(S_min, 3) if S_min != float('inf') else None,
-                    grenze=S_ZIEL, quelle=Q_M9, teil=t, hinweis=h, daten=daten)
+                    grenze=round(S_Z, 3), quelle=Q_M9, teil=t, hinweis=h, daten=daten)

@@ -14,7 +14,7 @@ hier ist die Übersicht mit Katalog-ID. Aufruf: `pruefkatalog(projekt)` bzw. aut
 | Feld | Bedeutung | Prüfungen |
 |---|---|---|
 | `material` | Standardmaterial aller Teile (PLA/PETG/ASA) | alle |
-| `sicherheit` | Ziel-Sicherheit (Standard 2,0; M26 kann sie nur erhöhen) | M*, D* |
+| `sicherheit` | Ziel-Sicherheit für **alle** Festigkeitsprüfungen (`mb2/sicherheit.py`): max(Minimum der Prüfung, Teil-/Projektziel, M26). Minima: FEM/M7/M9/D9/D11 2,0, M1 1,5, M4 3,0 | FEM, M*, D* |
 | `zuverlaessigkeit`, `lastfaktor`, `streuung_xy`, `streuung_z` | Sicherheitsziel aus Streuung (Std. 0,99 / 1,0 / kennwerte) | M26, D11 |
 | `T_max_C`, `T_min_C`, `T_mittel_C`, `T_tagesgang_K` (Spitze–Spitze) | Einsatztemperatur | D1, D5–D9, W6, S (Luftdaten) |
 | `T_bauraum_C` | Druckraum (Standard 25) | D10, W10 |
