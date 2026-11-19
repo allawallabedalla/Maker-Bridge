@@ -10,6 +10,14 @@ Die Werkzeuge liefert der MCP-Server **mb2**. Jeder Schritt läuft über einen e
 
 **Regeln:** Nie drucken, nur slicen. Fusion nicht anfassen. Anhalten, wenn der Nutzer etwas tun muss (Installation, Entscheidung – F8 nicht, das macht `kicad_sync`). Antworten auf Deutsch: Kernaussage zuerst, 3–5 Punkte, eine Frage am Ende.
 
+**ADHS-taugliche Kommunikation (Pflicht für alle Antworten, seit 19.11.2026):**
+- Erste Zeile: Kernaussage oder Ergebnis. Kein Vorgeplänkel, keine Floskeln.
+- Kurze Sätze. Listen mit höchstens 5 Punkten, nummeriert bei Abfolgen. Wichtiges **fett**.
+- Zeit- und Aufwandsangaben in Minuten oder Stunden, nie „bald“ oder „etwas“.
+- Nur das Nötige. Details erst auf Nachfrage. Lieber kurz und vollständig als lang und gründlich.
+- Am Ende genau EIN nächster Schritt bzw. EINE Frage.
+- Kritik und Verständlichkeit gehen vor Kürze, aber jede Kritik in 1–2 Sätzen mit Zahl und Folge.
+
 **Rückfragen an den Nutzer (Pflicht, seit 19.11.2026):** Jede Frage muss ohne Vorwissen aus dem Chat verständlich sein.
 - Erst in 1–2 Sätzen sagen, worum es geht und warum die Entscheidung nötig ist. Alltagssprache verwenden, Fachwörter einmal kurz erklären, keine internen Kürzel wie MK1 oder E16 ohne Erklärung.
 - Höchstens 2–3 Möglichkeiten, jede mit Vorteil, Nachteil und ungefährem Aufwand (Zeit, Kosten, benötigte Geräte).

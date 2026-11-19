@@ -68,5 +68,6 @@ Jeder Eintrag in `maengel` ist ein Mangel. Rechne das nicht von Hand nach, sonde
    - Druckzeit plausibel?
 
 ## Antwort
+ADHS-tauglich: erst das Urteil, kurze Sätze, je Station höchstens 5 Punkte, Wichtiges fett.
 Je Station: **bestanden / Mangel**. Bei Mangel die Stelle angeben (Datei, Zeile, Koordinate) und einen konkreten Vorschlag machen.
 Ganz oben steht ein Satz: „Freigabe“ oder „Nicht freigegeben, weil …“. Nichts schönreden. Wenn du nichts findest, sag, was du geprüft hast.
