@@ -10,6 +10,12 @@ Die Werkzeuge liefert der MCP-Server **mb2**. Jeder Schritt läuft über einen e
 
 **Regeln:** Nie drucken, nur slicen. Fusion nicht anfassen. Anhalten, wenn der Nutzer etwas tun muss (Installation, Entscheidung – F8 nicht, das macht `kicad_sync`). Antworten auf Deutsch: Kernaussage zuerst, 3–5 Punkte, eine Frage am Ende.
 
+**Rückfragen an den Nutzer (Pflicht, seit 19.11.2026):** Jede Frage muss ohne Vorwissen aus dem Chat verständlich sein.
+- Erst in 1–2 Sätzen sagen, worum es geht und warum die Entscheidung nötig ist. Alltagssprache verwenden, Fachwörter einmal kurz erklären, keine internen Kürzel wie MK1 oder E16 ohne Erklärung.
+- Höchstens 2–3 Möglichkeiten, jede mit Vorteil, Nachteil und ungefährem Aufwand (Zeit, Kosten, benötigte Geräte).
+- Eine Empfehlung mit einem Satz Begründung.
+- Eine einzige, klar beantwortbare Frage am Ende („a oder b?“). Keine Sammelfragen.
+
 ## 0. Idee schärfen (du selbst)
 - Nur fragen, was wirklich offen ist: Funktion, Strom (USB-C/Akku), Bedienelemente, Anschlüsse, Zielgröße, Einsatzort (Wärme oder außen → PETG/ASA), Lasten (Klemmen, Schnappen, Fallen).
 - Angaben des Nutzers zu Bauteilen übernehmen, nicht nach Datenblattdetails fragen.
