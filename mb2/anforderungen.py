@@ -96,7 +96,7 @@ def kontext_hash(pdir):
     Hash gebundene menschliche Freigabe ungueltig."""
     h = hashlib.sha1()
     dateien = ['cad/soll.json', 'projekt.md', 'anforderungen.json', 'abnahme.json', 'feld.json', 'messung.json',
-               'kosten.json']
+               'kosten.json', 'stichproben.json']
     fw = (_soll(pdir).get('_projekt', {}) or {}).get('firmware') or {}
     for k in (fw.get('konstanten') or {}).values():
         if k.get('datei'):
@@ -439,6 +439,11 @@ def pruefen(pdir, katalog=None, extra=None):
         widerlegt = {z['pruefung'] for z in feld_vergleich(feld, katalog) if z.get('urteil') == 'zu_optimistisch'}
     except Exception:  # noqa: BLE001 - Feldvergleich darf die Matrix nicht abbrechen
         widerlegt = set()
+    try:
+        from . import stichproben as _sp
+        stich = _sp.bewerte(pdir, katalog)
+    except Exception:  # noqa: BLE001
+        stich = {}
     stakeholder_ids = {a['id'] for a in anf if a.get('ebene') == 'stakeholder'}
     hat_stakeholder = bool(stakeholder_ids)
     for a in anf:
@@ -474,6 +479,19 @@ def pruefen(pdir, katalog=None, extra=None):
                 st, txt, treffer, info = _messung_status(nw, a, messung, kal_reihe, kal)
             else:
                 st, txt, treffer = nachweis_status(nw, pdir, katalog, abnahme, feld, extra)
+            # Stichproben-Validierung (stichproben.json): widerlegt -> kein Nachweis; ausserhalb des gemessenen Bereichs
+            # -> hoechstens vorbehalt; validiert -> nur vermerkt (der Nachweis selbst kommt aus der Pruefung)
+            schl = [('katalog', nw.get('ref'))] if nw.get('art') == 'katalog' else \
+                [('fem', f) for f in _fem_faelle(nw, pdir)] if nw.get('art') == 'fem' else []
+            for key in schl:
+                e = stich.get(key)
+                if not e or e['status'] == 'ohne_punkte':
+                    continue
+                if e['status'] == 'widerlegt' and st in ('bewiesen', 'vorbehalt'):
+                    st = 'unbewiesen'
+                elif e['status'] == 'extrapolation' and st == 'bewiesen':
+                    st = 'vorbehalt'
+                txt += f'; Stichproben {key[1]}: {e["text"]}'
             if nw.get('art') == 'katalog' and nw.get('ref') in widerlegt and st in ('bewiesen', 'vorbehalt'):
                 st, txt = 'unbewiesen', txt + f'; Feldmessung zeigt: {nw["ref"]} ist zu optimistisch - Modell ' \
                                               'nachkalibrieren (feld_abgleich), bis dahin kein Nachweis'
@@ -488,8 +506,8 @@ def pruefen(pdir, katalog=None, extra=None):
             if nw.get('art') == 'fem':
                 # Glaubwuerdigkeit je Modell (V&V 40): ein Modell ist hoechstens so gut wie seine Belege
                 for fall in _fem_faelle(nw, pdir):
-                    g = glaubwuerdigkeit.bewerte(pdir, fall, nw.get('modell'), katalog,
-                                                 herk if herk != 'fehlt' else None)
+                    g = glaubwuerdigkeit.bewerte(pdir, fall, _mit_stichproben(nw.get('modell'), stich.get(('fem', fall))),
+                                                 katalog, herk if herk != 'fehlt' else None)
                     glaub.append({'anforderung': a['id'], **g})
                     if RANG[g['status']] > RANG[st]:
                         st = g['status']
@@ -553,6 +571,20 @@ def pruefen(pdir, katalog=None, extra=None):
 
 
 # ---------------------------------------------------------------------------------------------- Messtechnische Freigabe
+
+def _mit_stichproben(modell, sp):
+    """Hat ein FEM-Modell keinen eigenen validierung-Block, aber gewertete Stichproben, gelten diese als Vergleich
+    (V&V-20-Metrik je Punkt; Stufe 4 nur, wenn jeder Punkt u_num, u_input und u_D hat)."""
+    if not modell or modell.get('validierung') or not sp:
+        return modell
+    pk = [p for p in sp.get('punkte', []) if 'E' in p]
+    if not pk:
+        return modell
+    return dict(modell, validierung={'beleg': 'stichproben.json', 'strenge': 'unsicherheit_beidseitig',
+                                     'groessen': [{'name': f'Punkt {i + 1}', 'S': p['S'], 'D': p['D'],
+                                                   'u_D': p.get('u_D'), 'u_num': p.get('u_num'),
+                                                   'u_input': p.get('u_input')} for i, p in enumerate(pk)]})
+
 
 def risiken_sammeln(anf_datei):
     """Bewusst eingegangene Risiken (seit 19.11.2026): Feld 'risiko' je Anforderung und Liste 'risiken' auf oberster

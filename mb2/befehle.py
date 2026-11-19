@@ -176,6 +176,25 @@ def messreihen_aus_csv(projekt: str, csv_datei: str, kopf: dict, ids: dict):
     return an.messreihen_aus_csv(pdir(projekt), csv_datei, kopf, ids)
 
 
+@befehl('anforderungen')
+def stichprobe_eintragen(projekt: str, modell: str, punkt: dict, art: str = '', ref: str = '', groesse: str = '',
+                         merkmale: list | None = None):
+    """Einzelne Realmessung gegen eine Modellvorhersage (stichproben.json): punkt = {bedingungen, S, D, u_D, u_num,
+    u_input, datum, quelle, datenstatus}. Neues Modell: art katalog|fem, ref (z. B. E16 bzw. FEM-Fall), groesse,
+    merkmale (soll-Pfade des Gueltigkeitsbereichs). Wirkt in der V-Matrix: widerlegt -> kein Nachweis."""
+    from . import stichproben
+    return stichproben.eintragen(pdir(projekt), modell, punkt, art or None, ref or None, groesse or None, merkmale)
+
+
+@befehl('anforderungen')
+def messpunkte_vorschlagen(projekt: str):
+    """Wo die naechste Realmessung am meisten bringt: kleinste Reserve ohne Stichprobe, empfindlichste FEM-Eingabe,
+    Extrapolation ueber den gemessenen Bereich hinaus."""
+    from . import pruefungen, stichproben
+    d = pdir(projekt)
+    return {'vorschlaege': stichproben.vorschlagen(d, pruefungen.alle(d)['module'])}
+
+
 @befehl('messtechnik')
 def kalibrierung_auswerten(projekt: str, reihe: str, grad: int = 2):
     """Kalibrierreihe aus messung.json auswerten (Korrekturpolynom, u_fit, u_referenz, u_kopplung). Schreibt die

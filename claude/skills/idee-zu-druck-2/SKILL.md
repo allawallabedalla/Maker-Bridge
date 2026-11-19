@@ -70,6 +70,9 @@ Die Werkzeuge liefert der MCP-Server **mb2**. Jeder Schritt läuft über einen e
   was bei einem Konflikt nachgibt. Jede Antwort nach der Regel oben hinterfragen. Kosten und Arbeitsschritte mit Quelle
   in `kosten.json` (K1/K2, `mb2/pruefungen/kpi.py`).
 - Nur fragen, was wirklich offen ist: Funktion, Strom (USB-C/Akku), Bedienelemente, Anschlüsse, Zielgröße, Einsatzort (Wärme oder außen → PETG/ASA), Lasten (Klemmen, Schnappen, Fallen).
+- **Realmessungen einstreuen:** Sobald gebaut oder gemessen wird, `messpunkte_vorschlagen` aufrufen und dem Nutzer die
+  wichtigste Messung als einzelne Rückfrage vorschlagen. Ergebnisse mit `stichprobe_eintragen` erfassen, mit
+  Messunsicherheit. Ein durchgefallener Punkt heißt nachkalibrieren, nicht wegdiskutieren.
 - **Datenlücken bedarfsgesteuert füllen:** fehlen in `bauteile.json` Werte für ein Bauteil, das ein Projekt WIRKLICH
   verwendet (z. B. Antennen-Pflichtzone, Ruhestrom), dann im Projekt nach dem Datenblatt fragen und den Wert mit
   Seite/Tabelle eintragen – nie auf Vorrat für Bauteile ohne Projekt, nie aus dem Gedächtnis.

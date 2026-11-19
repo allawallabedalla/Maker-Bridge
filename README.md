@@ -87,6 +87,7 @@ eine neue Rechnung.
 | Projekt | `project_new`, `project_status`, `eingaben_offen` |
 | Anforderungen | `anforderungen_erzeugen`, `anforderungen_pruefen`, `abnahme_eintragen`, `feld_eintragen`, `feld_abgleich`, `messreihe_eintragen`, `messreihen_aus_csv` |
 | Messtechnik | `messkette_rechnen`, `kalibrierung_auswerten` |
+| Validierung | `stichprobe_eintragen`, `messpunkte_vorschlagen` |
 | CAD | `cad_build`, `cad_plate`, `cad_check_step`, `cad_check_3mf` |
 | FEM | `fem_mech`, `fem_waerme`, `fem_sensitivitaet`, `fem_materialien` |
 | KiCad | `kicad_new`, `kicad_find`, `kicad_symbol`, `kicad_erc`, `kicad_schematic_pdf`, `kicad_sync`, `kicad_layout`, `kicad_route`, `kicad_cat`, `kicad_drc`, `kicad_render`, `kicad_board`, `kicad_fab` |

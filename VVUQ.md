@@ -36,6 +36,15 @@ Die Normtexte selbst lagen **nicht** vor. Grundlage sind öffentliche Quellen, u
 | DNV-RP-A204 (Qualifizierung digitaler Zwillinge) | nur der Grundgedanke „Validierung erlischt bei Abweichung im Feld“ | Text nicht eingesehen |
 | ISO/IEC 30186 (Reifegrad digitaler Zwillinge) | – | Text und Stand nicht geprüft. Erfundene Reifegrade wären Scheinsicherheit |
 
+## Stichproben-Validierung (`mb2/stichproben.py`, `stichproben.json`)
+
+Einzelne Realmessungen lassen sich jederzeit gegen eine Modellvorhersage einstreuen, egal ob aus dem Katalog oder aus der FEM:
+1. **Jeder Punkt einzeln** nach V&V 20 (|E| ≤ k·u_val). Ohne Messunsicherheit u_D und ohne echte Messung zählt er nicht.
+2. **Ein durchgefallener Punkt** genügt: Das Modell ist widerlegt und kein Nachweis mehr, bis es nachkalibriert ist.
+3. **Validiert ist nur der gemessene Bereich.** Liegt der Entwurf außerhalb, gilt das als Extrapolation, also höchstens `vorbehalt`.
+4. **FEM ohne eigenen Validierungsblock:** Die Stichproben zählen als Vergleich in der Glaubwürdigkeit.
+5. **`messpunkte_vorschlagen`** nennt die Stellen, an denen die nächste Messung am meisten bringt: kleinste Reserve, empfindlichste Eingabe, Extrapolation.
+
 ## KI/ML-Modelle als Nachweis (selbst abgeleitet)
 
 Ausgaben eines KI-**Agenten** sind nie ein Nachweis. Ein trainiertes ML-**Modell**, etwa ein Ersatzmodell für FEM, darf Nachweis sein, wenn alle diese Bedingungen erfüllt sind:

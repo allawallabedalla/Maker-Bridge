@@ -64,6 +64,7 @@ Neu seit 19.11.2026:
 - Validierungsmetrik nach V&V 20. Stufe 3/4 gibt es nur mit gerechnetem E und u_val.
 - Nachweisart `ml_modell` für KI/ML-Modelle, selbst abgeleitet.
 - Feldmessungen, die eine Vorhersage widerlegen, heben deren Nachweis auf.
+- Stichproben-Validierung (`stichproben.json`): einzelne Realmessungen gegen jede Modellvorhersage. Widerlegt heißt kein Nachweis, Extrapolation heißt höchstens `vorbehalt`.
 
 Risikobasiert nach ASME V&V 40 und dem FDA-Leitfaden von 2023. Grundlage ist der öffentliche Leitfaden, die Norm selbst lag nicht vor.
 Jeder FEM-Nachweis bekommt einen Block `modell`:
