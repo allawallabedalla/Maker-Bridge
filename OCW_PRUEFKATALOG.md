@@ -270,6 +270,11 @@ Wärmeglied α·L·ΔT (sonst ±20 K angenommen).
 | CH2 | Mischung quer zum Kanal | Pe = v w/D, L_mix ≈ v w²/D | Lehrbuch | `stoff.mischung` | L ≥ L_mix, wenn gemischt werden muss | mittel | ✅ umgesetzt |
 | CH3 | Ansprechzeit Diffusion | t = δ²/(2D) | Einstein-Smoluchowski | `stoff.ansprechen` | ≤ `ansprechzeit_max_s` | mittel | ✅ umgesetzt |
 | CH4 | Drift durch Belag/Adsorption | Drift × Kalibrierintervall ≤ Toleranz | eigen | `stoff.drift` (gemessen) | sonst höchstens warnung | mittel | ✅ umgesetzt |
+| EL1 | Pausenschicht für Einlegeteile | deckende Schicht = erste mit Mitte über der Decke; Teil-Oberkante ≤ gedruckte Höhe bei der Pause | PrusaSlicer 2.9.7 (Schnitt in Schichtmitte) | Teil `einlegeteile`, Platzhalter, Schichtraster | Luft ≥ 0,05 mm, Decke auf Schichtgrenze | hoch | ✅ umgesetzt – `einlegen.py` |
+| EL2 | Überbrückung der Tasche | Spannweite = kleinere Seite der Grundfläche | eigen | Lage aus cad_build | info | niedrig | ✅ umgesetzt |
+| EL3 | Temperatur am Magneten | Betttemperatur < T_max laut Datenblatt | Datenblatt | `T_max_C`, Profil | sonst fehler | hoch | ✅ umgesetzt |
+| EL4 | Pause im G-Code | `;PAUSE_PRINT` + `M601` vor `;Z:<print_z>` | PrusaSlicer 2.9.7 Quellcode | ASCII-G-Code | jede geplante Pause vorhanden | hoch | ✅ umgesetzt |
+| EL5 | Zeitpunkt der Pause | M73 R (Start) − R (Pause) | PrusaSlicer GCodeProcessor | G-Code | info für den Nutzer | mittel | ✅ umgesetzt |
 | FW2 | Hosttest der Firmware-Rechenlogik | Testprogramm am PC, je Fall `MB2 {json}`; Ergebnis an den Quell-Hash gebunden | eigen | `firmware.hosttest`, Befehl `firmware_test` | alle Fälle bestanden, nicht veraltet | hoch | ✅ umgesetzt – `firmware.py`, `firmware_test.py` |
 | FW3 | Fehlerinjektion in Software | je Fehler aus `erkennung` ein bestandener Fall `fehlerinjektion` + ein Fehlalarm-Fall | eigen | Hosttest, Anforderungen | vollständig | hoch | ✅ umgesetzt |
 | DS1 | Datenspeicher | Satz × 3600/Intervall × Aufbewahrung ≤ Speicher × (1 − Reserve) | eigen | `_projekt.daten` | – | mittel | ✅ umgesetzt – `daten.py` |

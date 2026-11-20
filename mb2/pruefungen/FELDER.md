@@ -211,3 +211,4 @@ Pflichtzone je Funkmodul aus dem Datenblatt, in `bauteile.json → antenne.keepo
 | Kanal `teil`; Teil `fertigung.min_kanal_mm`; `_projekt.fdm_min_kanal_mm` | Mindestkanal des Verfahrens | FL8 |
 | `_projekt.stoff {benetzt, medien, bestaendigkeit, mischung, ansprechen, drift}` | Stoffkontakt | CH1–CH4 |
 | `messkette.profil: "wandler"`, `prinzip` (beer_lambert, amperometrisch_grenzstrom, differenzdruck_laminar, linear_tk, kings_law), `eingaben {name: {wert, u}}`, `arbeitspunkte`, `faktor` | selbst gebautes Messprinzip, GUM + Monte-Carlo | MK1 |
+| Teil `einlegeteile [{name (= Platzhalter im Skript), art (magnet\|mutter\|lager\|sonstiges), einlegen (eingedruckt\|nachher), T_max_C, polung, anzahl}]`; `_projekt.druck {erste_schicht_mm, schicht_mm, bett_C}` (nur ohne Slicer-Profil) | Einlegeteile, Druckpause | EL1–EL5, S-EINLEGEN-*, AB-EL-* |

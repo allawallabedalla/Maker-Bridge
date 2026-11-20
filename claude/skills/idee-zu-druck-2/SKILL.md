@@ -146,6 +146,12 @@ Ohne Elektronik: Platzhalter-Maße in `projekt.md` festhalten und weiter zu 2.
 Auftrag mit allen Maßen: Platine aus `electronics/board.step` und `board_info.json`, Ausschnitte, Wand, Befestigung, Druckrichtung.
 Zurück kommen Prüfberichte (alle `ok`) und PNGs. **Sieh dir die PNGs selbst an**, bevor du weitermachst.
 
+**Einlegeteile (seit 20.11.2026):** Magnete, Muttern, Lager, NFC-Tags als Platzhalter mit Quelle im Skript und in
+`soll.json` unter `einlegeteile` (`einlegen`: eingedruckt oder nachher). Decke der Tasche auf eine Schichtgrenze legen.
+`slice_plate` setzt die Pausen selbst (ASCII-G-Code); EL4 muss ok sein, sonst nicht drucken. Dem Nutzer vor dem Druck
+sagen, wann (EL5) und was er einlegt, bei Magneten mit Polung. Nachher einsetzen ist oft robuster – kein Termin am
+Drucker. <!-- R:S37 -->
+
 ## 3. FEM → Agent `mb2-fem`
 Jedes Modell wird nach Risiko eingestuft (Block `modell`, V&V 40, siehe VMODELL.md). Den Bericht `pruef/glaubwuerdigkeit.md` nennst du dem Nutzer, wenn ein Modell bei Risiko ≥ 4 ohne Messung unbewiesen bleibt.
 Für jedes belastete Teil einen Lastfall: Schraubdom anziehen, Schnapphaken, Klemmung, Fall. Bei Wärmequellen (Ladeelektronik, LEDs, Pi) einen Wärmefall.

@@ -99,10 +99,59 @@ def build(projekt_dir, teil_name):
                     schnitt=getattr(_lade_skript, 'schnitt', None))
     bericht.pop('_markierungen', None)
     bericht['dateien'] = {'step': step, '3mf': m3f, 'png': png}
+    if soll.get('einlegeteile'):
+        bericht['einlegeteile'] = einlege_lage(teil, ph, druck, soll['einlegeteile'])
     bericht['druck_drehung'] = list(druck)
     json.dump(bericht, open(os.path.join(out, teil_name + '.pruefung.json'), 'w', encoding='utf-8'),
               indent=1, ensure_ascii=False)
     return bericht
+
+
+def einlege_lage(teil, platzhalter, druck, liste):
+    """Lage der Einlegeteile in Drucklage (gleiche Drehung/Verschiebung wie auf_bett): z_unten, z_oben, decke
+    (Unterkante des Materials ueber der Grundflaeche des Teils), offen (nichts darueber), spannweite (kleinere Seite
+    der Grundflaeche = Bruecke der deckenden Schicht). Platzhalter-Name = Einlegeteil-Name."""
+    from build123d import Box, Pos, extrude
+    r = Rotation(*druck) if any(druck) else None
+    s = r * teil if r else teil
+    bb = s.bounding_box()
+    loc = Location((-(bb.min.X + bb.max.X) / 2, -(bb.min.Y + bb.max.Y) / 2, -bb.min.Z))
+    s = loc * s
+    oben = s.bounding_box().max.Z
+    out = []
+    for e in liste or []:
+        p = (platzhalter or {}).get(e.get('name'))
+        if p is None:
+            out.append({'name': e.get('name'), 'fehler': 'kein Platzhalter mit diesem Namen im Skript'})
+            continue
+        q = loc * (r * p if r else p)
+        b = q.bounding_box()
+        z = {'name': e['name'], 'z_unten_mm': round(b.min.Z, 4), 'z_oben_mm': round(b.max.Z, 4),
+             'spannweite_mm': round(min(b.size.X, b.size.Y), 3)}
+        hoehe = oben - b.max.Z
+        decke = None
+        if hoehe > 1e-6:
+            # Saeule = echter Querschnitt des Teils (Schnitt in halber Hoehe), nach oben extrudiert - nicht die
+            # Bounding Box (die traefe bei runden Teilen die Taschenwand)
+            mitte_z = (b.min.Z + b.max.Z) / 2
+            try:
+                scheibe = q & (Pos((b.min.X + b.max.X) / 2, (b.min.Y + b.max.Y) / 2, mitte_z) *
+                               Box(b.size.X + 2, b.size.Y + 2, 0.01))
+                flaechen = [f for f in scheibe.faces() if f.normal_at().Z > 0.9]
+                saeulen = [extrude(Pos(0, 0, b.max.Z + 1e-4 - f.center().Z) * f, amount=hoehe + 1.0) for f in flaechen]
+                ueber = None
+                for sl in saeulen:
+                    x = s & sl
+                    if x.volume > 1e-6:
+                        ueber = x if ueber is None else ueber + x
+                if ueber is not None:
+                    decke = round(ueber.bounding_box().min.Z, 4)
+            except Exception:  # noqa: BLE001 - leerer Schnitt wirft je nach OCCT-Version
+                decke = None
+        z['decke_mm'] = decke
+        z['offen'] = decke is None
+        out.append(z)
+    return out
 
 
 def _export_3mf(shape, pfad):

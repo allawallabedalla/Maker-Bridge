@@ -54,3 +54,10 @@ Je Teil: ok/Fehler, Bounding Box, Volumen, Wand_min, Spalt_min, Kollisionen, Pfa
 
 ## Herkunft (V-Modell, seit 15.11.2026)
 Jede Angabe, die du in `cad/soll.json` einträgst (Maße von Kaufteilen, Lasten, Funkstrecke, Akku, Firmware-Konstanten), bekommt in `_herkunft` (projektweit `_projekt._herkunft`, je Teil `<teil>._herkunft`) ihre Quelle: `gemessen|datenblatt|norm|berechnet|geschaetzt|angenommen: Beleg`. Geschätztes ehrlich als geschätzt markieren, das senkt nur den Status auf „vorbehalt“, nie die Wahrheit. Regeln: `maker-bridge-2/VMODELL.md`.
+
+## Einlegeteile (Magnete, Muttern, Lager …, seit 20.11.2026)
+- Tasche mit Spiel ins Teil, das Einlegeteil als **Platzhalter** mit gleichem Namen wie in `soll.json` `einlegeteile`
+  und mit Quelle (Datenblatt). Keine Kollision, Boden mindestens eine Schicht.
+- Eingedruckt: Decke der Tasche genau auf eine Schichtgrenze in Drucklage (bei 0,2 mm Schicht: Vielfaches von 0,2 mm
+  ab Bett), Teil-Oberkante mindestens 0,05 mm darunter. `cad_build` schreibt die Lage, Katalog EL1 bewertet sie.
+- Nachher einsetzen: Tasche nach oben offen.

@@ -157,7 +157,18 @@ def _cli(args, timeout):
                           encoding='utf-8', errors='replace', timeout=timeout, stdin=subprocess.DEVNULL)
 
 
-def slice_platte(platte_3mf, ausgabe, druck, material, stuetzen=False, brim_mm=0.0, perimeter=0, bricklayers=None):
+def mit_pausen(platte_3mf, xml, ziel):
+    """Kopie der Platte mit Metadata/Prusa_Slicer_custom_gcode_per_print_z.xml (Druckpausen, mb2/pruefungen/einlegen.py)."""
+    with zipfile.ZipFile(platte_3mf) as zin, zipfile.ZipFile(ziel, 'w', zipfile.ZIP_DEFLATED) as zout:
+        for item in zin.infolist():
+            if item.filename != 'Metadata/Prusa_Slicer_custom_gcode_per_print_z.xml':
+                zout.writestr(item, zin.read(item.filename))
+        zout.writestr('Metadata/Prusa_Slicer_custom_gcode_per_print_z.xml', xml)
+    return ziel
+
+
+def slice_platte(platte_3mf, ausgabe, druck, material, stuetzen=False, brim_mm=0.0, perimeter=0, bricklayers=None,
+                 pausen_xml=None):
     """EIN 3MF (cad_plate) -> .bgcode, mittig aufs Bett. Danach Profilpruefung + PrusaSlicer-Projekt zum Ansehen.
     bricklayers = {'teile': Namen, 'bbox_mm': Lage je Teil aus print/platte.json}: dann ASCII-G-Code +
     Nachbearbeitung (mb2/bricklayers.py) -> <ausgabe ohne .bgcode>.gcode statt .bgcode. Die Teile werden ueber
@@ -177,14 +188,16 @@ def slice_platte(platte_3mf, ausgabe, druck, material, stuetzen=False, brim_mm=0
         ov.update({'brim_width': brim_mm, 'brim_type': 'outer_only', 'brim_separation': 0.1})
     if perimeter > 0:
         ov['perimeters'] = int(perimeter)
-    if bricklayers:
+    if bricklayers or pausen_xml:      # ASCII: Nachbearbeitung bzw. Nachweis der Pausen (EL4) im Klartext
         ov['binary_gcode'] = 0
         ausgabe = os.path.splitext(ausgabe)[0] + '.gcode'
+    if pausen_xml:
+        platte_3mf = mit_pausen(platte_3mf, pausen_xml, os.path.splitext(platte_3mf)[0] + '_pausen.3mf')
     cfg_pfad, cfg = build_config(druck, material, ov)
     if os.path.exists(ausgabe):
         os.remove(ausgabe)            # sonst gilt eine alte Datei als Erfolg, wenn das Slicen still scheitert
     mitte = f'{BETT_MITTE[0]},{BETT_MITTE[1]}'
-    binaer = [] if bricklayers else ['--binary-gcode']   # Bricklayers braucht ASCII zum Nachbearbeiten
+    binaer = [] if bricklayers or pausen_xml else ['--binary-gcode']   # ASCII fuer Bricklayers und Pausen-Nachweis
     p = _cli(['--load', cfg_pfad, '--export-gcode', *binaer, '--center', mitte, '-o', ausgabe, platte_3mf],
              1800)
     if p.returncode or not os.path.exists(ausgabe):
@@ -202,6 +215,10 @@ def slice_platte(platte_3mf, ausgabe, druck, material, stuetzen=False, brim_mm=0
         with open(ausgabe, 'w', encoding='utf-8', newline='\n') as f:
             f.write('\n'.join(neu))
         st = {k: v.strip('"') for k, v in bl.meta_ascii(neu).items() if k in _META_KEYS}
+    elif pausen_xml:
+        from .bricklayers import meta_ascii
+        st = {k: v.strip('"') for k, v in meta_ascii(open(ausgabe, encoding='utf-8').read().split('\n')).items()
+              if k in _META_KEYS}
     else:
         st = summarize(ausgabe)
     probleme = []
@@ -215,7 +232,7 @@ def slice_platte(platte_3mf, ausgabe, druck, material, stuetzen=False, brim_mm=0
         probleme.append(f'Filament im G-Code {st.get("filament_settings_id")!r} statt {material!r}')
     if st.get('nozzle_diameter', '0.4').split(',')[0] != '0.4':
         probleme.append(f'Duese {st.get("nozzle_diameter")} statt 0.4')
-    res = {'ok': not probleme, 'bgcode' if not bricklayers else 'gcode': ausgabe, 'stats': st, 'config': cfg_pfad}
+    res = {'ok': not probleme, 'gcode' if bricklayers or pausen_xml else 'bgcode': ausgabe, 'stats': st, 'config': cfg_pfad}
     if bl_bericht:
         res['bricklayers'] = bl_bericht
     if probleme:

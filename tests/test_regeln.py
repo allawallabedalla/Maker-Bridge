@@ -80,6 +80,7 @@ REGELN = {
     'V44': ['test_cfd.py::test_auswertung_und_katalog', 'test_cfd.py::test_openfoam_poiseuille', 'test_cfd.py::test_elmer_poiseuille'],
     'V45': ['test_wandler.py::test_beer_lambert_hand', 'test_wandler.py::test_nichtlinear_monte_carlo'],
     'V46': ['test_erweiterungen.py::test_stoff_und_fertigbarkeit'],
+    'V47': ['test_einlegen.py::test_3mf_pausen_und_gcode_nachweis', 'test_einlegen.py::test_anforderung_und_abnahme'],
     # ---------------------------------------------------------------- Skill idee-zu-druck-2
     'S01': ['test_regeln.py::test_kein_druck_und_keine_freigabe_ueber_mcp'],
     'S02': (VERHALTEN, 'Ton und Form der Antworten - Pruefung durch den Nutzer'),
@@ -120,6 +121,7 @@ REGELN = {
     'S33': ['test_pruef_dauer_toleranz.py::test_t1_t4_messung', 'test_erweiterungen.py::test_nicht_gedruckte_teile'],
     'S34': ['test_firmware_host.py::test_hosttest_bestanden_veraltet_und_fehlerhaft'],
     'S35': ['test_erweiterungen.py::test_datenbudget_hand'],
+    'S37': ['test_einlegen.py::test_lage_und_pausenschicht', 'test_einlegen.py::test_nachher_einsetzen'],
     'S36': ['test_cfd.py::test_openfoam_fall', 'test_cfd.py::test_werkzeug_einrichten'],
     'S26': (VERHALTEN, 'Grundannahme pruefen nach zwei gescheiterten Varianten - Urteil der KI'),
 }

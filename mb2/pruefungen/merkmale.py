@@ -31,6 +31,7 @@ STICHWORTE = {
     'dauerlast': r'vorspann|presssitz|pressitz|dauerlast|dauerhaft belastet|traegt dauerhaft',
     'fluid': r'durchfluss|volumenstrom|\bschlauch|mikrofluid|\bkanal\b.*\b(wasser|fluessig|gas)|leckage|\bpumpe|ventil\b',
     'daten': r'datenlogger|\blogger\b|aufzeichn|sd-?karte|speichert die (mess)?daten|messdaten speichern|\bflash-?speicher',
+    'einlegen': r'eingedruckt|einlegeteil|druckpause|magnete? (mit )?eindrucken|magnete? einlegen|pause (beim|im) druck',
     'firmware': r'firmware|\.ino|arduino|platformio|esp-idf|micropython',
 }
 
@@ -149,6 +150,8 @@ def merkmale(pdir):
     setze('fluid', bool(pj.get('stroemung')) or any(t.get('stroemung') for t in teile.values()), 'soll.json stroemung')
     setze('fluid', bool(wort('fluid')), wort('fluid') or '')
     setze('daten', bool(pj.get('daten')), 'soll.json _projekt.daten')
+    setze('einlegen', any(t.get('einlegeteile') for t in teile.values()), 'soll.json einlegeteile')
+    setze('einlegen', bool(wort('einlegen')), wort('einlegen') or '')
     setze('daten', bool(wort('daten')), wort('daten') or '')
     # Messfunktion: Messkette im soll oder messtechnische Anforderung im Lastenheft
     setze('messung', bool(pj.get('messkette')), 'soll.json _projekt.messkette')

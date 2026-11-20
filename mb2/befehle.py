@@ -542,8 +542,26 @@ def slice_plate(projekt: str, material: str = 'Prusament PETG @PGIS', druck: str
     from . import slicer
     d = pdir(projekt)
     bl = _bricklayers_objekte(d)
+    # Einlegeteile (eingedruckt): Pausen mit dem Schichtraster GENAU dieses Profils (mb2/pruefungen/einlegen.py)
+    from .pruefungen import einlegen
+    xml, plan = None, []
+    pj_platte = os.path.join(d, 'print', 'platte.json')
+    teile_platte = json.load(open(pj_platte, encoding='utf-8')).get('teile', []) if os.path.exists(pj_platte) else []
+    if any((json.load(open(os.path.join(d, 'cad', 'soll.json'), encoding='utf-8')).get(t) or {}).get('einlegeteile')
+           for t in teile_platte):
+        _, cfg = slicer.build_config(druck, material)
+        h = float(cfg['layer_height'])
+        e1 = str(cfg.get('first_layer_height', h))
+        e1 = h * float(e1[:-1]) / 100 if e1.endswith('%') else float(e1)
+        plan = einlegen.pausen(d, teile_platte, {'erste': e1, 'h': h, 'bett': None, 'quelle': druck})
+        xml = einlegen.pausen_xml(plan) if plan else None
     erg = slicer.slice_platte(os.path.join(d, 'print', 'platte.3mf'), os.path.join(d, 'print', projekt + '.bgcode'),
-                              druck, material, stuetzen, brim_mm=brim_mm, perimeter=perimeter, bricklayers=bl)
+                              druck, material, stuetzen, brim_mm=brim_mm, perimeter=perimeter, bricklayers=bl,
+                              pausen_xml=xml)
+    if plan:
+        erg['pausen'] = plan
+        erg['hinweis_pausen'] = ('Druck haelt an den Pausen an (M601). Teile einlegen, dann am Drucker fortsetzen. '
+                                 'Zeitpunkt: Katalog EL5.')
     if bl:
         erg['bricklayers_teile'] = sorted(bl['teile'])
     # Druckfreigabe nur mit validen CAD-Daten fuer alle Kaufteile (Regel des Nutzers, 11.11.2026)

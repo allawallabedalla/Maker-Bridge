@@ -68,6 +68,8 @@ Nachweis auf derselben Höhe des V. Anlass und Herleitung: `audits/KERNPROBLEM_2
 - **Selbst gebaute Messprinzipien** (Profil `wandler`): Budget aus der Modellgleichung; trägt die lineare Näherung nicht, gilt das größere U aus Monte-Carlo (JCGM 101). <!-- R:V45 -->
 - **Stoffkontakt** (CH1): jede Paarung benetzter Werkstoff × Medium braucht eine belegte Beständigkeit; fehlt sie, ist es ein Fehler. <!-- R:V46 -->
 
+- **Einlegeteile** (Magnet, Mutter, Lager …): eingedruckt nur mit berechneter Pausenschicht (EL1) und nachgewiesener Pause im G-Code (EL4); fehlt die Pause, NICHT drucken. Abnahme AB-EL-* prüft Sitz und Polung. <!-- R:V47 -->
+
 ## Glaubwürdigkeit der Rechenmodelle (seit 17.11.2026, `mb2/glaubwuerdigkeit.py`)
 
 Begriffe und Quellenstand: **`VVUQ.md`**.

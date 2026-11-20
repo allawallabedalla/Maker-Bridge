@@ -767,6 +767,20 @@ def standard(pdir):
                                  'anweisung': f'Wareneingang {tn}: jedes Funktionsmass messen ({masse or "Liste fehlt"}) '
                                               'und die Zahl der Masse ausserhalb der Toleranz eintragen.',
                                  'kriterium': {'groesse': 'ausser_toleranz', 'op': '==', 'wert': 0, 'einheit': 'Masse'}}]})
+    # Einlegeteile (Magnete, Muttern ... eingedruckt oder nachher, seit 20.11.2026)
+    for tn, ts in _soll(pdir).items():
+        if tn == '_projekt' or not isinstance(ts, dict) or not ts.get('einlegeteile'):
+            continue
+        liste = '; '.join(f'{e.get("anzahl", 1)}x {e.get("name")}' + (f' ({e["polung"]})' if e.get('polung') else '')
+                          for e in ts['einlegeteile'])
+        L.append({'id': f'S-EINLEGEN-{tn}', 'ebene': 'subsystem', 'eltern': ['A-GERAET'],
+                  'herkunft': f'abgeleitet: {tn} hat Einlegeteile', 'text': f'Einlegeteile in {tn} sitzen richtig: {liste}.',
+                  'nachweise': [{'art': 'katalog', 'ref': 'EL1', 'teil': tn, 'stufe': 'komponente'},
+                                {'art': 'katalog', 'ref': 'EL4', 'stufe': 'integration'},
+                                {'art': 'abnahme', 'ref': f'AB-EL-{tn}', 'stufe': 'abnahme',
+                                 'anweisung': f'{tn}: jedes Einlegeteil vorhanden, fest, an seiner Stelle; Magnete mit '
+                                              f'Kompass/zweitem Magnet auf Polung pruefen ({liste}). Zahl der Fehler eintragen.',
+                                 'kriterium': {'groesse': 'fehlerhaft', 'op': '==', 'wert': 0, 'einheit': 'Teile'}}]})
     zl = pj.get('ziele') or {}
     if isinstance(zl.get('zielkosten_eur_stueck'), (int, float)):
         L.append({'id': 'S-KOSTEN', 'ebene': 'subsystem', 'eltern': ['A-GERAET'], 'herkunft': 'Projektziel (ziele)',
